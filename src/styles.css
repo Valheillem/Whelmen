@@ -1,0 +1,251 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap');
+
+:root {
+    --bg-dark: #040212;
+    --bg-panel: rgba(13, 11, 28, 0.75);
+    --border-glow: rgba(255, 255, 255, 0.1);
+    
+    /* Elemental Colors */
+    --color-fire: #ff3c00;
+    --color-fire-glow: rgba(255, 60, 0, 0.6);
+    
+    --color-earth: #00e676;
+    --color-earth-glow: rgba(0, 230, 118, 0.6);
+    
+    --color-water: #00b0ff;
+    --color-water-glow: rgba(0, 176, 255, 0.6);
+    
+    --color-air: #00e5ff;
+    --color-air-glow: rgba(0, 229, 255, 0.6);
+    
+    --color-neutral: #e0e0e0;
+    --color-neutral-glow: rgba(224, 224, 224, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-dark);
+    font-family: 'Inter', sans-serif;
+    color: #ffffff;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game-container {
+    width: 1560px;
+    height: 720px;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(78, 62, 160, 0.15);
+}
+
+/* Modals Overlay Base */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1560px;
+    height: 720px;
+    background-color: rgba(4, 2, 15, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease;
+    z-index: 100;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Glassmorphic Modal Cards */
+.modal-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-glow);
+    border-radius: 20px;
+    width: 600px;
+    max-width: 90%;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+    position: relative;
+}
+
+.overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #ffffff 0%, #b0aec2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 60, 60, 0.2);
+    border-color: rgba(255, 60, 60, 0.5);
+    color: #ff8a80;
+}
+
+/* Specific Modals Content */
+#share-modal .qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#share-modal canvas, #share-modal img {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin-bottom: 15px;
+}
+
+#share-modal .share-link-box {
+    display: flex;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
+    margin-top: 15px;
+    overflow: hidden;
+}
+
+#share-modal .share-link-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 15px;
+    color: #a0a0b0;
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+#share-modal .share-copy-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 0 20px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+#share-modal .share-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Tutorial Layout */
+#tutorial-modal .modal-card {
+    width: 800px;
+    max-width: 95%;
+    text-align: left;
+}
+
+#tutorial-modal .tutorial-content {
+    max-height: 450px;
+    overflow-y: auto;
+    padding-right: 15px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #cbd5e1;
+}
+
+/* Scrollbar styling */
+#tutorial-modal .tutorial-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+#tutorial-modal .tutorial-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+#tutorial-modal .tutorial-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+#tutorial-modal .tutorial-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#tutorial-modal h3 {
+    font-family: 'Outfit', sans-serif;
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+}
+
+#tutorial-modal h3:first-of-type {
+    margin-top: 0;
+}
+
+#tutorial-modal p {
+    margin-bottom: 12px;
+}
+
+#tutorial-modal ul {
+    margin-bottom: 15px;
+    padding-left: 10px;
+    list-style-type: none;
+}
+
+#tutorial-modal li {
+    margin-bottom: 6px;
+}
+
+/* Element color spans */
+.element-fire { color: var(--color-fire); font-weight: bold; }
+.element-earth { color: var(--color-earth); font-weight: bold; }
+.element-water { color: var(--color-water); font-weight: bold; }
+.element-air { color: var(--color-air); font-weight: bold; }
+.element-cycle { color: #f43f5e; font-weight: bold; }
