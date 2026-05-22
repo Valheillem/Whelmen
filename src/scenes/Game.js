@@ -757,7 +757,7 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         // Combo Selection Preview Label
-        this.comboPreviewText = this.add.text(w / 2, h - 255, '', {
+        this.comboPreviewText = this.add.text(w / 2, h - 220, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '15px',
             fontWeight: '700',
