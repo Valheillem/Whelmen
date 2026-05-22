@@ -1025,7 +1025,11 @@ export class Game extends Phaser.Scene {
         // Keep a maximum of 150 messages in history to prevent any massive memory build-up over long play sessions
         if (this.allLogTextLines.length >= 150) {
             const old = this.allLogTextLines.shift();
+            const shiftY = old.height + 6;
             old.destroy();
+            this.allLogTextLines.forEach(line => {
+                line.y -= shiftY;
+            });
         }
 
         // Add new
@@ -1034,7 +1038,13 @@ export class Game extends Phaser.Scene {
                       msg.includes('Reaction') ? '#00e5ff' :
                       msg.includes('---') ? '#d4af37' : '#cbd5e1';
 
-        const textLine = this.add.text(12, 15 + (this.allLogTextLines.length) * 26, msg, {
+        let targetY = 15;
+        if (this.allLogTextLines.length > 0) {
+            const lastLine = this.allLogTextLines[this.allLogTextLines.length - 1];
+            targetY = lastLine.y + lastLine.height + 6;
+        }
+
+        const textLine = this.add.text(12, targetY, msg, {
             fontFamily: '"Inter", sans-serif',
             fontSize: '15px',
             color: color,
@@ -2603,7 +2613,8 @@ export class Game extends Phaser.Scene {
 
     getLogTotalHeight() {
         if (!this.allLogTextLines || this.allLogTextLines.length === 0) return 0;
-        return this.allLogTextLines.length * 26 + 30;
+        const lastLine = this.allLogTextLines[this.allLogTextLines.length - 1];
+        return lastLine.y + lastLine.height + 15;
     }
 
     scrollHistoryByScrollbarY(relativeY, handleHeight) {
