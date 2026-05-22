@@ -502,7 +502,7 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         const h = this.scale.height;
 
-        this.cycleContainer = this.add.container(w / 2, h / 2 - 20);
+        this.cycleContainer = this.add.container(w / 2, h / 2 - 40);
         this.cycleLabels = [];
 
         // Core cycle dial drawing
@@ -547,7 +547,7 @@ export class Game extends Phaser.Scene {
     triggerCycleParticles(element) {
         if (element === 'neutral') return;
         const emitter = this.emitters[element];
-        emitter.explode(40, this.scale.width / 2, this.scale.height / 2 - 20);
+        emitter.explode(40, this.scale.width / 2, this.scale.height / 2 - 40);
         this.cycleCenterText.setText(element.toUpperCase());
         this.cycleCenterText.setColor(
             element === 'fire' ? '#ff3c00' :
@@ -691,7 +691,7 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         this.deckG = this.add.graphics();
-        this.deckT = this.add.text(w / 2 - 220, h / 2 - 20, '', {
+        this.deckT = this.add.text(w / 2 - 220, h / 2 - 40, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
@@ -699,7 +699,7 @@ export class Game extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.discardG = this.add.graphics();
-        this.discardT = this.add.text(w / 2 + 220, h / 2 - 20, '', {
+        this.discardT = this.add.text(w / 2 + 220, h / 2 - 40, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
@@ -717,13 +717,13 @@ export class Game extends Phaser.Scene {
         this.deckG.clear();
         this.deckG.fillStyle(0x1a103c, 0.9);
         this.deckG.lineStyle(2, 0xd4af37, 0.6);
-        this.deckG.fillRoundedRect(w / 2 - 265, h / 2 - 75, 90, 110, 8);
-        this.deckG.strokeRoundedRect(w / 2 - 265, h / 2 - 75, 90, 110, 8);
+        this.deckG.fillRoundedRect(w / 2 - 265, h / 2 - 95, 90, 110, 8);
+        this.deckG.strokeRoundedRect(w / 2 - 265, h / 2 - 95, 90, 110, 8);
 
         // Deck depth layers
         if (this.sharedDeck.length > 5) {
-            this.deckG.strokeRoundedRect(w / 2 - 269, h / 2 - 71, 90, 110, 8);
-            this.deckG.strokeRoundedRect(w / 2 - 273, h / 2 - 67, 90, 110, 8);
+            this.deckG.strokeRoundedRect(w / 2 - 269, h / 2 - 91, 90, 110, 8);
+            this.deckG.strokeRoundedRect(w / 2 - 273, h / 2 - 87, 90, 110, 8);
         }
 
         this.deckT.setText(`DECK\n(${this.sharedDeck.length})`);
@@ -739,14 +739,14 @@ export class Game extends Phaser.Scene {
 
             this.discardG.fillStyle(0x0a0714, 0.95);
             this.discardG.lineStyle(2, topColor, 0.8);
-            this.discardG.fillRoundedRect(w / 2 + 175, h / 2 - 75, 90, 110, 8);
-            this.discardG.strokeRoundedRect(w / 2 + 175, h / 2 - 75, 90, 110, 8);
+            this.discardG.fillRoundedRect(w / 2 + 175, h / 2 - 95, 90, 110, 8);
+            this.discardG.strokeRoundedRect(w / 2 + 175, h / 2 - 95, 90, 110, 8);
 
             this.discardT.setText(`DISCARD\n(${this.sharedDiscard.length})\n[${topEl.toUpperCase()}]`);
             this.discardT.setColor('#ffffff');
         } else {
             this.discardG.lineStyle(1.5, 0x4e3ea0, 0.3);
-            this.discardG.strokeRoundedRect(w / 2 + 175, h / 2 - 75, 90, 110, 8);
+            this.discardG.strokeRoundedRect(w / 2 + 175, h / 2 - 95, 90, 110, 8);
             this.discardT.setText('EMPTY\nDISCARD');
             this.discardT.setColor('#4e3ea0');
         }
@@ -757,9 +757,9 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         // Combo Selection Preview Label
-        this.comboPreviewText = this.add.text(w / 2, h - 220, '', {
+        this.comboPreviewText = this.add.text(w / 2, h - 285, '', {
             fontFamily: '"Outfit", sans-serif',
-            fontSize: '15px',
+            fontSize: '19px',
             fontWeight: '700',
             color: '#00e5ff',
             align: 'center'
@@ -886,7 +886,7 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         this.add.text(w - 370, 25, 'DUEL HISTORY:', {
             fontFamily: '"Inter", sans-serif',
-            fontSize: '11px',
+            fontSize: '13px',
             fontWeight: '600',
             color: '#a0a0b0',
             letterSpacing: 1
@@ -899,8 +899,8 @@ export class Game extends Phaser.Scene {
         const logBg = this.add.graphics();
         logBg.fillStyle(0x070512, 0.8);
         logBg.lineStyle(1, 0x4e3ea0, 0.25);
-        logBg.fillRoundedRect(0, 0, 340, 280, 8);
-        logBg.strokeRoundedRect(0, 0, 340, 280, 8);
+        logBg.fillRoundedRect(0, 0, 340, 380, 8);
+        logBg.strokeRoundedRect(0, 0, 340, 380, 8);
         this.logContainer.add(logBg);
 
         // Scrolling container for log lines
@@ -908,10 +908,10 @@ export class Game extends Phaser.Scene {
         this.logContainer.add(this.logScrollContainer);
 
         // Mask to restrict visible area to the inside of the history box
-        // Viewport bounds: X = w - 370 + 8, Y = 50 + 10, Width = 324, Height = 260
+        // Viewport bounds: X = w - 370 + 8, Y = 50 + 10, Width = 324, Height = 360
         const maskShape = this.make.graphics();
         maskShape.fillStyle(0xffffff);
-        maskShape.fillRoundedRect(w - 370 + 8, 50 + 10, 324, 260, 8);
+        maskShape.fillRoundedRect(w - 370 + 8, 50 + 10, 324, 360, 8);
         const mask = maskShape.createGeometryMask();
         this.logScrollContainer.setMask(mask);
 
@@ -931,7 +931,7 @@ export class Game extends Phaser.Scene {
             const relativeX = pointer.x - (w - 370);
             const relativeY = pointer.y - 50;
             // Check if pointer is inside the history box
-            if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 280) {
+            if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 380) {
                 this.scrollDuelHistory(deltaY);
             }
         });
@@ -942,11 +942,11 @@ export class Game extends Phaser.Scene {
             const relativeY = pointer.y - 50;
 
             // Check if pointer is inside the history box
-            if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 280) {
-                // If it is inside the scrollbar area (X: 320 to 338)
-                if (relativeX >= 320 && relativeX <= 338 && relativeY >= 10 && relativeY <= 270) {
+            if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 380) {
+                // If it is inside the scrollbar area (X: 320 to 338, Y: 10 to 370)
+                if (relativeX >= 320 && relativeX <= 338 && relativeY >= 10 && relativeY <= 370) {
                     const totalHeight = this.getLogTotalHeight();
-                    const viewportHeight = 260;
+                    const viewportHeight = 360;
                     if (totalHeight > viewportHeight) {
                         this.isDraggingScrollbar = true;
                         const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
@@ -965,7 +965,7 @@ export class Game extends Phaser.Scene {
             if (this.isDraggingScrollbar) {
                 const relativeY = pointer.y - 50;
                 const totalHeight = this.getLogTotalHeight();
-                const viewportHeight = 260;
+                const viewportHeight = 360;
                 const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
                 this.scrollHistoryByScrollbarY(relativeY, handleHeight);
             } else if (this.isDraggingHistory) {
@@ -1027,11 +1027,11 @@ export class Game extends Phaser.Scene {
                       msg.includes('Reaction') ? '#00e5ff' :
                       msg.includes('---') ? '#d4af37' : '#cbd5e1';
 
-        const textLine = this.add.text(12, 15 + (this.allLogTextLines.length) * 20, msg, {
+        const textLine = this.add.text(12, 15 + (this.allLogTextLines.length) * 26, msg, {
             fontFamily: '"Inter", sans-serif',
-            fontSize: '11px',
+            fontSize: '15px',
             color: color,
-            wordWrap: { width: 310 }
+            wordWrap: { width: 305 }
         });
 
         // Make interactive for hovering spell details
@@ -1057,7 +1057,7 @@ export class Game extends Phaser.Scene {
 
         // Auto-scroll to the bottom when a new message is added
         const totalHeight = this.getLogTotalHeight();
-        const viewportHeight = 260;
+        const viewportHeight = 360;
         if (totalHeight > viewportHeight) {
             this.logScrollContainer.y = viewportHeight - totalHeight;
         } else {
@@ -2602,17 +2602,17 @@ export class Game extends Phaser.Scene {
 
     getLogTotalHeight() {
         if (!this.allLogTextLines || this.allLogTextLines.length === 0) return 0;
-        return this.allLogTextLines.length * 20 + 30;
+        return this.allLogTextLines.length * 26 + 30;
     }
 
     scrollHistoryByScrollbarY(relativeY, handleHeight) {
-        const viewportHeight = 260;
+        const viewportHeight = 360;
         const totalHeight = this.getLogTotalHeight();
         
         // Calculate clicked center and map it
-        // The handle travel range is from 10 to 10 + 260 - handleHeight
+        // The handle travel range is from 10 to 10 + 360 - handleHeight
         const minHandleY = 10;
-        const maxHandleTravel = 260 - handleHeight;
+        const maxHandleTravel = 360 - handleHeight;
         
         // Clamp handle target position
         let targetHandleY = relativeY - handleHeight / 2;
@@ -2630,7 +2630,7 @@ export class Game extends Phaser.Scene {
     scrollDuelHistoryTo(targetY) {
         if (!this.logScrollContainer || !this.allLogTextLines || this.allLogTextLines.length === 0) return;
         
-        const viewportHeight = 260;
+        const viewportHeight = 360;
         const totalHeight = this.getLogTotalHeight();
         
         if (totalHeight <= viewportHeight) {
@@ -2652,8 +2652,8 @@ export class Game extends Phaser.Scene {
     scrollDuelHistory(deltaY) {
         if (!this.logScrollContainer || !this.allLogTextLines || this.allLogTextLines.length === 0) return;
         
-        // Scroll by 1 line height (20px) per tick
-        const scrollAmount = -Math.sign(deltaY) * 20;
+        // Scroll by 1 line height (26px) per tick
+        const scrollAmount = -Math.sign(deltaY) * 26;
         this.scrollDuelHistoryTo(this.logScrollContainer.y + scrollAmount);
     }
 
@@ -2662,7 +2662,7 @@ export class Game extends Phaser.Scene {
         
         this.logScrollbarGraphics.clear();
         
-        const viewportHeight = 260;
+        const viewportHeight = 360;
         const totalHeight = this.getLogTotalHeight();
         
         if (totalHeight <= viewportHeight) return;
@@ -2671,12 +2671,12 @@ export class Game extends Phaser.Scene {
         const maxScroll = viewportHeight - totalHeight;
         const scrollRatio = maxScroll === 0 ? 0 : (this.logScrollContainer.y / maxScroll);
         
-        const maxHandleTravel = 260 - handleHeight;
+        const maxHandleTravel = 360 - handleHeight;
         const handleY = 10 + scrollRatio * maxHandleTravel;
         
-        // Draw track with a subtle, premium glassmorphic border/fill
+        // Draw track with a subtle, premium glassmorphic border/fill (height 360)
         this.logScrollbarGraphics.fillStyle(0xffffff, 0.04);
-        this.logScrollbarGraphics.fillRoundedRect(328, 10, 6, 260, 3);
+        this.logScrollbarGraphics.fillRoundedRect(328, 10, 6, 360, 3);
         
         // Draw glowing aesthetic scroll handle
         this.logScrollbarGraphics.fillStyle(0x7c3aed, 0.7); // vibrant purple
