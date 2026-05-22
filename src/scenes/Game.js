@@ -575,7 +575,7 @@ export class Game extends Phaser.Scene {
         this.player.shieldG = this.add.graphics();
         this.playerZone.add(this.player.shieldG);
 
-        this.player.shieldT = this.add.text(45, 42, '', {
+        this.player.shieldT = this.add.text(600, 158, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '16px',
             fontWeight: '700',
@@ -642,7 +642,7 @@ export class Game extends Phaser.Scene {
         this.ai.shieldG = this.add.graphics();
         this.aiZone.add(this.ai.shieldG);
 
-        this.ai.shieldT = this.add.text(45, 42, '', {
+        this.ai.shieldT = this.add.text(600, 10, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '16px',
             fontWeight: '700',
@@ -678,8 +678,15 @@ export class Game extends Phaser.Scene {
         if (char.shield > 0) {
             char.shieldG.fillStyle(0x00e676, 0.15);
             char.shieldG.lineStyle(2, 0x00e676, 0.7);
-            char.shieldG.fillRoundedRect(35, 38, 140, 24, 6);
-            char.shieldG.strokeRoundedRect(35, 38, 140, 24, 6);
+            if (who === 'player') {
+                char.shieldG.fillRoundedRect(590, 154, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(590, 154, 140, 24, 6);
+                char.shieldT.setPosition(600, 158);
+            } else {
+                char.shieldG.fillRoundedRect(590, 6, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(590, 6, 140, 24, 6);
+                char.shieldT.setPosition(600, 10);
+            }
             char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
         } else {
             char.shieldT.setText('');
@@ -2457,14 +2464,8 @@ export class Game extends Phaser.Scene {
         this.updateComboPreview();
 
         // Update shield visuals
-        if (this.player.shieldG) {
-            this.player.shieldG.setVisible(this.player.shield > 0);
-            if (this.player.shieldT) this.player.shieldT.setText(`🛡 ${this.player.shield}`);
-        }
-        if (this.ai.shieldG) {
-            this.ai.shieldG.setVisible(this.ai.shield > 0);
-            if (this.ai.shieldT) this.ai.shieldT.setText(`🛡 ${this.ai.shield}`);
-        }
+        this.updateShieldDisplay('player');
+        this.updateShieldDisplay('ai');
     }
 
     /**
