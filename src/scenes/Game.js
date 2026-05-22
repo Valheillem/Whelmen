@@ -503,6 +503,7 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         this.cycleContainer = this.add.container(w / 2, h / 2 - 20);
+        this.cycleLabels = [];
 
         // Core cycle dial drawing
         const bgDial = this.add.graphics();
@@ -530,6 +531,7 @@ export class Game extends Phaser.Scene {
                 fontSize: '24px'
             }).setOrigin(0.5);
             this.cycleContainer.add(label);
+            this.cycleLabels.push(label);
         });
 
         // Center wheel indicator
@@ -755,7 +757,7 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         // Combo Selection Preview Label
-        this.comboPreviewText = this.add.text(w / 2, h - 315, '', {
+        this.comboPreviewText = this.add.text(w / 2, h - 255, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '15px',
             fontWeight: '700',
@@ -882,7 +884,7 @@ export class Game extends Phaser.Scene {
 
     drawActionLog() {
         const w = this.scale.width;
-        this.add.text(w - 280, 25, 'DUEL HISTORY:', {
+        this.add.text(w - 370, 25, 'DUEL HISTORY:', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '11px',
             fontWeight: '600',
@@ -891,15 +893,44 @@ export class Game extends Phaser.Scene {
         });
 
         this.logTextLines = [];
-        this.logContainer = this.add.container(w - 280, 50);
+        this.logContainer = this.add.container(w - 370, 50);
 
         // Drawer backing
         const logBg = this.add.graphics();
         logBg.fillStyle(0x070512, 0.8);
         logBg.lineStyle(1, 0x4e3ea0, 0.25);
-        logBg.fillRoundedRect(0, 0, 250, 280, 8);
-        logBg.strokeRoundedRect(0, 0, 250, 280, 8);
+        logBg.fillRoundedRect(0, 0, 340, 280, 8);
+        logBg.strokeRoundedRect(0, 0, 340, 280, 8);
         this.logContainer.add(logBg);
+
+        // Dynamic Interactive Tooltip for Spell Hovering
+        this.logTooltip = this.add.container(0, 0).setVisible(false).setDepth(10000);
+        this.logTooltipBg = this.add.graphics();
+        this.logTooltip.add(this.logTooltipBg);
+
+        this.logTooltipTitle = this.add.text(12, 10, '', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '13px',
+            fontWeight: '700',
+            color: '#ffffff'
+        });
+        this.logTooltip.add(this.logTooltipTitle);
+
+        this.logTooltipCombo = this.add.text(12, 28, '', {
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '10px',
+            fontWeight: '600',
+            color: '#a0a0b0'
+        });
+        this.logTooltip.add(this.logTooltipCombo);
+
+        this.logTooltipDesc = this.add.text(12, 43, '', {
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '11px',
+            color: '#cbd5e1',
+            wordWrap: { width: 216 }
+        });
+        this.logTooltip.add(this.logTooltipDesc);
     }
 
     logMessage(msg) {
@@ -929,8 +960,27 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Inter", sans-serif',
             fontSize: '11px',
             color: color,
-            wordWrap: { width: 230 }
+            wordWrap: { width: 310 }
         });
+
+        // Make interactive for hovering spell details
+        textLine.setInteractive();
+        textLine.originalColor = color;
+        textLine.on('pointerover', (pointer) => {
+            const spell = this.findSpellInMessage(msg);
+            if (spell) {
+                textLine.setColor('#ffffff');
+                this.showLogTooltip(spell, pointer.x, pointer.y);
+            }
+        });
+        textLine.on('pointerout', () => {
+            textLine.setColor(textLine.originalColor);
+            this.hideLogTooltip();
+        });
+        textLine.on('pointermove', (pointer) => {
+            this.updateLogTooltipPosition(pointer.x, pointer.y);
+        });
+
         this.logContainer.add(textLine);
         this.logTextLines.push(textLine);
     }
@@ -1879,49 +1929,50 @@ export class Game extends Phaser.Scene {
 
     // --- ALPHABETICAL SPELL COMBO PARSER ---
     getSpellFromCombo(combo) {
+        if (!this.spellsCatalog) {
+            this.spellsCatalog = {
+                // Tier 1 (1 Card)
+                'earth': { name: 'Pebble Shield', element: 'earth', damage: 0, shield: 2, desc: '+2 Shield' },
+                'fire': { name: 'Ember Poke', element: 'fire', damage: 2, shield: 0, desc: '2 DMG' },
+                'water': { name: 'Splash Cure', element: 'water', damage: 0, shield: 0, desc: 'Draw 1 card' },
+                'air': { name: 'Breeze', element: 'air', damage: 0, shield: 0, desc: 'Draw 1 card' },
+
+                // Tier 2 (2 Cards)
+                'fire,fire': { name: 'Combustion', element: 'fire', damage: 5, shield: 0, desc: '5 DMG' },
+                'earth,earth': { name: 'Stone Wall', element: 'earth', damage: 0, shield: 5, desc: '+5 Shield' },
+                'water,water': { name: 'Spring of Life', element: 'water', damage: 0, shield: 0, desc: 'Draw 2 cards' },
+                'air,air': { name: 'Gust', element: 'air', damage: 0, shield: 0, desc: 'Opponent discards 1 card' },
+                'air,fire': { name: 'Firestorm', element: 'fire', damage: 4, shield: 0, desc: '4 DMG (7 if Cycle is Fire/Air)' },
+                'earth,water': { name: 'Mudslide', element: 'earth', damage: 0, shield: 3, desc: '+3 Shield, draw 1 card' },
+                'fire,water': { name: 'Steam Blast', element: 'water', damage: 3, shield: 0, desc: '3 DMG + weaken enemy' },
+                'air,earth': { name: 'Dust Devil', element: 'air', damage: 2, shield: 0, desc: '2 DMG, destroy 1 enemy board mana' },
+
+                // Tier 3 (3 Cards)
+                'fire,fire,fire': { name: 'Cataclysm', element: 'fire', damage: 10, shield: 0, desc: '10 DMG (15 if Cycle is Fire)' },
+                'water,water,water': { name: 'Deluge', element: 'water', damage: 0, shield: 0, desc: 'Both players draw 3 cards' },
+                'earth,earth,earth': { name: 'Fortress', element: 'earth', damage: 0, shield: 10, desc: '+10 Shield, immune to next attack' },
+                'air,air,air': { name: 'Tornado', element: 'air', damage: 0, shield: 0, desc: 'Opponent discards 3 cards' },
+                'air,fire,fire': { name: 'Wildfire', element: 'fire', damage: 8, shield: 0, desc: '8 DMG + force Cycle to Fire' },
+                'earth,earth,water': { name: 'Gaia\'s Blessing', element: 'earth', damage: 0, shield: 6, desc: '+6 Shield, draw 2 cards' },
+                'fire,water,water': { name: 'Tsunami', element: 'water', damage: 6, shield: 0, desc: '6 DMG, destroy 2 enemy board mana' },
+                'air,fire,water': { name: 'Aether Storm', element: 'air', damage: 5, shield: 0, desc: '5 DMG, draw 2 cards, advance Cycle twice' },
+                'air,air,fire': { name: 'Zephyr Ignite', element: 'air', damage: 6, shield: 0, desc: '6 DMG, can take another action' },
+                'air,air,earth': { name: 'Sandstorm', element: 'air', damage: 4, shield: 0, desc: '4 DMG, opponent discards 2 cards' },
+                'air,air,water': { name: 'Hurricane', element: 'air', damage: 5, shield: 0, desc: '5 DMG, return all enemy board mana to hand' },
+                'earth,earth,air': { name: 'Tectonic Drift', element: 'earth', damage: 5, shield: 0, desc: '5 DMG, destroy 2 enemy board mana' },
+                'earth,water,water': { name: 'Quagmire', element: 'water', damage: 3, shield: 0, desc: '3 DMG, reduce opponent hand limit' },
+                'earth,fire,fire': { name: 'Lava Surge', element: 'fire', damage: 7, shield: 0, desc: '7 DMG, bypasses all shields!' },
+                'earth,fire,water': { name: 'Elemental Fusion', element: 'earth', damage: 6, shield: 4, desc: 'Deal 6 DMG + gain 4 Shield' }
+            };
+        }
+
         if (combo.length === 0 || combo.length > 3) return null;
         
         // Sort alphabetically to maintain order independence!
         const sorted = [...combo].sort();
         const key = sorted.join(',');
 
-        // 3-Tier spells catalog lookup
-        const spells = {
-            // Tier 1 (1 Card)
-            'earth': { name: 'Pebble Shield', element: 'earth', damage: 0, shield: 2, desc: '+2 Shield' },
-            'fire': { name: 'Ember Poke', element: 'fire', damage: 2, shield: 0, desc: '2 DMG' },
-            'water': { name: 'Splash Cure', element: 'water', damage: 0, shield: 0, desc: 'Draw 1 card' },
-            'air': { name: 'Breeze', element: 'air', damage: 0, shield: 0, desc: 'Draw 1 card' },
-
-            // Tier 2 (2 Cards)
-            'fire,fire': { name: 'Combustion', element: 'fire', damage: 5, shield: 0, desc: '5 DMG' },
-            'earth,earth': { name: 'Stone Wall', element: 'earth', damage: 0, shield: 5, desc: '+5 Shield' },
-            'water,water': { name: 'Spring of Life', element: 'water', damage: 0, shield: 0, desc: 'Draw 2 cards' },
-            'air,air': { name: 'Gust', element: 'air', damage: 0, shield: 0, desc: 'Opponent discards 1 card' },
-            'air,fire': { name: 'Firestorm', element: 'fire', damage: 4, shield: 0, desc: '4 DMG (7 if Cycle is Fire/Air)' },
-            'earth,water': { name: 'Mudslide', element: 'earth', damage: 0, shield: 3, desc: '+3 Shield, draw 1 card' },
-            'fire,water': { name: 'Steam Blast', element: 'water', damage: 3, shield: 0, desc: '3 DMG + weaken enemy' },
-            'air,earth': { name: 'Dust Devil', element: 'air', damage: 2, shield: 0, desc: '2 DMG, destroy 1 enemy board mana' },
-
-            // Tier 3 (3 Cards)
-            'fire,fire,fire': { name: 'Cataclysm', element: 'fire', damage: 10, shield: 0, desc: '10 DMG (15 if Cycle is Fire)' },
-            'water,water,water': { name: 'Deluge', element: 'water', damage: 0, shield: 0, desc: 'Both players draw 3 cards' },
-            'earth,earth,earth': { name: 'Fortress', element: 'earth', damage: 0, shield: 10, desc: '+10 Shield, immune to next attack' },
-            'air,air,air': { name: 'Tornado', element: 'air', damage: 0, shield: 0, desc: 'Opponent discards 3 cards' },
-            'air,fire,fire': { name: 'Wildfire', element: 'fire', damage: 8, shield: 0, desc: '8 DMG + force Cycle to Fire' },
-            'earth,earth,water': { name: 'Gaia\'s Blessing', element: 'earth', damage: 0, shield: 6, desc: '+6 Shield, draw 2 cards' },
-            'fire,water,water': { name: 'Tsunami', element: 'water', damage: 6, shield: 0, desc: '6 DMG, destroy 2 enemy board mana' },
-            'air,fire,water': { name: 'Aether Storm', element: 'air', damage: 5, shield: 0, desc: '5 DMG, draw 2 cards, advance Cycle twice' },
-            'air,air,fire': { name: 'Zephyr Ignite', element: 'air', damage: 6, shield: 0, desc: '6 DMG, can take another action' },
-            'air,air,earth': { name: 'Sandstorm', element: 'air', damage: 4, shield: 0, desc: '4 DMG, opponent discards 2 cards' },
-            'air,air,water': { name: 'Hurricane', element: 'air', damage: 5, shield: 0, desc: '5 DMG, return all enemy board mana to hand' },
-            'earth,earth,air': { name: 'Tectonic Drift', element: 'earth', damage: 5, shield: 0, desc: '5 DMG, destroy 2 enemy board mana' },
-            'earth,water,water': { name: 'Quagmire', element: 'water', damage: 3, shield: 0, desc: '3 DMG, reduce opponent hand limit' },
-            'earth,fire,fire': { name: 'Lava Surge', element: 'fire', damage: 7, shield: 0, desc: '7 DMG, bypasses all shields!' },
-            'earth,fire,water': { name: 'Elemental Fusion', element: 'earth', damage: 6, shield: 4, desc: 'Deal 6 DMG + gain 4 Shield' }
-        };
-
-        return spells[key] || null;
+        return this.spellsCatalog[key] || null;
     }
 
     isWeakenedByCycle(spellEl, cycleEl) {
@@ -2311,6 +2362,87 @@ export class Game extends Phaser.Scene {
         }
         if (this.lobbyCode) {
             firebase.database().ref(`lobbies/${this.lobbyCode}/status`).set('finished').catch(() => {});
+        }
+    }
+
+    update() {
+        if (this.cycleContainer) {
+            const rot = this.cycleContainer.rotation;
+            if (this.cycleCenterText) {
+                this.cycleCenterText.rotation = -rot;
+            }
+            if (this.cycleLabels) {
+                this.cycleLabels.forEach(label => {
+                    label.rotation = -rot;
+                });
+            }
+        }
+    }
+
+    findSpellInMessage(msg) {
+        if (!this.spellsCatalog) {
+            this.getSpellFromCombo([]);
+        }
+        if (!this.spellsCatalog) return null;
+        const lowerMsg = msg.toLowerCase();
+        const sortedSpells = Object.values(this.spellsCatalog).sort((a, b) => b.name.length - a.name.length);
+        for (const spell of sortedSpells) {
+            if (lowerMsg.includes(spell.name.toLowerCase())) {
+                return spell;
+            }
+        }
+        return null;
+    }
+
+    showLogTooltip(spell, x, y) {
+        if (!this.logTooltip) return;
+        const colors = { fire: 0xff3c00, earth: 0x00e676, water: 0x00b0ff, air: 0x00e5ff };
+        const colorHex = colors[spell.element] || 0x4e3ea0;
+
+        const elementIcon = spell.element === 'fire' ? '🔥' :
+                            spell.element === 'earth' ? '🌿' :
+                            spell.element === 'water' ? '💧' : '🌪️';
+        this.logTooltipTitle.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
+        this.logTooltipTitle.setColor(
+            spell.element === 'fire' ? '#ff3c00' :
+            spell.element === 'earth' ? '#00e676' :
+            spell.element === 'water' ? '#00b0ff' : '#00e5ff'
+        );
+
+        let comboStr = '';
+        for (const key in this.spellsCatalog) {
+            if (this.spellsCatalog[key].name === spell.name) {
+                comboStr = key.split(',').map(el => el.toUpperCase()).join(' + ');
+                break;
+            }
+        }
+        this.logTooltipCombo.setText(`COMBO: ${comboStr}`);
+        this.logTooltipDesc.setText(spell.desc);
+
+        const width = 240;
+        const height = 48 + this.logTooltipDesc.height + 12;
+
+        this.logTooltipBg.clear();
+        this.logTooltipBg.fillStyle(0x090518, 0.95);
+        this.logTooltipBg.lineStyle(2, colorHex, 0.85);
+        this.logTooltipBg.fillRoundedRect(0, 0, width, height, 8);
+        this.logTooltipBg.strokeRoundedRect(0, 0, width, height, 8);
+
+        this.logTooltip.setPosition(x - width - 15, y - height / 2);
+        this.logTooltip.setVisible(true);
+    }
+
+    hideLogTooltip() {
+        if (this.logTooltip) {
+            this.logTooltip.setVisible(false);
+        }
+    }
+
+    updateLogTooltipPosition(x, y) {
+        if (this.logTooltip && this.logTooltip.visible) {
+            const width = 240;
+            const height = 48 + this.logTooltipDesc.height + 12;
+            this.logTooltip.setPosition(x - width - 15, y - height / 2);
         }
     }
 }
