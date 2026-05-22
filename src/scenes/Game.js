@@ -1239,6 +1239,8 @@ export class Game extends Phaser.Scene {
     }
 
     updateComboPreview() {
+        if (!this.comboPreviewText) return;
+
         const who = this.phase === 'reaction' ? 'Defensive Reaction' : 'Offensive Spell';
         if (this.selectedBoardMana.length === 0) {
             this.comboPreviewText.setText('');
@@ -1260,11 +1262,82 @@ export class Game extends Phaser.Scene {
             if (isWeak) powerDetail = ' (WEAKENED! -2)';
 
             this.comboPreviewText.setText(`${who}: ${spell.name} (${spell.desc})${powerDetail}`);
-            this.comboPreviewText.setColor(isEmp ? '#00e676' : isWeak ? '#ff3c00' : '#00e5ff');
+            this.comboPreviewText.updateText(); // Force Phaser to recalculate dimensions instantly
+            
+            const fillStyle = this.getComboColorStyle(elements);
+            this.comboPreviewText.setFill(fillStyle);
         } else {
             this.comboPreviewText.setText('Invalid elemental combination selected.');
-            this.comboPreviewText.setColor('#ff3c00');
+            this.comboPreviewText.setFill('#ff3838'); // Glowing error red
         }
+    }
+
+    getComboColorStyle(elements) {
+        if (!elements || elements.length === 0) return '#00e5ff';
+
+        const colorMap = {
+            fire: '#ff3838',   // Red
+            water: '#38bdf8',  // Blue
+            earth: '#34d399',  // Green
+            air: '#facc15'     // Yellow
+        };
+
+        // Count occurrences of each element
+        const counts = { fire: 0, water: 0, earth: 0, air: 0 };
+        elements.forEach(el => {
+            if (counts[el] !== undefined) {
+                counts[el]++;
+            }
+        });
+
+        // Find max count
+        let maxCount = 0;
+        for (const el in counts) {
+            if (counts[el] > maxCount) {
+                maxCount = counts[el];
+            }
+        }
+
+        // Find elements with max count
+        const candidates = [];
+        for (const el in counts) {
+            if (counts[el] === maxCount) {
+                candidates.push(el);
+            }
+        }
+
+        // If single majority element, return its mapped color
+        if (candidates.length === 1) {
+            return colorMap[candidates[0]];
+        }
+
+        // Otherwise, it's a tie/composite of two or three elements.
+        // Collect unique elements present, maintaining order of occurrence
+        const uniqueElements = [];
+        elements.forEach(el => {
+            if (colorMap[el] && !uniqueElements.includes(el)) {
+                uniqueElements.push(el);
+            }
+        });
+
+        const colors = uniqueElements.map(el => colorMap[el]);
+
+        if (colors.length === 0) {
+            return '#00e5ff'; // Fallback cyan
+        }
+        if (colors.length === 1) {
+            return colors[0];
+        }
+
+        // Create canvas linear gradient across the text length
+        const textWidth = Math.max(100, this.comboPreviewText.width);
+        const gradient = this.comboPreviewText.context.createLinearGradient(0, 0, textWidth, 0);
+        colors.forEach((col, idx) => {
+            const stop = idx / (colors.length - 1);
+            gradient.addColorStop(stop, col);
+        });
+
+        return gradient;
     }
 
     // --- STRATEGIC PLAY ACTIONS ---
