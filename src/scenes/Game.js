@@ -892,7 +892,7 @@ export class Game extends Phaser.Scene {
             letterSpacing: 1
         });
 
-        this.logTextLines = [];
+        this.allLogTextLines = [];
         this.logContainer = this.add.container(w - 370, 50);
 
         // Drawer backing
@@ -902,6 +902,82 @@ export class Game extends Phaser.Scene {
         logBg.fillRoundedRect(0, 0, 340, 280, 8);
         logBg.strokeRoundedRect(0, 0, 340, 280, 8);
         this.logContainer.add(logBg);
+
+        // Scrolling container for log lines
+        this.logScrollContainer = this.add.container(0, 0);
+        this.logContainer.add(this.logScrollContainer);
+
+        // Mask to restrict visible area to the inside of the history box
+        // Viewport bounds: X = w - 370 + 8, Y = 50 + 10, Width = 324, Height = 260
+        const maskShape = this.make.graphics();
+        maskShape.fillStyle(0xffffff);
+        maskShape.fillRoundedRect(w - 370 + 8, 50 + 10, 324, 260, 8);
+        const mask = maskShape.createGeometryMask();
+        this.logScrollContainer.setMask(mask);
+
+        // Scrollbar track and handle graphics
+        this.logScrollbarGraphics = this.add.graphics();
+        this.logContainer.add(this.logScrollbarGraphics);
+
+        // Setup global pointer listeners for drag-scrolling and scrollbar dragging
+        this.isDraggingHistory = false;
+        this.isDraggingScrollbar = false;
+        this.dragStartY = 0;
+        this.dragStartScrollY = 0;
+
+        // Mouse wheel scrolling bounds checking
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+            const w = this.scale.width;
+            const relativeX = pointer.x - (w - 370);
+            const relativeY = pointer.y - 50;
+            // Check if pointer is inside the history box
+            if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 280) {
+                this.scrollDuelHistory(deltaY);
+            }
+        });
+
+        this.input.on('pointerdown', (pointer) => {
+            const w = this.scale.width;
+            const relativeX = pointer.x - (w - 370);
+            const relativeY = pointer.y - 50;
+
+            // Check if pointer is inside the history box
+            if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 280) {
+                // If it is inside the scrollbar area (X: 320 to 338)
+                if (relativeX >= 320 && relativeX <= 338 && relativeY >= 10 && relativeY <= 270) {
+                    const totalHeight = this.getLogTotalHeight();
+                    const viewportHeight = 260;
+                    if (totalHeight > viewportHeight) {
+                        this.isDraggingScrollbar = true;
+                        const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
+                        this.scrollHistoryByScrollbarY(relativeY, handleHeight);
+                    }
+                } else {
+                    // Otherwise, it is a drag-scroll on the text area
+                    this.isDraggingHistory = true;
+                    this.dragStartY = pointer.y;
+                    this.dragStartScrollY = this.logScrollContainer.y;
+                }
+            }
+        });
+
+        this.input.on('pointermove', (pointer) => {
+            if (this.isDraggingScrollbar) {
+                const relativeY = pointer.y - 50;
+                const totalHeight = this.getLogTotalHeight();
+                const viewportHeight = 260;
+                const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
+                this.scrollHistoryByScrollbarY(relativeY, handleHeight);
+            } else if (this.isDraggingHistory) {
+                const deltaY = pointer.y - this.dragStartY;
+                this.scrollDuelHistoryTo(this.dragStartScrollY + deltaY);
+            }
+        });
+
+        this.input.on('pointerup', () => {
+            this.isDraggingHistory = false;
+            this.isDraggingScrollbar = false;
+        });
 
         // Dynamic Interactive Tooltip for Spell Hovering
         this.logTooltip = this.add.container(0, 0).setVisible(false).setDepth(10000);
@@ -937,18 +1013,13 @@ export class Game extends Phaser.Scene {
         console.log(`[Whelmen] ${msg}`);
 
         // Safety: if log UI not ready yet, just console log
-        if (!this.logTextLines || !this.logContainer) return;
+        if (!this.allLogTextLines || !this.logScrollContainer) return;
 
-        // Maintain 12 lines
-        if (this.logTextLines.length >= 12) {
-            const old = this.logTextLines.shift();
+        // Keep a maximum of 150 messages in history to prevent any massive memory build-up over long play sessions
+        if (this.allLogTextLines.length >= 150) {
+            const old = this.allLogTextLines.shift();
             old.destroy();
         }
-
-        // Shift existing up
-        this.logTextLines.forEach((textLine, i) => {
-            textLine.y = 20 + i * 20;
-        });
 
         // Add new
         const color = msg.includes('VICTORY') ? '#00e676' :
@@ -956,7 +1027,7 @@ export class Game extends Phaser.Scene {
                       msg.includes('Reaction') ? '#00e5ff' :
                       msg.includes('---') ? '#d4af37' : '#cbd5e1';
 
-        const textLine = this.add.text(12, 20 + (this.logTextLines.length) * 20, msg, {
+        const textLine = this.add.text(12, 15 + (this.allLogTextLines.length) * 20, msg, {
             fontFamily: '"Inter", sans-serif',
             fontSize: '11px',
             color: color,
@@ -981,8 +1052,18 @@ export class Game extends Phaser.Scene {
             this.updateLogTooltipPosition(pointer.x, pointer.y);
         });
 
-        this.logContainer.add(textLine);
-        this.logTextLines.push(textLine);
+        this.logScrollContainer.add(textLine);
+        this.allLogTextLines.push(textLine);
+
+        // Auto-scroll to the bottom when a new message is added
+        const totalHeight = this.getLogTotalHeight();
+        const viewportHeight = 260;
+        if (totalHeight > viewportHeight) {
+            this.logScrollContainer.y = viewportHeight - totalHeight;
+        } else {
+            this.logScrollContainer.y = 0;
+        }
+        this.updateScrollbar();
     }
 
     // --- CARD HAND RENDERING ---
@@ -2444,5 +2525,90 @@ export class Game extends Phaser.Scene {
             const height = 48 + this.logTooltipDesc.height + 12;
             this.logTooltip.setPosition(x - width - 15, y - height / 2);
         }
+    }
+
+    getLogTotalHeight() {
+        if (!this.allLogTextLines || this.allLogTextLines.length === 0) return 0;
+        return this.allLogTextLines.length * 20 + 30;
+    }
+
+    scrollHistoryByScrollbarY(relativeY, handleHeight) {
+        const viewportHeight = 260;
+        const totalHeight = this.getLogTotalHeight();
+        
+        // Calculate clicked center and map it
+        // The handle travel range is from 10 to 10 + 260 - handleHeight
+        const minHandleY = 10;
+        const maxHandleTravel = 260 - handleHeight;
+        
+        // Clamp handle target position
+        let targetHandleY = relativeY - handleHeight / 2;
+        if (targetHandleY < minHandleY) targetHandleY = minHandleY;
+        if (targetHandleY > minHandleY + maxHandleTravel) targetHandleY = minHandleY + maxHandleTravel;
+        
+        // Map handle target position to container scroll Y
+        const scrollRatio = (targetHandleY - minHandleY) / maxHandleTravel;
+        const maxScroll = viewportHeight - totalHeight; // negative number
+        
+        this.logScrollContainer.y = scrollRatio * maxScroll;
+        this.updateScrollbar();
+    }
+
+    scrollDuelHistoryTo(targetY) {
+        if (!this.logScrollContainer || !this.allLogTextLines || this.allLogTextLines.length === 0) return;
+        
+        const viewportHeight = 260;
+        const totalHeight = this.getLogTotalHeight();
+        
+        if (totalHeight <= viewportHeight) {
+            this.logScrollContainer.y = 0;
+            this.updateScrollbar();
+            return;
+        }
+        
+        const minY = viewportHeight - totalHeight;
+        const maxY = 0;
+        
+        if (targetY < minY) targetY = minY;
+        if (targetY > maxY) targetY = maxY;
+        
+        this.logScrollContainer.y = targetY;
+        this.updateScrollbar();
+    }
+
+    scrollDuelHistory(deltaY) {
+        if (!this.logScrollContainer || !this.allLogTextLines || this.allLogTextLines.length === 0) return;
+        
+        // Scroll by 1 line height (20px) per tick
+        const scrollAmount = -Math.sign(deltaY) * 20;
+        this.scrollDuelHistoryTo(this.logScrollContainer.y + scrollAmount);
+    }
+
+    updateScrollbar() {
+        if (!this.logScrollbarGraphics) return;
+        
+        this.logScrollbarGraphics.clear();
+        
+        const viewportHeight = 260;
+        const totalHeight = this.getLogTotalHeight();
+        
+        if (totalHeight <= viewportHeight) return;
+        
+        const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
+        const maxScroll = viewportHeight - totalHeight;
+        const scrollRatio = maxScroll === 0 ? 0 : (this.logScrollContainer.y / maxScroll);
+        
+        const maxHandleTravel = 260 - handleHeight;
+        const handleY = 10 + scrollRatio * maxHandleTravel;
+        
+        // Draw track with a subtle, premium glassmorphic border/fill
+        this.logScrollbarGraphics.fillStyle(0xffffff, 0.04);
+        this.logScrollbarGraphics.fillRoundedRect(328, 10, 6, 260, 3);
+        
+        // Draw glowing aesthetic scroll handle
+        this.logScrollbarGraphics.fillStyle(0x7c3aed, 0.7); // vibrant purple
+        this.logScrollbarGraphics.lineStyle(1, 0xa78bfa, 0.95); // glowing border
+        this.logScrollbarGraphics.fillRoundedRect(328, handleY, 6, handleHeight, 3);
+        this.logScrollbarGraphics.strokeRoundedRect(328, handleY, 6, handleHeight, 3);
     }
 }
