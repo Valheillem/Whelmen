@@ -98,13 +98,16 @@ export class Game extends Phaser.Scene {
     }
 
     init(data) {
-        // Mode: 'ai' (default, single-player) or 'online' (multiplayer via Firebase)
+        // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
         this.mode = data?.mode || 'ai';
         this.lobbyCode = data?.lobbyCode || null;
         this.myRole = data?.myRole || 'host'; // 'host' or 'guest'
         this.playerId = data?.playerId || null;
         this.firebaseUnsub = null;
         this.isOnlineInitialized = false;
+        if (this.mode === 'test') {
+            this.dummyMode = 'passive'; // 'passive' or 'active'
+        }
     }
 
     preload() {
@@ -262,6 +265,9 @@ export class Game extends Phaser.Scene {
             this.initSharedDeck();
             this.dealStartingHands();
             this.startTurn('player');
+            if (this.mode === 'test') {
+                this.buildSandboxDashboard();
+            }
         }
     }
 
@@ -358,6 +364,17 @@ export class Game extends Phaser.Scene {
                 this.time.delayedCall(1200, () => {
                     this.runAITurn();
                 });
+            } else if (this.mode === 'test') {
+                if (this.dummyMode === 'passive') {
+                    this.logMessage("Dummy is passive. Passing turn back to Player.");
+                    this.time.delayedCall(800, () => {
+                        this.endTurn();
+                    });
+                } else {
+                    this.time.delayedCall(1200, () => {
+                        this.runAITurn();
+                    });
+                }
             } else {
                 // ONLINE: wait for opponent — Firebase listener handles it
                 this.logMessage('Waiting for opponent...');
@@ -434,6 +451,19 @@ export class Game extends Phaser.Scene {
         const char = who === 'player' ? this.player : this.ai;
         const totalCards = char.hand.length + char.board.length;
         if (totalCards === 0) {
+            if (this.mode === 'test') {
+                if (who === 'ai') {
+                    this.showSandboxNotification("Dummy Defeated! Reviving...");
+                    this.logMessage("--- DUMMY DEFEATED! Reviving Dummy... ---");
+                    this.resetDummyState();
+                } else {
+                    this.showSandboxNotification("You Died! Reviving...");
+                    this.logMessage("--- PLAYER DEFEATED! Reviving Player... ---");
+                    this.resetPlayerState();
+                }
+                return true;
+            }
+
             this.phase = 'gameover';
             this.enablePlayerControls(false);
             this.showGameOver(who === 'player' ? 'DEFEAT' : 'VICTORY');
@@ -630,7 +660,8 @@ export class Game extends Phaser.Scene {
         this.aiZone = this.add.container(0, 30);
 
         // Life card count glow
-        this.aiLifeText = this.add.text(45, 12, 'AI HEALTH: 8 (CARDS)', {
+        const prefix = this.mode === 'test' ? 'DUMMY' : 'AI';
+        this.aiLifeText = this.add.text(45, 12, `${prefix} HEALTH: 8 (CARDS)`, {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '20px',
             fontWeight: '700',
@@ -651,7 +682,7 @@ export class Game extends Phaser.Scene {
         this.aiZone.add(this.ai.shieldT);
 
         // Title AI Board Mana
-        this.add.text(45, 160, 'AI BOARD MANA:', {
+        this.add.text(45, 160, `${prefix} BOARD MANA:`, {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
             fontWeight: '600',
@@ -669,7 +700,8 @@ export class Game extends Phaser.Scene {
     updateAILifeDisplay() {
         const total = this.ai.hand.length + this.ai.board.length;
         this.ai.life = total;
-        this.aiLifeText.setText(`AI HEALTH: ${total} (Hand: ${this.ai.hand.length} | Board: ${this.ai.board.length})`);
+        const prefix = this.mode === 'test' ? 'DUMMY' : 'AI';
+        this.aiLifeText.setText(`${prefix} HEALTH: ${total} (Hand: ${this.ai.hand.length} | Board: ${this.ai.board.length})`);
     }
 
     updateShieldDisplay(who) {
@@ -2011,6 +2043,7 @@ export class Game extends Phaser.Scene {
 
     calculateAIReaction(incomingDamage) {
         if (this.ai.board.length === 0) return null;
+        if (this.mode === 'test' && this.dummyMode === 'passive') return null;
 
         // Smart Reaction selection:
         // Try to find Earth (Pebble Shield) or Earth+Earth (Stone Wall) or Earth+Water (Mudslide)
@@ -2695,5 +2728,345 @@ export class Game extends Phaser.Scene {
         this.logScrollbarGraphics.lineStyle(1, 0xa78bfa, 0.95); // glowing border
         this.logScrollbarGraphics.fillRoundedRect(328, handleY, 6, handleHeight, 3);
         this.logScrollbarGraphics.strokeRoundedRect(328, handleY, 6, handleHeight, 3);
+    }
+
+    buildSandboxDashboard() {
+        const parent = document.getElementById('game-container');
+        if (!parent) return;
+
+        // 1. Create notification overlay
+        const notif = document.createElement('div');
+        notif.id = 'sandbox-notif';
+        notif.className = 'floating-notif';
+        notif.textContent = 'DUMMY RECOVERED!';
+        parent.appendChild(notif);
+
+        // 2. Create vertical sidebar toggle tab
+        const tab = document.createElement('div');
+        tab.id = 'sandbox-tab';
+        tab.className = 'test-range-tab';
+        tab.innerHTML = '⚙️';
+        parent.appendChild(tab);
+
+        // 3. Create sidebar panel
+        const panel = document.createElement('div');
+        panel.id = 'sandbox-panel';
+        panel.className = 'test-range-panel';
+        panel.innerHTML = `
+            <div class="panel-header">
+                <div class="panel-title">⚙️ SANDBOX TOOLS</div>
+                <button class="panel-close" id="panel-close-btn">&times;</button>
+            </div>
+            <div class="panel-content">
+                <div class="panel-section">
+                    <div class="panel-section-title">Environmental Cycle</div>
+                    <div class="cycle-btn-group">
+                        <button class="panel-btn active-weather" id="w-neutral" style="--color: var(--color-neutral); --glow: var(--glow-neutral-glow);"><span class="emoji">⚪</span>Neut</button>
+                        <button class="panel-btn" id="w-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);"><span class="emoji">🔥</span>Fire</button>
+                        <button class="panel-btn" id="w-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);"><span class="emoji">🌿</span>Earth</button>
+                        <button class="panel-btn" id="w-air" style="--color: var(--color-air); --glow: var(--color-air-glow);"><span class="emoji">🌪️</span>Air</button>
+                        <button class="panel-btn" id="w-water" style="--color: var(--color-water); --glow: var(--color-water-glow);"><span class="emoji">💧</span>Water</button>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="panel-section-title">Card Sandbox</div>
+                    <div class="spawner-grid">
+                        <div class="spawner-column">
+                            <div class="spawner-col-title">Spawn In Hand</div>
+                            <div class="element-grid">
+                                <button class="panel-btn el-btn" id="spawn-h-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);">🔥 Fire</button>
+                                <button class="panel-btn el-btn" id="spawn-h-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);">🌿 Earth</button>
+                                <button class="panel-btn el-btn" id="spawn-h-air" style="--color: var(--color-air); --glow: var(--color-air-glow);">🌪️ Air</button>
+                                <button class="panel-btn el-btn" id="spawn-h-water" style="--color: var(--color-water); --glow: var(--color-water-glow);">💧 Water</button>
+                                <button class="panel-btn el-btn clear-btn" id="clear-hand">Clear Hand</button>
+                            </div>
+                        </div>
+                        <div class="spawner-column">
+                            <div class="spawner-col-title">Spawn On Board</div>
+                            <div class="element-grid">
+                                <button class="panel-btn el-btn" id="spawn-b-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);">🔥 Fire</button>
+                                <button class="panel-btn el-btn" id="spawn-b-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);">🌿 Earth</button>
+                                <button class="panel-btn el-btn" id="spawn-b-air" style="--color: var(--color-air); --glow: var(--color-air-glow);">🌪️ Air</button>
+                                <button class="panel-btn el-btn" id="spawn-b-water" style="--color: var(--color-water); --glow: var(--color-water-glow);">💧 Water</button>
+                                <button class="panel-btn el-btn clear-btn" id="clear-board">Clear Board</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="panel-section-title">Test Dummy Opponent</div>
+                    <div class="dummy-btn-group">
+                        <button class="panel-btn toggle-btn btn-passive-ai" id="btn-dummy-passive">Passive Mode</button>
+                        <button class="panel-btn toggle-btn" id="btn-dummy-active">Active AI</button>
+                        <button class="panel-btn util-btn" id="btn-dummy-shield5">+5 Dummy Shield</button>
+                        <button class="panel-btn util-btn" id="btn-dummy-shield10">+10 Dummy Shield</button>
+                        <button class="panel-btn util-btn" id="btn-dummy-reset">Reset Dummy Health</button>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="panel-section-title">Spell Sandbox Catalog</div>
+                    <div class="spell-search-box">
+                        <span class="spell-search-icon">🔍</span>
+                        <input type="text" id="spell-search-input" class="spell-search-input" placeholder="Search spells by name or element...">
+                    </div>
+                    <div class="spell-list-scroll" id="spell-list-scroll"></div>
+                </div>
+            </div>
+        `;
+        parent.appendChild(panel);
+
+        // --- Interaction Listeners ---
+        const togglePanel = () => {
+            panel.classList.toggle('active');
+            this.playSound('click');
+        };
+
+        tab.addEventListener('click', togglePanel);
+        document.getElementById('panel-close-btn').addEventListener('click', togglePanel);
+
+        // 1. Weather Cycle Handlers
+        const weatherIds = ['w-neutral', 'w-fire', 'w-earth', 'w-air', 'w-water'];
+        const elementsList = ['neutral', 'fire', 'earth', 'air', 'water'];
+        
+        weatherIds.forEach((id, idx) => {
+            const btn = document.getElementById(id);
+            btn.addEventListener('click', () => {
+                this.playSound('click');
+                // Deactivate all cycle buttons
+                weatherIds.forEach(wid => document.getElementById(wid).classList.remove('active-weather'));
+                btn.classList.add('active-weather');
+
+                // Force game cycle logic
+                this.cycleIndex = idx;
+                const el = elementsList[idx];
+                this.logMessage(`[Sandbox] Forced Cycle to: [${el.toUpperCase()}]`);
+
+                // Rotate visual dial
+                this.tweens.add({
+                    targets: this.cycleContainer,
+                    rotation: (idx) * (Math.PI / 2),
+                    duration: 500,
+                    ease: 'Cubic.easeOut'
+                });
+                this.triggerCycleParticles(el);
+                this.updateComboPreview();
+            });
+        });
+
+        // 2. Card Spawn Handlers
+        const spawnCard = (zone, el) => {
+            this.playSound('draw');
+            if (zone === 'hand') {
+                this.player.hand.push(el);
+                this.updatePlayerHandDisplay();
+            } else {
+                if (this.player.board.length < 5) {
+                    this.player.board.push(el);
+                    this.updatePlayerBoardDisplay();
+                } else {
+                    this.showSandboxNotification("Board is full!");
+                }
+            }
+            this.updatePlayerLifeDisplay();
+            this.updateComboPreview();
+        };
+
+        ['fire', 'earth', 'air', 'water'].forEach(el => {
+            document.getElementById(`spawn-h-${el}`).addEventListener('click', () => spawnCard('hand', el));
+            document.getElementById(`spawn-b-${el}`).addEventListener('click', () => spawnCard('board', el));
+        });
+
+        document.getElementById('clear-hand').addEventListener('click', () => {
+            this.playSound('fire');
+            this.player.hand = [];
+            this.updatePlayerHandDisplay();
+            this.updatePlayerLifeDisplay();
+            this.updateComboPreview();
+            this.logMessage("[Sandbox] Cleared Player hand.");
+        });
+
+        document.getElementById('clear-board').addEventListener('click', () => {
+            this.playSound('fire');
+            this.player.board = [];
+            this.selectedBoardMana = [];
+            this.updatePlayerBoardDisplay();
+            this.updatePlayerLifeDisplay();
+            this.updateComboPreview();
+            this.logMessage("[Sandbox] Cleared Player board mana.");
+        });
+
+        // 3. Dummy Behavior Handlers
+        const btnDummyPassive = document.getElementById('btn-dummy-passive');
+        const btnDummyActive = document.getElementById('btn-dummy-active');
+
+        btnDummyPassive.addEventListener('click', () => {
+            this.playSound('click');
+            this.dummyMode = 'passive';
+            btnDummyPassive.classList.add('btn-passive-ai');
+            btnDummyActive.classList.remove('btn-active-ai');
+            this.logMessage("[Sandbox] Dummy set to PASSIVE Mode.");
+        });
+
+        btnDummyActive.addEventListener('click', () => {
+            this.playSound('click');
+            this.dummyMode = 'active';
+            btnDummyActive.classList.add('btn-active-ai');
+            btnDummyPassive.classList.remove('btn-passive-ai');
+            this.logMessage("[Sandbox] Dummy set to ACTIVE AI Mode.");
+        });
+
+        document.getElementById('btn-dummy-shield5').addEventListener('click', () => {
+            this.playSound('shield');
+            this.ai.shield += 5;
+            this.updateShieldDisplay('ai');
+            this.logMessage(`[Sandbox] Granted Dummy +5 Shield. Total: ${this.ai.shield}`);
+        });
+
+        document.getElementById('btn-dummy-shield10').addEventListener('click', () => {
+            this.playSound('shield');
+            this.ai.shield += 10;
+            this.updateShieldDisplay('ai');
+            this.logMessage(`[Sandbox] Granted Dummy +10 Shield. Total: ${this.ai.shield}`);
+        });
+
+        document.getElementById('btn-dummy-reset').addEventListener('click', () => {
+            this.playSound('shield');
+            this.resetDummyState();
+            this.showSandboxNotification("Dummy Health Reset!");
+            this.logMessage("[Sandbox] Reset Dummy Health.");
+        });
+
+        // 4. Populating Spell Catalog Scroll
+        if (!this.spellsCatalog) {
+            this.getSpellFromCombo([]);
+        }
+        
+        const scrollList = document.getElementById('spell-list-scroll');
+        const searchInput = document.getElementById('spell-search-input');
+        
+        const renderSpellList = (filterText = '') => {
+            scrollList.innerHTML = '';
+            const lowerFilter = filterText.toLowerCase();
+            
+            Object.keys(this.spellsCatalog).forEach(comboKey => {
+                const spell = this.spellsCatalog[comboKey];
+                
+                if (filterText && !spell.name.toLowerCase().includes(lowerFilter) && !spell.element.toLowerCase().includes(lowerFilter)) {
+                    return;
+                }
+                
+                const elementIcon = spell.element === 'fire' ? '🔥' :
+                                    spell.element === 'earth' ? '🌿' :
+                                    spell.element === 'water' ? '💧' : '🌪️';
+                
+                const elSpanClass = `element-${spell.element}`;
+                
+                const spellItem = document.createElement('div');
+                spellItem.className = 'spell-item';
+                spellItem.innerHTML = `
+                    <div class="spell-info">
+                        <div class="spell-name-row">
+                            <span class="spell-el-icon">${elementIcon}</span>
+                            <span class="spell-name ${elSpanClass}">${spell.name}</span>
+                        </div>
+                        <div class="spell-desc-txt">${spell.desc}</div>
+                    </div>
+                    <button class="spell-cast-action" data-combo="${comboKey}">CAST</button>
+                `;
+                scrollList.appendChild(spellItem);
+
+                // Add Cast Trigger
+                spellItem.querySelector('.spell-cast-action').addEventListener('click', () => {
+                    if (this.phase === 'discard') {
+                        this.showSandboxNotification("Must discard first!");
+                        return;
+                    }
+                    
+                    this.playSound('click');
+                    this.logMessage(`[Sandbox] Instant Casting: ${spell.name}!`);
+                    const w = this.scale.width;
+                    
+                    // Visual spell fire from player center to AI center
+                    this.triggerSpellVisual(spell.element, w / 2 - 100, 500, w / 2 - 100, 100, () => {
+                        this.initiateAttack('player', 'ai', spell);
+                    });
+                });
+            });
+        };
+
+        renderSpellList();
+
+        searchInput.addEventListener('input', (e) => {
+            renderSpellList(e.target.value);
+        });
+
+        // 5. Clean up events on Phaser scene shutdown
+        this.events.on('shutdown', () => {
+            const notifEl = document.getElementById('sandbox-notif');
+            const tabEl = document.getElementById('sandbox-tab');
+            const panelEl = document.getElementById('sandbox-panel');
+            if (notifEl) notifEl.remove();
+            if (tabEl) tabEl.remove();
+            if (panelEl) panelEl.remove();
+        });
+    }
+
+    showSandboxNotification(text) {
+        const notif = document.getElementById('sandbox-notif');
+        if (notif) {
+            notif.textContent = text.toUpperCase();
+            notif.classList.add('show');
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 3000);
+        }
+    }
+
+    resetDummyState() {
+        this.ai.hand = [];
+        this.ai.board = [];
+        this.ai.shield = 0;
+        this.ai.steamDebuff = false;
+        this.ai.maxHand = 8;
+        
+        // Restore random 8 hand cards and 3 board cards
+        for (let i = 0; i < 8; i++) {
+            this.ai.hand.push(this.drawCard() || 'fire');
+        }
+        for (let i = 0; i < 3; i++) {
+            this.ai.board.push(this.drawCard() || 'earth');
+        }
+        
+        this.updateAIHandDisplay();
+        this.updateAIBoardDisplay();
+        this.updateAILifeDisplay();
+        this.updateShieldDisplay('ai');
+    }
+
+    resetPlayerState() {
+        this.player.hand = [];
+        this.player.board = [];
+        this.player.shield = 0;
+        this.player.steamDebuff = false;
+        this.player.maxHand = 8;
+        this.selectedBoardMana = [];
+        
+        // Restore random 8 hand cards and 3 board cards
+        for (let i = 0; i < 8; i++) {
+            this.player.hand.push(this.drawCard() || 'fire');
+        }
+        for (let i = 0; i < 3; i++) {
+            this.player.board.push(this.drawCard() || 'earth');
+        }
+        
+        this.updatePlayerHandDisplay();
+        this.updatePlayerBoardDisplay();
+        this.updatePlayerLifeDisplay();
+        this.updateShieldDisplay('player');
+        this.updateComboPreview();
+        this.enablePlayerControls(true);
     }
 }

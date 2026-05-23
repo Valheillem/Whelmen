@@ -66,7 +66,7 @@ export class Start extends Phaser.Scene {
         });
 
         // 5. Add Main Title - "WHELMEN"
-        const titleText = this.add.text(width / 2, height / 2 - 80, 'WHELMEN', {
+        const titleText = this.add.text(width / 2, height / 2 - 110, 'WHELMEN', {
             fontFamily: '"Outfit", "Inter", sans-serif',
             fontSize: '84px',
             fontWeight: '800',
@@ -76,7 +76,7 @@ export class Start extends Phaser.Scene {
         titleText.setStroke('#4e3ea0', 16);
         titleText.setShadow(0, 0, 'rgba(78, 62, 160, 0.8)', 30, true, true);
 
-        const subTitleText = this.add.text(width / 2, height / 2 + 5, 'THE ELEMENTAL DUELING GAME', {
+        const subTitleText = this.add.text(width / 2, height / 2 - 25, 'THE ELEMENTAL DUELING GAME', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '18px',
             fontWeight: '600',
@@ -107,15 +107,19 @@ export class Start extends Phaser.Scene {
         }
 
         // 8. Add Menu Buttons
-        this.createMenuButton(width / 2, height / 2 + 80, 'PLAY VS AI', () => {
+        this.createMenuButton(width / 2, height / 2 + 35, 'PLAY VS AI', () => {
             this.scene.start('Game', { mode: 'ai' });
         });
 
-        this.createMenuButton(width / 2, height / 2 + 145, 'PLAY ONLINE', () => {
+        this.createMenuButton(width / 2, height / 2 + 95, 'PLAY ONLINE', () => {
             this.scene.start('Lobby', { action: 'create' });
         });
 
-        this.createMenuButton(width / 2, height / 2 + 210, 'HOW TO PLAY', () => {
+        this.createMenuButton(width / 2, height / 2 + 155, 'TEST RANGE', () => {
+            this.scene.start('Game', { mode: 'test' });
+        });
+
+        this.createMenuButton(width / 2, height / 2 + 215, 'HOW TO PLAY', () => {
             document.getElementById('tutorial-overlay').classList.add('active');
         });
 
