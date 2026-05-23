@@ -461,6 +461,19 @@ export class Game extends Phaser.Scene {
                     this.logMessage("--- PLAYER DEFEATED! Reviving Player... ---");
                     this.resetPlayerState();
                 }
+                
+                // Clear any locked sandbox phases
+                this.phase = 'action';
+                this.cardsToDiscardCount = 0;
+                this.selectedBoardMana = [];
+                if (this.discardPromptText) this.discardPromptText.setVisible(false);
+                this.updateComboPreview();
+                this.enablePlayerControls(true);
+
+                // Advance turn cleanly
+                this.time.delayedCall(800, () => {
+                    this.endTurn();
+                });
                 return true;
             }
 
@@ -3044,6 +3057,15 @@ export class Game extends Phaser.Scene {
         this.updateAIBoardDisplay();
         this.updateAILifeDisplay();
         this.updateShieldDisplay('ai');
+
+        if (this.mode === 'test') {
+            this.phase = 'action';
+            this.cardsToDiscardCount = 0;
+            this.selectedBoardMana = [];
+            if (this.discardPromptText) this.discardPromptText.setVisible(false);
+            this.updateComboPreview();
+            this.enablePlayerControls(true);
+        }
     }
 
     resetPlayerState() {
@@ -3068,5 +3090,11 @@ export class Game extends Phaser.Scene {
         this.updateShieldDisplay('player');
         this.updateComboPreview();
         this.enablePlayerControls(true);
+
+        if (this.mode === 'test') {
+            this.phase = 'action';
+            this.cardsToDiscardCount = 0;
+            if (this.discardPromptText) this.discardPromptText.setVisible(false);
+        }
     }
 }
