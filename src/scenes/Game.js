@@ -1264,22 +1264,44 @@ export class Game extends Phaser.Scene {
 
         this.playerBoardGroup = this.add.group();
         const h = this.scale.height;
-        const startX = 60;
-        const spaceX = 90;
         const y = h - 280;
 
-        // Render card slots
+        // Group player board elements dynamically
+        const stacks = {};
+        const uniqueElements = [];
         this.player.board.forEach((el, index) => {
-            const x = startX + index * spaceX;
+            if (!stacks[el]) {
+                stacks[el] = {
+                    element: el,
+                    count: 0,
+                    indices: [],
+                    selectedCount: 0
+                };
+                uniqueElements.push(el);
+            }
+            stacks[el].count++;
+            stacks[el].indices.push(index);
+            if (this.selectedBoardMana.includes(index)) {
+                stacks[el].selectedCount++;
+            }
+        });
 
-            const isSelected = this.selectedBoardMana.includes(index);
+        // Dynamic symmetric centering around player board center x = 240
+        const centerX = 240;
+        const spaceX = 100;
+        const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
+
+        uniqueElements.forEach((el, index) => {
+            const x = startX + index * spaceX;
+            const stack = stacks[el];
+            const hasSelected = stack.selectedCount > 0;
 
             const cardObj = this.add.image(x, y, `card_${el}`)
-                .setScale(isSelected ? 0.72 : 0.65)
+                .setScale(hasSelected ? 0.72 : 0.65)
                 .setInteractive({ useHandCursor: true });
 
-            // Glowing pulsing border highlight if selected for spell combos
-            if (isSelected) {
+            // Glowing pulsing border highlight if any card in stack is selected
+            if (hasSelected) {
                 const borderW = cardObj.width * 0.72 + 8;
                 const borderH = cardObj.height * 0.72 + 8;
                 
@@ -1320,23 +1342,32 @@ export class Game extends Phaser.Scene {
 
             this.playerBoardGroup.add(cardObj);
 
+            // Click listener
             cardObj.on('pointerdown', () => {
                 if (this.phase === 'discard' || this.phase === 'discard_request_active') {
-                    this.discardCardFromZone('board', index, 'player');
+                    // Discard the last index in the stack
+                    const discardIdx = stack.indices[stack.indices.length - 1];
+                    this.discardCardFromZone('board', discardIdx, 'player');
                     return;
                 }
 
-                // If in action or reaction, select card for casting combos!
+                // If in action or reaction, select card for casting combos
                 if (this.turn === 'player' || this.phase === 'reaction' || this.phase === 'reaction_request_active') {
-                    const selIdx = this.selectedBoardMana.indexOf(index);
-                    if (selIdx > -1) {
-                        this.selectedBoardMana.splice(selIdx, 1);
+                    const unselectedIndices = stack.indices.filter(idx => !this.selectedBoardMana.includes(idx));
+                    const selectedIndices = stack.indices.filter(idx => this.selectedBoardMana.includes(idx));
+
+                    if (unselectedIndices.length > 0 && this.selectedBoardMana.length < 3) {
+                        // Select one more
+                        const nextToSelect = unselectedIndices[0];
+                        this.selectedBoardMana.push(nextToSelect);
                     } else {
-                        if (this.selectedBoardMana.length < 3) {
-                            this.selectedBoardMana.push(index);
-                        } else {
-                            this.playSound('click');
-                        }
+                        // Deselect all selected cards of this element in the stack
+                        selectedIndices.forEach(idx => {
+                            const selIdx = this.selectedBoardMana.indexOf(idx);
+                            if (selIdx > -1) {
+                                this.selectedBoardMana.splice(selIdx, 1);
+                            }
+                        });
                     }
                     this.playSound('click');
                     this.updatePlayerBoardDisplay();
@@ -1349,7 +1380,7 @@ export class Game extends Phaser.Scene {
             cardObj.on('pointerover', () => {
                 if (this.phase === 'discard') {
                     cardObj.setTint(0xff3c00);
-                } else if (!isSelected) {
+                } else if (!hasSelected) {
                     cardObj.setScale(0.7);
                 }
             });
@@ -1357,10 +1388,75 @@ export class Game extends Phaser.Scene {
             cardObj.on('pointerout', () => {
                 if (this.phase === 'discard') {
                     cardObj.clearTint();
-                } else if (!isSelected) {
+                } else if (!hasSelected) {
                     cardObj.setScale(0.65);
                 }
             });
+
+            // Calculate exact corners relative to current scale
+            const currentScale = hasSelected ? 0.72 : 0.65;
+            const wHalf = (100 * currentScale) / 2;
+            const hHalf = (150 * currentScale) / 2;
+
+            // 1. Draw Total Count Badge (Top-Right)
+            if (stack.count > 1) {
+                const badgeX = x + wHalf - 8;
+                const badgeY = y - hHalf + 8;
+                
+                const elementColors = {
+                    fire: 0xff3c00,
+                    earth: 0x00e676,
+                    water: 0x00b0ff,
+                    air: 0x00e5ff
+                };
+                const elementColorHex = elementColors[el] || 0xffffff;
+
+                const countBadgeG = this.add.graphics();
+                countBadgeG.fillStyle(0x0d0b1c, 0.95);
+                countBadgeG.lineStyle(1.5, elementColorHex, 0.9);
+                countBadgeG.fillCircle(badgeX, badgeY, 11);
+                countBadgeG.strokeCircle(badgeX, badgeY, 11);
+                this.playerBoardGroup.add(countBadgeG);
+                
+                const countText = this.add.text(badgeX, badgeY, `${stack.count}`, {
+                    fontFamily: '"Outfit", sans-serif',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    color: '#ffffff'
+                }).setOrigin(0.5);
+                this.playerBoardGroup.add(countText);
+            }
+
+            // 2. Draw Selected Count Badge (Bottom-Right)
+            if (stack.selectedCount > 0) {
+                const badgeX = x + wHalf - 8;
+                const badgeY = y + hHalf - 8;
+                
+                const selBadgeG = this.add.graphics();
+                const isAllSelected = (stack.selectedCount === stack.count);
+                
+                if (isAllSelected) {
+                    selBadgeG.fillStyle(0x00ffff, 0.95);
+                    selBadgeG.lineStyle(1.5, 0xffffff, 1);
+                    selBadgeG.fillCircle(badgeX, badgeY, 11);
+                    selBadgeG.strokeCircle(badgeX, badgeY, 11);
+                } else {
+                    selBadgeG.fillStyle(0x040212, 0.95);
+                    selBadgeG.lineStyle(2, 0x00e5ff, 0.95);
+                    selBadgeG.fillCircle(badgeX, badgeY, 11);
+                    selBadgeG.strokeCircle(badgeX, badgeY, 11);
+                }
+                this.playerBoardGroup.add(selBadgeG);
+                
+                const selTextVal = isAllSelected ? `✓` : `${stack.selectedCount}`;
+                const selText = this.add.text(badgeX, badgeY, selTextVal, {
+                    fontFamily: '"Outfit", sans-serif',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    color: isAllSelected ? '#040212' : '#00e5ff'
+                }).setOrigin(0.5);
+                this.playerBoardGroup.add(selText);
+            }
         });
     }
 
@@ -1370,15 +1466,65 @@ export class Game extends Phaser.Scene {
         }
 
         this.aiBoardGroup = this.add.group();
-        const startX = 60;
-        const spaceX = 90;
         const y = 260;
 
+        // Group AI board elements dynamically
+        const stacks = {};
+        const uniqueElements = [];
         this.ai.board.forEach((el, index) => {
+            if (!stacks[el]) {
+                stacks[el] = {
+                    element: el,
+                    count: 0
+                };
+                uniqueElements.push(el);
+            }
+            stacks[el].count++;
+        });
+
+        // Dynamic symmetric centering around AI board center x = 240
+        const centerX = 240;
+        const spaceX = 100;
+        const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
+
+        uniqueElements.forEach((el, index) => {
             const x = startX + index * spaceX;
+            const stack = stacks[el];
+
             const cardObj = this.add.image(x, y, `card_${el}`)
                 .setScale(0.65);
             this.aiBoardGroup.add(cardObj);
+
+            // Total Count Badge (Top-Right)
+            if (stack.count > 1) {
+                const wHalf = (100 * 0.65) / 2;
+                const hHalf = (150 * 0.65) / 2;
+                const badgeX = x + wHalf - 8;
+                const badgeY = y - hHalf + 8;
+
+                const elementColors = {
+                    fire: 0xff3c00,
+                    earth: 0x00e676,
+                    water: 0x00b0ff,
+                    air: 0x00e5ff
+                };
+                const elementColorHex = elementColors[el] || 0xffffff;
+
+                const countBadgeG = this.add.graphics();
+                countBadgeG.fillStyle(0x0d0b1c, 0.95);
+                countBadgeG.lineStyle(1.5, elementColorHex, 0.9);
+                countBadgeG.fillCircle(badgeX, badgeY, 11);
+                countBadgeG.strokeCircle(badgeX, badgeY, 11);
+                this.aiBoardGroup.add(countBadgeG);
+
+                const countText = this.add.text(badgeX, badgeY, `${stack.count}`, {
+                    fontFamily: '"Outfit", sans-serif',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    color: '#ffffff'
+                }).setOrigin(0.5);
+                this.aiBoardGroup.add(countText);
+            }
         });
     }
 
