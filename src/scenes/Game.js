@@ -603,10 +603,10 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         const h = this.scale.height;
 
-        this.playerZone = this.add.container(0, h - 220);
+        this.playerZone = this.add.container(0, h - 195);
 
         // Life card count glow (moved below hand cards)
-        this.playerLifeText = this.add.text(45, 160, 'HEALTH: 8 (CARDS)', {
+        this.playerLifeText = this.add.text(45, 135, 'HEALTH: 8 (CARDS)', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '20px',
             fontWeight: '700',
@@ -618,7 +618,7 @@ export class Game extends Phaser.Scene {
         this.player.shieldG = this.add.graphics();
         this.playerZone.add(this.player.shieldG);
 
-        this.player.shieldT = this.add.text(600, 158, '', {
+        this.player.shieldT = this.add.text(600, 133, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '16px',
             fontWeight: '700',
@@ -627,7 +627,7 @@ export class Game extends Phaser.Scene {
         this.playerZone.add(this.player.shieldT);
 
         // Title Player Board Mana (added to playerZone for consistent relative placement)
-        const boardTitle = this.add.text(45, -80, 'BOARD MANA (READY COMBOS):', {
+        const boardTitle = this.add.text(45, -145, 'BOARD MANA (READY COMBOS):', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
             fontWeight: '600',
@@ -695,7 +695,7 @@ export class Game extends Phaser.Scene {
         this.aiZone.add(this.ai.shieldT);
 
         // Title AI Board Mana
-        this.add.text(45, 160, `${prefix} BOARD MANA:`, {
+        this.add.text(45, 195, `${prefix} BOARD MANA:`, {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
             fontWeight: '600',
@@ -724,9 +724,9 @@ export class Game extends Phaser.Scene {
             char.shieldG.fillStyle(0x00e676, 0.15);
             char.shieldG.lineStyle(2, 0x00e676, 0.7);
             if (who === 'player') {
-                char.shieldG.fillRoundedRect(590, 154, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(590, 154, 140, 24, 6);
-                char.shieldT.setPosition(600, 158);
+                char.shieldG.fillRoundedRect(590, 129, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(590, 129, 140, 24, 6);
+                char.shieldT.setPosition(600, 133);
             } else {
                 char.shieldG.fillRoundedRect(590, 6, 140, 24, 6);
                 char.shieldG.strokeRoundedRect(590, 6, 140, 24, 6);
@@ -1219,7 +1219,7 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
         const startX = 60;
         const spaceX = 90;
-        const y = h - 215;
+        const y = h - 280;
 
         // Render card slots
         this.player.board.forEach((el, index) => {
@@ -1325,7 +1325,7 @@ export class Game extends Phaser.Scene {
         this.aiBoardGroup = this.add.group();
         const startX = 60;
         const spaceX = 90;
-        const y = 230;
+        const y = 260;
 
         this.ai.board.forEach((el, index) => {
             const x = startX + index * spaceX;
