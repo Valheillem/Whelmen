@@ -606,14 +606,7 @@ export class Game extends Phaser.Scene {
 
         this.playerZone = this.add.container(0, h - 195);
 
-        // Life card count glow (moved below hand cards)
-        this.playerLifeText = this.add.text(45, 135, 'HEALTH: 8 (CARDS)', {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '20px',
-            fontWeight: '700',
-            color: '#ffffff'
-        });
-        this.playerZone.add(this.playerLifeText);
+
 
         // Draw Player Shield indicator
         this.player.shieldG = this.add.graphics();
@@ -663,15 +656,7 @@ export class Game extends Phaser.Scene {
 
         this.aiZone = this.add.container(0, 30);
 
-        // Life card count glow
-        const prefix = this.mode === 'test' ? 'DUMMY' : 'AI';
-        this.aiLifeText = this.add.text(45, 12, `${prefix} HEALTH: 8 (CARDS)`, {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '20px',
-            fontWeight: '700',
-            color: '#ffffff'
-        });
-        this.aiZone.add(this.aiLifeText);
+
 
         // Draw AI Shield indicator
         this.ai.shieldG = this.add.graphics();
@@ -754,14 +739,11 @@ export class Game extends Phaser.Scene {
     updatePlayerLifeDisplay() {
         const total = this.player.hand.length + this.player.board.length;
         this.player.life = total;
-        this.playerLifeText.setText(`PLAYER HEALTH: ${total} (Hand: ${this.player.hand.length} | Board: ${this.player.board.length})`);
     }
 
     updateAILifeDisplay() {
         const total = this.ai.hand.length + this.ai.board.length;
         this.ai.life = total;
-        const prefix = this.mode === 'test' ? 'DUMMY' : 'AI';
-        this.aiLifeText.setText(`${prefix} HEALTH: ${total} (Hand: ${this.ai.hand.length} | Board: ${this.ai.board.length})`);
     }
 
     updateShieldDisplay(who) {
