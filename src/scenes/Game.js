@@ -2274,49 +2274,135 @@ export class Game extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5);
 
-        const btnLabel = this.mode === 'online' ? 'RETURN TO MENU' : 'REMATCH';
-        const rBg = this.add.graphics();
-        const rText = this.add.text(w / 2, h / 2 + 50, btnLabel, {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '18px',
-            fontWeight: '700',
-            color: '#ffffff',
-            letterSpacing: 1
-        }).setOrigin(0.5);
+        if (this.mode === 'online') {
+            // Single button: RETURN TO MENU
+            const rBg = this.add.graphics();
+            const rText = this.add.text(w / 2, h / 2 + 50, 'RETURN TO MENU', {
+                fontFamily: '"Outfit", sans-serif',
+                fontSize: '18px',
+                fontWeight: '700',
+                color: '#ffffff',
+                letterSpacing: 1
+            }).setOrigin(0.5);
 
-        rBg.fillStyle(0x0d0b1c, 0.95);
-        rBg.lineStyle(1.5, 0x4e3ea0, 0.7);
-        rBg.fillRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
-        rBg.strokeRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
+            const drawBtnNormal = () => {
+                rBg.clear();
+                rBg.fillStyle(0x0d0b1c, 0.95);
+                rBg.lineStyle(1.5, 0x4e3ea0, 0.7);
+                rBg.fillRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
+                rBg.strokeRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
+            };
 
-        const z = this.add.zone(w/2, h/2 + 50, 240, 50).setInteractive({ useHandCursor: true });
-        z.on('pointerover', () => {
-            rBg.clear();
-            rBg.fillStyle(0x161233, 0.95);
-            rBg.lineStyle(2, 0x00e5ff, 1);
-            rBg.fillRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
-            rBg.strokeRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
-            rText.setColor('#00e5ff');
-            this.playSound('click');
-        });
+            const drawBtnHover = () => {
+                rBg.clear();
+                rBg.fillStyle(0x161233, 0.95);
+                rBg.lineStyle(2, 0x00e5ff, 1);
+                rBg.fillRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
+                rBg.strokeRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
+            };
 
-        z.on('pointerout', () => {
-            rBg.clear();
-            rBg.fillStyle(0x0d0b1c, 0.95);
-            rBg.lineStyle(1.5, 0x4e3ea0, 0.7);
-            rBg.fillRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
-            rBg.strokeRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
-            rText.setColor('#ffffff');
-        });
+            drawBtnNormal();
 
-        z.on('pointerdown', () => {
-            if (this.mode === 'online') {
+            const z = this.add.zone(w / 2, h / 2 + 50, 240, 50).setInteractive({ useHandCursor: true });
+            z.on('pointerover', () => {
+                drawBtnHover();
+                rText.setColor('#00e5ff');
+                this.playSound('click');
+            });
+            z.on('pointerout', () => {
+                drawBtnNormal();
+                rText.setColor('#ffffff');
+            });
+            z.on('pointerdown', () => {
                 this.cleanupOnline();
                 this.scene.start('Start');
-            } else {
+            });
+        } else {
+            // Two buttons: REMATCH and MAIN MENU
+            // --- 1. REMATCH Button (Left) ---
+            const remBg = this.add.graphics();
+            const remText = this.add.text(w / 2 - 120, h / 2 + 50, 'REMATCH', {
+                fontFamily: '"Outfit", sans-serif',
+                fontSize: '18px',
+                fontWeight: '700',
+                color: '#ffffff',
+                letterSpacing: 1
+            }).setOrigin(0.5);
+
+            const drawRemNormal = () => {
+                remBg.clear();
+                remBg.fillStyle(0x0d0b1c, 0.95);
+                remBg.lineStyle(1.5, 0x4e3ea0, 0.7);
+                remBg.fillRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
+                remBg.strokeRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
+            };
+
+            const drawRemHover = () => {
+                remBg.clear();
+                remBg.fillStyle(0x161233, 0.95);
+                remBg.lineStyle(2, 0x00e5ff, 1);
+                remBg.fillRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
+                remBg.strokeRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
+            };
+
+            drawRemNormal();
+
+            const zRem = this.add.zone(w / 2 - 120, h / 2 + 50, 210, 50).setInteractive({ useHandCursor: true });
+            zRem.on('pointerover', () => {
+                drawRemHover();
+                remText.setColor('#00e5ff');
+                this.playSound('click');
+            });
+            zRem.on('pointerout', () => {
+                drawRemNormal();
+                remText.setColor('#ffffff');
+            });
+            zRem.on('pointerdown', () => {
                 this.scene.restart();
-            }
-        });
+            });
+
+            // --- 2. MAIN MENU Button (Right) ---
+            const menuBg = this.add.graphics();
+            const menuText = this.add.text(w / 2 + 120, h / 2 + 50, 'MAIN MENU', {
+                fontFamily: '"Outfit", sans-serif',
+                fontSize: '18px',
+                fontWeight: '700',
+                color: '#ffffff',
+                letterSpacing: 1
+            }).setOrigin(0.5);
+
+            const drawMenuNormal = () => {
+                menuBg.clear();
+                menuBg.fillStyle(0x0d0b1c, 0.95);
+                menuBg.lineStyle(1.5, 0x4e3ea0, 0.7);
+                menuBg.fillRoundedRect(w / 2 + 15, h / 2 + 25, 210, 50, 6);
+                menuBg.strokeRoundedRect(w / 2 + 15, h / 2 + 25, 210, 50, 6);
+            };
+
+            const drawMenuHover = () => {
+                menuBg.clear();
+                menuBg.fillStyle(0x161233, 0.95);
+                menuBg.lineStyle(2, 0xffab40, 1); // elegant warm orange highlight for Main Menu
+                menuBg.fillRoundedRect(w / 2 + 15, h / 2 + 25, 210, 50, 6);
+                menuBg.strokeRoundedRect(w / 2 + 15, h / 2 + 25, 210, 50, 6);
+            };
+
+            drawMenuNormal();
+
+            const zMenu = this.add.zone(w / 2 + 120, h / 2 + 50, 210, 50).setInteractive({ useHandCursor: true });
+            zMenu.on('pointerover', () => {
+                drawMenuHover();
+                menuText.setColor('#ffab40');
+                this.playSound('click');
+            });
+            zMenu.on('pointerout', () => {
+                drawMenuNormal();
+                menuText.setColor('#ffffff');
+            });
+            zMenu.on('pointerdown', () => {
+                this.scene.start('Start');
+            });
+        }
     }
 
     // ============================================================
