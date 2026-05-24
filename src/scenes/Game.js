@@ -859,7 +859,7 @@ export class Game extends Phaser.Scene {
         const panelW = 240;
         const panelH = 120;
         
-        this.primedSpellPanel = this.add.container(w - 460, h - 230).setVisible(false);
+        this.primedSpellPanel = this.add.container(w - 550, h - 208).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
