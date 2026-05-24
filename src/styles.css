@@ -724,11 +724,12 @@ html, body {
     }
 }
 
-/* Mobile Landscape Immersive Fullscreen Stretch & Border/Margin Removal */
+/* Mobile Landscape Immersive Fullscreen Aspect Ratio Clamp & Border/Margin/Shadow Removal */
 @media (max-height: 500px) and (orientation: landscape) {
     #game-container {
-        width: 100% !important;
-        height: 100% !important;
+        /* Strictly maintain 1560:720 aspect ratio instead of stretching horizontally */
+        width: min(1560px, 100vw, calc(100dvh * 1560 / 720)) !important;
+        height: min(720px, 100dvh, calc(100vw * 720 / 1560)) !important;
         border-radius: 0 !important;
         box-shadow: none !important;
         margin: 0 !important;

@@ -56,7 +56,7 @@ export class Start extends Phaser.Scene {
         ringColors.forEach((color, i) => {
             let ring = this.add.graphics();
             ring.lineStyle(2, color, 0.2 + i * 0.05);
-            ring.strokeCircle(width / 2, height / 2 - 125, 180 + i * 25);
+            ring.strokeCircle(width / 2, height / 2 - 130, 180 + i * 25);
             this.rings.push({
                 graphic: ring,
                 speed: 0.002 * (i % 2 === 0 ? 1 : -1),
@@ -66,7 +66,7 @@ export class Start extends Phaser.Scene {
         });
 
         // 5. Add Main Title - "WHELMEN"
-        const titleText = this.add.text(width / 2, height / 2 - 185, 'WHELMEN', {
+        const titleText = this.add.text(width / 2, height / 2 - 190, 'WHELMEN', {
             fontFamily: '"Outfit", "Inter", sans-serif',
             fontSize: '84px',
             fontWeight: '800',
@@ -76,7 +76,7 @@ export class Start extends Phaser.Scene {
         titleText.setStroke('#4e3ea0', 16);
         titleText.setShadow(0, 0, 'rgba(78, 62, 160, 0.8)', 30, true, true);
 
-        const subTitleText = this.add.text(width / 2, height / 2 - 100, 'THE ELEMENTAL DUELING GAME', {
+        const subTitleText = this.add.text(width / 2, height / 2 - 110, 'THE ELEMENTAL DUELING GAME', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '18px',
             fontWeight: '600',
@@ -107,23 +107,23 @@ export class Start extends Phaser.Scene {
         }
 
         // 8. Add Menu Buttons
-        this.createMenuButton(width / 2, height / 2 - 40, 'PLAY VS AI', () => {
+        this.createMenuButton(width / 2, height / 2 - 50, 'PLAY VS AI', () => {
             this.scene.start('Game', { mode: 'ai' });
         });
 
-        this.createMenuButton(width / 2, height / 2 + 20, 'PLAY ONLINE', () => {
+        this.createMenuButton(width / 2, height / 2 + 10, 'PLAY ONLINE', () => {
             this.scene.start('Lobby', { action: 'create' });
         });
 
-        this.createMenuButton(width / 2, height / 2 + 80, 'TEST RANGE', () => {
+        this.createMenuButton(width / 2, height / 2 + 70, 'TEST RANGE', () => {
             this.scene.start('Game', { mode: 'test' });
         });
 
-        this.createMenuButton(width / 2, height / 2 + 140, 'HOW TO PLAY', () => {
+        this.createMenuButton(width / 2, height / 2 + 130, 'HOW TO PLAY', () => {
             document.getElementById('tutorial-overlay').classList.add('active');
         });
 
-        this.createMenuButton(width / 2, height / 2 + 200, 'SHARE GAME', () => {
+        this.createMenuButton(width / 2, height / 2 + 190, 'SHARE GAME', () => {
             document.getElementById('share-overlay').classList.add('active');
         });
     }
