@@ -1231,9 +1231,44 @@ export class Game extends Phaser.Scene {
                 .setScale(isSelected ? 0.72 : 0.65)
                 .setInteractive({ useHandCursor: true });
 
-            // Glowing border overlay if selected for spell combos
+            // Glowing pulsing border highlight if selected for spell combos
             if (isSelected) {
-                cardObj.setTint(0x00ffff);
+                const borderW = cardObj.width * 0.72 + 8;
+                const borderH = cardObj.height * 0.72 + 8;
+                
+                const borderHighlight = this.add.graphics();
+                
+                // Outer glow shadow ring
+                borderHighlight.lineStyle(1.5, 0x00e5ff, 0.45);
+                borderHighlight.strokeRoundedRect(
+                    x - borderW / 2 - 2, 
+                    y - borderH / 2 - 2, 
+                    borderW + 4, 
+                    borderH + 4, 
+                    12
+                );
+                
+                // Core bright border stroke
+                borderHighlight.lineStyle(3, 0x00ffff, 0.95);
+                borderHighlight.strokeRoundedRect(
+                    x - borderW / 2, 
+                    y - borderH / 2, 
+                    borderW, 
+                    borderH, 
+                    10
+                );
+
+                this.playerBoardGroup.add(borderHighlight);
+
+                // Breathing pulse animation for premium feel
+                this.tweens.add({
+                    targets: borderHighlight,
+                    alpha: 0.4,
+                    duration: 900,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
             }
 
             this.playerBoardGroup.add(cardObj);
