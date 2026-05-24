@@ -28,25 +28,37 @@
     box-sizing: border-box;
 }
 
-body {
-    width: 100vw;
-    height: 100vh;
+html, body {
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background-color: var(--bg-dark);
     font-family: 'Inter', sans-serif;
     color: #ffffff;
-    overflow: hidden;
+    overflow: hidden !important;
     display: flex;
     justify-content: center;
     align-items: center;
+    touch-action: none !important; /* Block all double-tap zoom and touch panning */
+    -webkit-text-size-adjust: 100%;
 }
 
 #game-container {
-    width: min(1560px, 100vw, calc(100vh * 1560 / 720));
-    height: min(720px, 100vh, calc(100vw * 720 / 1560));
+    width: min(1560px, 100vw, calc(100dvh * 1560 / 720)) !important;
+    height: min(720px, 100dvh, calc(100vw * 720 / 1560)) !important;
     position: relative;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(78, 62, 160, 0.15);
+}
+
+/* Force Phaser canvas to stretch perfectly to the limits of the responsive container */
+#game-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
 }
 
 /* Modals Overlay Base */
