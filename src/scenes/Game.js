@@ -771,21 +771,34 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         const h = this.scale.height;
 
-        this.deckG = this.add.graphics();
-        this.deckT = this.add.text(w / 2 - 170, h / 2 - 40, '', {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '14px',
-            fontWeight: '700',
-            color: '#ffffff'
-        }).setOrigin(0.5);
+        // Create actual image representations for Deck and Discard
+        this.deckCardImg = this.add.image(w / 2 - 170, h / 2 - 40, 'card_back')
+            .setScale(0.75)
+            .setVisible(true);
 
-        this.discardG = this.add.graphics();
-        this.discardT = this.add.text(w / 2 + 270, h / 2 - 40, '', {
+        this.discardCardImg = this.add.image(w / 2 + 270, h / 2 - 40, 'card_back')
+            .setScale(0.75)
+            .setVisible(false);
+
+        // Graphics to draw empty slot outline when discard is empty
+        this.discardOutlineG = this.add.graphics();
+
+        // Text labels positioned under the card images
+        this.deckT = this.add.text(w / 2 - 170, h / 2 + 35, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
-            color: '#ffffff'
-        }).setOrigin(0.5);
+            color: '#a0a0b0',
+            align: 'center'
+        }).setOrigin(0.5, 0);
+
+        this.discardT = this.add.text(w / 2 + 270, h / 2 + 35, '', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '14px',
+            fontWeight: '700',
+            color: '#a0a0b0',
+            align: 'center'
+        }).setOrigin(0.5, 0);
 
         this.updateDeckDiscardDisplay();
     }
@@ -794,42 +807,39 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         const h = this.scale.height;
 
-        // Draw Deck stack
-        this.deckG.clear();
-        this.deckG.fillStyle(0x1a103c, 0.9);
-        this.deckG.lineStyle(2, 0xd4af37, 0.6);
-        this.deckG.fillRoundedRect(w / 2 - 215, h / 2 - 95, 90, 110, 8);
-        this.deckG.strokeRoundedRect(w / 2 - 215, h / 2 - 95, 90, 110, 8);
+        if (!this.deckCardImg || !this.discardCardImg) return;
 
-        // Deck depth layers
-        if (this.sharedDeck.length > 5) {
-            this.deckG.strokeRoundedRect(w / 2 - 219, h / 2 - 91, 90, 110, 8);
-            this.deckG.strokeRoundedRect(w / 2 - 223, h / 2 - 87, 90, 110, 8);
+        // Update Deck representation
+        if (this.sharedDeck.length > 0) {
+            this.deckCardImg.setVisible(true);
+            this.deckT.setText(`DECK\n(${this.sharedDeck.length})`);
+        } else {
+            this.deckCardImg.setVisible(false);
+            this.deckT.setText('DECK\n(EMPTY)');
         }
 
-        this.deckT.setText(`DECK\n(${this.sharedDeck.length})`);
-
-        // Draw Discard stack
-        this.discardG.clear();
+        // Update Discard representation
+        this.discardOutlineG.clear();
         if (this.sharedDiscard.length > 0) {
             const topEl = this.sharedDiscard[this.sharedDiscard.length - 1];
-            let topColor = 0xff3c00;
-            if (topEl === 'earth') topColor = 0x00e676;
-            if (topEl === 'water') topColor = 0x00b0ff;
-            if (topEl === 'air') topColor = 0x00e5ff;
-
-            this.discardG.fillStyle(0x0a0714, 0.95);
-            this.discardG.lineStyle(2, topColor, 0.8);
-            this.discardG.fillRoundedRect(w / 2 + 225, h / 2 - 95, 90, 110, 8);
-            this.discardG.strokeRoundedRect(w / 2 + 225, h / 2 - 95, 90, 110, 8);
-
-            this.discardT.setText(`DISCARD\n(${this.sharedDiscard.length})\n[${topEl.toUpperCase()}]`);
-            this.discardT.setColor('#ffffff');
+            this.discardCardImg.setTexture(`card_${topEl}`);
+            this.discardCardImg.setVisible(true);
+            this.discardT.setText(`DISCARD\n(${this.sharedDiscard.length})`);
         } else {
-            this.discardG.lineStyle(1.5, 0x4e3ea0, 0.3);
-            this.discardG.strokeRoundedRect(w / 2 + 225, h / 2 - 95, 90, 110, 8);
-            this.discardT.setText('EMPTY\nDISCARD');
-            this.discardT.setColor('#4e3ea0');
+            this.discardCardImg.setVisible(false);
+            this.discardT.setText('DISCARD\n(EMPTY)');
+
+            // Draw a clean, semi-transparent card slot outline for empty discard
+            const cardW = 100 * 0.75;
+            const cardH = 150 * 0.75;
+            this.discardOutlineG.lineStyle(1.5, 0x4e3ea0, 0.4);
+            this.discardOutlineG.strokeRoundedRect(
+                w / 2 + 270 - cardW / 2, 
+                h / 2 - 40 - cardH / 2, 
+                cardW, 
+                cardH, 
+                6
+            );
         }
     }
 
