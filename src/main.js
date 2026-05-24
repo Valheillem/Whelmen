@@ -40,3 +40,15 @@ window.addEventListener('orientationchange', () => {
 });
 window.addEventListener('load', resetViewport);
 document.addEventListener('DOMContentLoaded', resetViewport);
+
+// Lock browser page vertical/horizontal scrolling and screen bounce on iOS Safari
+document.addEventListener('touchmove', (e) => {
+    // Allow scrolling ONLY inside elements with the scrollable classes
+    if (e.target.closest('.tutorial-content') || e.target.closest('.panel-content') || e.target.closest('.modal-card')) {
+        return; 
+    }
+    // Block native swipe-to-scroll screen shifts on iOS Safari
+    if (e.touches.length === 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
