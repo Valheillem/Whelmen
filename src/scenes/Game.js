@@ -253,6 +253,7 @@ export class Game extends Phaser.Scene {
         this.drawCycleIndicator();
         this.drawPlayerStats();
         this.drawAIStats();
+        this.drawMagicSigils();
         this.drawDeckDiscardPiles();
         this.drawUIControls();
         this.createTopRightUI();
@@ -545,7 +546,7 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         const h = this.scale.height;
 
-        this.cycleContainer = this.add.container(w / 2, h / 2 - 40);
+        this.cycleContainer = this.add.container(w / 2 + 50, h / 2 - 40);
         this.cycleLabels = [];
 
         // Core cycle dial drawing
@@ -625,16 +626,6 @@ export class Game extends Phaser.Scene {
             color: '#00e676'
         });
         this.playerZone.add(this.player.shieldT);
-
-        // Title Player Board Mana (added to playerZone for consistent relative placement)
-        const boardTitle = this.add.text(45, -145, 'BOARD MANA (READY COMBOS):', {
-            fontFamily: '"Inter", sans-serif',
-            fontSize: '13px',
-            fontWeight: '600',
-            color: '#a0a0b0',
-            letterSpacing: 1
-        });
-        this.playerZone.add(boardTitle);
     }
 
     createTopRightUI() {
@@ -693,14 +684,70 @@ export class Game extends Phaser.Scene {
             color: '#00e676'
         });
         this.aiZone.add(this.ai.shieldT);
+    }
 
-        // Title AI Board Mana
-        this.add.text(45, 195, `${prefix} BOARD MANA:`, {
-            fontFamily: '"Inter", sans-serif',
-            fontSize: '13px',
-            fontWeight: '600',
-            color: '#a0a0b0',
-            letterSpacing: 1
+    drawMagicSigils() {
+        const h = this.scale.height;
+        this.drawMagicSigil(240, h - 280, 0x00e5ff); // Player board sigil (cyan)
+        this.drawMagicSigil(240, 260, 0xff3c00); // AI board sigil (red)
+    }
+
+    drawMagicSigil(x, y, colorHex) {
+        const sigil = this.add.graphics();
+        
+        // Concentric outer rings
+        sigil.lineStyle(1.5, colorHex, 0.25);
+        sigil.strokeCircle(x, y, 75);
+        
+        sigil.lineStyle(1, colorHex, 0.15);
+        sigil.strokeCircle(x, y, 69);
+        
+        // Concentric inner ring
+        sigil.lineStyle(2, colorHex, 0.4);
+        sigil.strokeCircle(x, y, 45);
+        
+        // Concentric innermost core circle
+        sigil.strokeCircle(x, y, 12);
+        
+        // Heptagram or Heptagon details (8-pointed geometric star)
+        sigil.lineStyle(1.5, colorHex, 0.35);
+        const points = [];
+        const numPoints = 8;
+        for (let i = 0; i < numPoints; i++) {
+            const angle = (i * Math.PI * 2) / numPoints;
+            const radius = i % 2 === 0 ? 45 : 18;
+            points.push({
+                x: x + Math.cos(angle) * radius,
+                y: y + Math.sin(angle) * radius
+            });
+        }
+        
+        sigil.beginPath();
+        sigil.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+            sigil.lineTo(points[i].x, points[i].y);
+        }
+        sigil.closePath();
+        sigil.stroke();
+        
+        // Add tiny elemental cardinal spikes
+        sigil.lineStyle(1.5, colorHex, 0.5);
+        for (let i = 0; i < 4; i++) {
+            const angle = (i * Math.PI) / 2;
+            sigil.beginPath();
+            sigil.moveTo(x + Math.cos(angle) * 45, y + Math.sin(angle) * 45);
+            sigil.lineTo(x + Math.cos(angle) * 78, y + Math.sin(angle) * 78);
+            sigil.stroke();
+        }
+        
+        // Subtle breathing animation for a premium element feel
+        this.tweens.add({
+            targets: sigil,
+            alpha: 0.35,
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
         });
     }
 
@@ -743,7 +790,7 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         this.deckG = this.add.graphics();
-        this.deckT = this.add.text(w / 2 - 220, h / 2 - 40, '', {
+        this.deckT = this.add.text(w / 2 - 170, h / 2 - 40, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
@@ -751,7 +798,7 @@ export class Game extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.discardG = this.add.graphics();
-        this.discardT = this.add.text(w / 2 + 220, h / 2 - 40, '', {
+        this.discardT = this.add.text(w / 2 + 270, h / 2 - 40, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
@@ -769,13 +816,13 @@ export class Game extends Phaser.Scene {
         this.deckG.clear();
         this.deckG.fillStyle(0x1a103c, 0.9);
         this.deckG.lineStyle(2, 0xd4af37, 0.6);
-        this.deckG.fillRoundedRect(w / 2 - 265, h / 2 - 95, 90, 110, 8);
-        this.deckG.strokeRoundedRect(w / 2 - 265, h / 2 - 95, 90, 110, 8);
+        this.deckG.fillRoundedRect(w / 2 - 215, h / 2 - 95, 90, 110, 8);
+        this.deckG.strokeRoundedRect(w / 2 - 215, h / 2 - 95, 90, 110, 8);
 
         // Deck depth layers
         if (this.sharedDeck.length > 5) {
-            this.deckG.strokeRoundedRect(w / 2 - 269, h / 2 - 91, 90, 110, 8);
-            this.deckG.strokeRoundedRect(w / 2 - 273, h / 2 - 87, 90, 110, 8);
+            this.deckG.strokeRoundedRect(w / 2 - 219, h / 2 - 91, 90, 110, 8);
+            this.deckG.strokeRoundedRect(w / 2 - 223, h / 2 - 87, 90, 110, 8);
         }
 
         this.deckT.setText(`DECK\n(${this.sharedDeck.length})`);
@@ -791,14 +838,14 @@ export class Game extends Phaser.Scene {
 
             this.discardG.fillStyle(0x0a0714, 0.95);
             this.discardG.lineStyle(2, topColor, 0.8);
-            this.discardG.fillRoundedRect(w / 2 + 175, h / 2 - 95, 90, 110, 8);
-            this.discardG.strokeRoundedRect(w / 2 + 175, h / 2 - 95, 90, 110, 8);
+            this.discardG.fillRoundedRect(w / 2 + 225, h / 2 - 95, 90, 110, 8);
+            this.discardG.strokeRoundedRect(w / 2 + 225, h / 2 - 95, 90, 110, 8);
 
             this.discardT.setText(`DISCARD\n(${this.sharedDiscard.length})\n[${topEl.toUpperCase()}]`);
             this.discardT.setColor('#ffffff');
         } else {
             this.discardG.lineStyle(1.5, 0x4e3ea0, 0.3);
-            this.discardG.strokeRoundedRect(w / 2 + 175, h / 2 - 95, 90, 110, 8);
+            this.discardG.strokeRoundedRect(w / 2 + 225, h / 2 - 95, 90, 110, 8);
             this.discardT.setText('EMPTY\nDISCARD');
             this.discardT.setColor('#4e3ea0');
         }
