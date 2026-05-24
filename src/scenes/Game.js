@@ -855,14 +855,49 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         const h = this.scale.height;
 
-        // Combo Selection Preview Label
-        this.comboPreviewText = this.add.text(w / 2, h - 285, '', {
+        // Primed Spell Preview Panel next to buttons
+        const panelW = 240;
+        const panelH = 120;
+        
+        this.primedSpellPanel = this.add.container(w - 460, h - 230).setVisible(false);
+        
+        this.primedSpellBg = this.add.graphics();
+        this.primedSpellPanel.add(this.primedSpellBg);
+        
+        this.primedSpellTitle = this.add.text(14, 12, '', {
             fontFamily: '"Outfit", sans-serif',
-            fontSize: '19px',
+            fontSize: '13.5px',
+            fontWeight: '800',
+            color: '#ffffff'
+        });
+        this.primedSpellPanel.add(this.primedSpellTitle);
+        
+        this.primedSpellCombo = this.add.text(14, 32, '', {
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '10px',
             fontWeight: '700',
-            color: '#00e5ff',
-            align: 'center'
-        }).setOrigin(0.5);
+            color: '#a0a0b0',
+            letterSpacing: 0.5
+        });
+        this.primedSpellPanel.add(this.primedSpellCombo);
+        
+        this.primedSpellDesc = this.add.text(14, 49, '', {
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '11px',
+            fontWeight: '500',
+            color: '#cbd5e1',
+            wordWrap: { width: panelW - 28 }
+        });
+        this.primedSpellPanel.add(this.primedSpellDesc);
+
+        this.primedSpellAdvantage = this.add.text(14, 88, '', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '10.5px',
+            fontWeight: '800',
+            color: '#00e676',
+            letterSpacing: 0.5
+        });
+        this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // Action Menu Container
         this.btnSpellBook = this.createActionButton(w - 180, h - 230, 'SPELL BOOK', () => this.handleSpellBookOption());
@@ -1529,17 +1564,21 @@ export class Game extends Phaser.Scene {
     }
 
     updateComboPreview() {
-        if (!this.comboPreviewText) return;
+        if (!this.primedSpellPanel) return;
 
-        const who = this.phase === 'reaction' ? 'Defensive Reaction' : 'Offensive Spell';
         if (this.selectedBoardMana.length === 0) {
-            this.comboPreviewText.setText('');
+            this.primedSpellPanel.setVisible(false);
             return;
         }
 
         const elements = this.selectedBoardMana.map(idx => this.player.board[idx]);
         const spell = this.getSpellFromCombo(elements);
+        const panelW = 240;
+        const panelH = 120;
         
+        this.primedSpellBg.clear();
+        this.primedSpellPanel.setVisible(true);
+
         if (spell) {
             // Check weather Cycle advantage
             const cycle = this.cycleElements[this.cycleIndex];
@@ -1547,87 +1586,69 @@ export class Game extends Phaser.Scene {
             if (spell.name === 'Firestorm' && cycle === 'air') isEmp = true;
             const isWeak = this.isWeakenedByCycle(spell.element, cycle);
             
-            let powerDetail = '';
-            if (isEmp) powerDetail = ' (EMPOWERED! +3)';
-            if (isWeak) powerDetail = ' (WEAKENED! -2)';
+            const colors = { fire: 0xff3c00, earth: 0x00e676, water: 0x00b0ff, air: 0x00e5ff };
+            const colorHex = colors[spell.element] || 0x4e3ea0;
 
-            this.comboPreviewText.setText(`${who}: ${spell.name} (${spell.desc})${powerDetail}`);
-            this.comboPreviewText.updateText(); // Force Phaser to recalculate dimensions instantly
+            const elementIcon = spell.element === 'fire' ? '🔥' :
+                                spell.element === 'earth' ? '🌿' :
+                                spell.element === 'water' ? '💧' : '🌪️';
             
-            const fillStyle = this.getComboColorStyle(elements);
-            this.comboPreviewText.setFill(fillStyle);
+            // 1. Set Title
+            this.primedSpellTitle.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
+            this.primedSpellTitle.setColor(
+                spell.element === 'fire' ? '#ff3c00' :
+                spell.element === 'earth' ? '#00e676' :
+                spell.element === 'water' ? '#00b0ff' : '#00e5ff'
+            );
+
+            // 2. Set Combo Recipe
+            let comboStr = '';
+            for (const key in this.spellsCatalog) {
+                if (this.spellsCatalog[key].name === spell.name) {
+                    comboStr = key.split(',').map(el => el.toUpperCase()).join(' + ');
+                    break;
+                }
+            }
+            this.primedSpellCombo.setText(`PRIMED COMBO: ${comboStr}`);
+
+            // 3. Set Description
+            this.primedSpellDesc.setText(spell.desc);
+
+            // 4. Set Cycle Advantage Banner
+            if (isEmp) {
+                this.primedSpellAdvantage.setText('⚡ EMPOWERED (+3 STATS)');
+                this.primedSpellAdvantage.setColor('#00e676');
+                this.primedSpellAdvantage.setVisible(true);
+            } else if (isWeak) {
+                this.primedSpellAdvantage.setText('⚠ WEAKENED (-2 STATS)');
+                this.primedSpellAdvantage.setColor('#ff3c00');
+                this.primedSpellAdvantage.setVisible(true);
+            } else {
+                this.primedSpellAdvantage.setText('⚪ ENVIRONMENT NEUTRAL');
+                this.primedSpellAdvantage.setColor('#a0a0b0');
+                this.primedSpellAdvantage.setVisible(true);
+            }
+
+            // Draw glowing background card
+            this.primedSpellBg.fillStyle(0x090518, 0.95);
+            this.primedSpellBg.lineStyle(2, colorHex, 0.9);
+            this.primedSpellBg.fillRoundedRect(0, 0, panelW, panelH, 10);
+            this.primedSpellBg.strokeRoundedRect(0, 0, panelW, panelH, 10);
+
         } else {
-            this.comboPreviewText.setText('Invalid elemental combination selected.');
-            this.comboPreviewText.setFill('#ff3838'); // Glowing error red
+            // Invalid combination
+            this.primedSpellTitle.setText('INVALID COMBO');
+            this.primedSpellTitle.setColor('#ff3c00');
+            this.primedSpellCombo.setText('FORMULA UNKNOWN');
+            this.primedSpellDesc.setText('Select valid elemental cards on your board to prime a spell.');
+            this.primedSpellAdvantage.setVisible(false);
+
+            // Draw warning background
+            this.primedSpellBg.fillStyle(0x090518, 0.95);
+            this.primedSpellBg.lineStyle(2, 0xff3c00, 0.6);
+            this.primedSpellBg.fillRoundedRect(0, 0, panelW, panelH, 10);
+            this.primedSpellBg.strokeRoundedRect(0, 0, panelW, panelH, 10);
         }
-    }
-
-    getComboColorStyle(elements) {
-        if (!elements || elements.length === 0) return '#00e5ff';
-
-        const colorMap = {
-            fire: '#ff3838',   // Red
-            water: '#38bdf8',  // Blue
-            earth: '#34d399',  // Green
-            air: '#facc15'     // Yellow
-        };
-
-        // Count occurrences of each element
-        const counts = { fire: 0, water: 0, earth: 0, air: 0 };
-        elements.forEach(el => {
-            if (counts[el] !== undefined) {
-                counts[el]++;
-            }
-        });
-
-        // Find max count
-        let maxCount = 0;
-        for (const el in counts) {
-            if (counts[el] > maxCount) {
-                maxCount = counts[el];
-            }
-        }
-
-        // Find elements with max count
-        const candidates = [];
-        for (const el in counts) {
-            if (counts[el] === maxCount) {
-                candidates.push(el);
-            }
-        }
-
-        // If single majority element, return its mapped color
-        if (candidates.length === 1) {
-            return colorMap[candidates[0]];
-        }
-
-        // Otherwise, it's a tie/composite of two or three elements.
-        // Collect unique elements present, maintaining order of occurrence
-        const uniqueElements = [];
-        elements.forEach(el => {
-            if (colorMap[el] && !uniqueElements.includes(el)) {
-                uniqueElements.push(el);
-            }
-        });
-
-        const colors = uniqueElements.map(el => colorMap[el]);
-
-        if (colors.length === 0) {
-            return '#00e5ff'; // Fallback cyan
-        }
-        if (colors.length === 1) {
-            return colors[0];
-        }
-
-        // Create canvas linear gradient across the text length
-        const textWidth = Math.max(100, this.comboPreviewText.width);
-        const gradient = this.comboPreviewText.context.createLinearGradient(0, 0, textWidth, 0);
-        colors.forEach((col, idx) => {
-            const stop = idx / (colors.length - 1);
-            gradient.addColorStop(stop, col);
-        });
-
-        return gradient;
     }
 
     // --- STRATEGIC PLAY ACTIONS ---
