@@ -26,3 +26,17 @@ const config = {
 }
 
 new Phaser.Game(config);
+
+// Lock scroll and center viewport on mobile orientation switch or resize
+const resetViewport = () => {
+    window.scrollTo(0, 0);
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+};
+
+window.addEventListener('resize', resetViewport);
+window.addEventListener('orientationchange', () => {
+    setTimeout(resetViewport, 150); // Timeout allows the browser's viewport bounds to recalculate fully
+});
+window.addEventListener('load', resetViewport);
+document.addEventListener('DOMContentLoaded', resetViewport);

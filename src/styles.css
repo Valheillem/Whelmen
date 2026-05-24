@@ -723,3 +723,14 @@ html, body {
         margin: 10px 0;
     }
 }
+
+/* Mobile Landscape Immersive Fullscreen Stretch & Border/Margin Removal */
+@media (max-height: 500px) and (orientation: landscape) {
+    #game-container {
+        width: 100vw !important;
+        height: 100dvh !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+    }
+}
