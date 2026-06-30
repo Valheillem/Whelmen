@@ -679,7 +679,7 @@ export class Game extends Phaser.Scene {
         this.player.shieldG = this.add.graphics();
         this.playerZone.add(this.player.shieldG);
 
-        this.player.shieldT = this.add.text(600, 133, '', {
+        this.player.shieldT = this.add.text(600, -31, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '16px',
             fontWeight: '700',
@@ -729,7 +729,7 @@ export class Game extends Phaser.Scene {
         this.ai.shieldG = this.add.graphics();
         this.aiZone.add(this.ai.shieldG);
 
-        this.ai.shieldT = this.add.text(600, 10, '', {
+        this.ai.shieldT = this.add.text(600, 169, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '16px',
             fontWeight: '700',
@@ -820,13 +820,15 @@ export class Game extends Phaser.Scene {
             char.shieldG.fillStyle(0xa67032, 0.15);
             char.shieldG.lineStyle(2, 0xa67032, 0.7);
             if (who === 'player') {
-                char.shieldG.fillRoundedRect(590, 129, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(590, 129, 140, 24, 6);
-                char.shieldT.setPosition(600, 133);
+                // Place above the player hand (relative to playerZone) to avoid overlap
+                char.shieldG.fillRoundedRect(590, -35, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(590, -35, 140, 24, 6);
+                char.shieldT.setPosition(600, -31);
             } else {
-                char.shieldG.fillRoundedRect(590, 6, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(590, 6, 140, 24, 6);
-                char.shieldT.setPosition(600, 10);
+                // Place below the AI hand (relative to aiZone)
+                char.shieldG.fillRoundedRect(590, 165, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(590, 165, 140, 24, 6);
+                char.shieldT.setPosition(600, 169);
             }
             char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
         } else {
