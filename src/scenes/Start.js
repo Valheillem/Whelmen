@@ -52,7 +52,7 @@ export class Start extends Phaser.Scene {
 
         // 4. Create Pulsing Elemental Rings in the center
         this.rings = [];
-        const ringColors = [0xff3c00, 0x00e676, 0x00e5ff, 0x00b0ff]; // Fire, Earth, Air, Water
+        const ringColors = [0xdf1b2d, 0xa67032, 0xbf8cff, 0x1084e9]; // Fire, Earth, Air, Water
         ringColors.forEach((color, i) => {
             let ring = this.add.graphics();
             ring.lineStyle(2, color, 0.2 + i * 0.05);
@@ -151,7 +151,7 @@ export class Start extends Phaser.Scene {
 
         const drawHover = () => {
             btnBg.clear();
-            btnBg.lineStyle(2, 0x00e5ff, 1);
+            btnBg.lineStyle(2, 0xbf8cff, 1);
             btnBg.fillStyle(0x161233, 0.95);
             btnBg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 8);
             btnBg.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 8);
@@ -173,7 +173,7 @@ export class Start extends Phaser.Scene {
 
         zone.on('pointerover', () => {
             drawHover();
-            btnText.setColor('#00e5ff');
+            btnText.setColor('#bf8cff');
             
             // Floating micro-scale effect
             this.tweens.add({
@@ -239,11 +239,11 @@ export class Start extends Phaser.Scene {
             shareLinkInput.value = shareUrl;
             generateQR(shareUrl);
             shareStatus.textContent = '✅ Scan this QR code with a phone to play instantly!';
-            shareStatus.style.color = '#00e676';
+            shareStatus.style.color = '#a67032';
         } else {
             // On localhost — try to auto-detect LAN IP via WebRTC
             shareStatus.textContent = '🔍 Detecting your LAN IP address...';
-            shareStatus.style.color = '#00e5ff';
+            shareStatus.style.color = '#bf8cff';
 
             this.detectLanIP().then((lanIP) => {
                 if (lanIP) {
@@ -251,7 +251,7 @@ export class Start extends Phaser.Scene {
                     shareLinkInput.value = shareUrl;
                     generateQR(shareUrl);
                     shareStatus.textContent = `✅ LAN IP detected! Scan to play on your phone.`;
-                    shareStatus.style.color = '#00e676';
+                    shareStatus.style.color = '#a67032';
                 } else {
                     // WebRTC blocked — fall back to manual entry
                     shareLinkInput.value = '';
@@ -276,11 +276,11 @@ export class Start extends Phaser.Scene {
 
             generateQR(url);
             shareStatus.textContent = '✅ QR code updated! Scan to play on your phone.';
-            shareStatus.style.color = '#00e676';
+            shareStatus.style.color = '#a67032';
 
             // Flash the button green briefly
             updateQrBtn.style.background = 'rgba(0, 230, 118, 0.2)';
-            updateQrBtn.style.color = '#00e676';
+            updateQrBtn.style.color = '#a67032';
             setTimeout(() => {
                 updateQrBtn.style.background = 'rgba(255, 255, 255, 0.08)';
                 updateQrBtn.style.color = '#ffffff';
@@ -299,7 +299,7 @@ export class Start extends Phaser.Scene {
             navigator.clipboard.writeText(url).then(() => {
                 copyShareBtn.innerText = 'Copied!';
                 copyShareBtn.style.background = 'rgba(0, 230, 118, 0.2)';
-                copyShareBtn.style.color = '#00e676';
+                copyShareBtn.style.color = '#a67032';
                 setTimeout(() => {
                     copyShareBtn.innerText = 'Copy';
                     copyShareBtn.style.background = 'rgba(255, 255, 255, 0.08)';

@@ -160,11 +160,11 @@ export class Game extends Phaser.Scene {
         // Fire Card
         this.createCardCanvas('card_fire', cardWidth, cardHeight, (ctx) => {
             let grad = ctx.createLinearGradient(0, 0, 0, cardHeight);
-            grad.addColorStop(0, '#2e0a0a');
-            grad.addColorStop(0.5, '#4a1200');
-            grad.addColorStop(1, '#0f0300');
+            grad.addColorStop(0, '#33050a');
+            grad.addColorStop(0.5, '#590a13');
+            grad.addColorStop(1, '#140204');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
-            ctx.strokeStyle = '#ff3c00'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
+            ctx.strokeStyle = '#df1b2d'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
             let img = this.textures.get('icon_fire').getSourceImage();
             ctx.drawImage(img, cardWidth/2 - 40, cardHeight/2 - 40, 80, 80);
         });
@@ -172,11 +172,11 @@ export class Game extends Phaser.Scene {
         // Earth Card
         this.createCardCanvas('card_earth', cardWidth, cardHeight, (ctx) => {
             let grad = ctx.createLinearGradient(0, 0, 0, cardHeight);
-            grad.addColorStop(0, '#0a2412');
-            grad.addColorStop(0.5, '#12381c');
-            grad.addColorStop(1, '#020d05');
+            grad.addColorStop(0, '#2e1d0d');
+            grad.addColorStop(0.5, '#4d3216');
+            grad.addColorStop(1, '#140c05');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
-            ctx.strokeStyle = '#00e676'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
+            ctx.strokeStyle = '#a67032'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
             let img = this.textures.get('icon_earth').getSourceImage();
             ctx.drawImage(img, cardWidth/2 - 40, cardHeight/2 - 40, 80, 80);
         });
@@ -184,11 +184,11 @@ export class Game extends Phaser.Scene {
         // Water Card
         this.createCardCanvas('card_water', cardWidth, cardHeight, (ctx) => {
             let grad = ctx.createLinearGradient(0, 0, 0, cardHeight);
-            grad.addColorStop(0, '#061c30');
-            grad.addColorStop(0.5, '#0d2d4c');
-            grad.addColorStop(1, '#020b14');
+            grad.addColorStop(0, '#061a2e');
+            grad.addColorStop(0.5, '#0a2b4d');
+            grad.addColorStop(1, '#020912');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
-            ctx.strokeStyle = '#00b0ff'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
+            ctx.strokeStyle = '#1084e9'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
             let img = this.textures.get('icon_water').getSourceImage();
             ctx.drawImage(img, cardWidth/2 - 40, cardHeight/2 - 40, 80, 80);
         });
@@ -196,11 +196,11 @@ export class Game extends Phaser.Scene {
         // Air Card
         this.createCardCanvas('card_air', cardWidth, cardHeight, (ctx) => {
             let grad = ctx.createLinearGradient(0, 0, 0, cardHeight);
-            grad.addColorStop(0, '#05222c');
-            grad.addColorStop(0.5, '#0a3644');
-            grad.addColorStop(1, '#010c10');
+            grad.addColorStop(0, '#1f1433');
+            grad.addColorStop(0.5, '#332054');
+            grad.addColorStop(1, '#0d0817');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
-            ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
+            ctx.strokeStyle = '#bf8cff'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
             let img = this.textures.get('icon_air').getSourceImage();
             ctx.drawImage(img, cardWidth/2 - 40, cardHeight/2 - 40, 80, 80);
         });
@@ -501,7 +501,7 @@ export class Game extends Phaser.Scene {
     setupParticles() {
         this.emitters = {};
         const elements = ['fire', 'earth', 'water', 'air'];
-        const colors = { fire: 0xff3c00, earth: 0x00e676, water: 0x00b0ff, air: 0x00e5ff };
+        const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff };
 
         elements.forEach(el => {
             this.emitters[el] = this.add.particles(0, 0, 'star', {
@@ -519,9 +519,9 @@ export class Game extends Phaser.Scene {
         this.playSound(element === 'earth' ? 'shield' : element);
         
         let visual = this.add.circle(startX, startY, 20, 
-            element === 'fire' ? 0xff3c00 : 
-            element === 'earth' ? 0x00e676 : 
-            element === 'water' ? 0x00b0ff : 0x00e5ff
+            element === 'fire' ? 0xdf1b2d : 
+            element === 'earth' ? 0xa67032 : 
+            element === 'water' ? 0x1084e9 : 0xbf8cff
         );
         visual.setStrokeStyle(4, 0xffffff);
 
@@ -565,10 +565,10 @@ export class Game extends Phaser.Scene {
 
         // 4 Elements around the circle
         const ringPositions = [
-            { x: 0, y: -65, color: 0xff3c00, icon: 'icon_fire', label: 'FIRE' },
-            { x: 65, y: 0, color: 0x00e676, icon: 'icon_earth', label: 'EARTH' },
-            { x: 0, y: 65, color: 0x00e5ff, icon: 'icon_air', label: 'AIR' },
-            { x: -65, y: 0, color: 0x00b0ff, icon: 'icon_water', label: 'WATER' }
+            { x: 0, y: -65, color: 0xdf1b2d, icon: 'icon_fire', label: 'FIRE' },
+            { x: 65, y: 0, color: 0xa67032, icon: 'icon_earth', label: 'EARTH' },
+            { x: 0, y: 65, color: 0xbf8cff, icon: 'icon_air', label: 'AIR' },
+            { x: -65, y: 0, color: 0x1084e9, icon: 'icon_water', label: 'WATER' }
         ];
 
         ringPositions.forEach((pos) => {
@@ -598,9 +598,9 @@ export class Game extends Phaser.Scene {
         emitter.explode(40, this.scale.width / 2, this.scale.height / 2 - 40);
         this.cycleCenterText.setText(element.toUpperCase());
         this.cycleCenterText.setColor(
-            element === 'fire' ? '#ff3c00' :
-            element === 'earth' ? '#00e676' :
-            element === 'water' ? '#00b0ff' : '#00e5ff'
+            element === 'fire' ? '#df1b2d' :
+            element === 'earth' ? '#a67032' :
+            element === 'water' ? '#1084e9' : '#bf8cff'
         );
     }
 
@@ -620,7 +620,7 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '16px',
             fontWeight: '700',
-            color: '#00e676'
+            color: '#a67032'
         });
         this.playerZone.add(this.player.shieldT);
     }
@@ -633,17 +633,17 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
-            color: '#ff3c00',
+            color: '#df1b2d',
             backgroundColor: 'rgba(13,11,28,0.85)',
             padding: { x: 14, y: 8 }
         }).setOrigin(1, 0).setInteractive({ useHandCursor: true }).setDepth(2000);
         
         btnResign.on('pointerover', () => {
             btnResign.setColor('#ffffff');
-            btnResign.setBackgroundColor('#ff3c00');
+            btnResign.setBackgroundColor('#df1b2d');
         });
         btnResign.on('pointerout', () => {
-            btnResign.setColor('#ff3c00');
+            btnResign.setColor('#df1b2d');
             btnResign.setBackgroundColor('rgba(13,11,28,0.85)');
         });
         
@@ -670,15 +670,15 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '16px',
             fontWeight: '700',
-            color: '#00e676'
+            color: '#a67032'
         });
         this.aiZone.add(this.ai.shieldT);
     }
 
     drawMagicSigils() {
         const h = this.scale.height;
-        this.drawMagicSigil(240, h - 280, 0x00e5ff); // Player board sigil (cyan)
-        this.drawMagicSigil(240, 260, 0xff3c00); // AI board sigil (red)
+        this.drawMagicSigil(240, h - 280, 0xbf8cff); // Player board sigil (cyan)
+        this.drawMagicSigil(240, 260, 0xdf1b2d); // AI board sigil (red)
     }
 
     drawMagicSigil(x, y, colorHex) {
@@ -754,8 +754,8 @@ export class Game extends Phaser.Scene {
         const char = who === 'player' ? this.player : this.ai;
         char.shieldG.clear();
         if (char.shield > 0) {
-            char.shieldG.fillStyle(0x00e676, 0.15);
-            char.shieldG.lineStyle(2, 0x00e676, 0.7);
+            char.shieldG.fillStyle(0xa67032, 0.15);
+            char.shieldG.lineStyle(2, 0xa67032, 0.7);
             if (who === 'player') {
                 char.shieldG.fillRoundedRect(590, 129, 140, 24, 6);
                 char.shieldG.strokeRoundedRect(590, 129, 140, 24, 6);
@@ -890,7 +890,7 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '10.5px',
             fontWeight: '800',
-            color: '#00e676',
+            color: '#a67032',
             letterSpacing: 0.5
         });
         this.primedSpellPanel.add(this.primedSpellAdvantage);
@@ -905,7 +905,7 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '22px',
             fontWeight: '800',
-            color: '#ff3c00',
+            color: '#df1b2d',
             backgroundColor: '#040212',
             padding: { x: 20, y: 10 },
             align: 'center'
@@ -917,7 +917,7 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '28px',
             fontWeight: '800',
-            color: '#00e5ff',
+            color: '#bf8cff',
             align: 'center'
         }).setOrigin(0.5).setVisible(false);
     }
@@ -952,7 +952,7 @@ export class Game extends Phaser.Scene {
 
         zone.on('pointerover', () => {
             if (!enabled) return;
-            drawState(0x00e5ff, 0x161233, '#00e5ff');
+            drawState(0xbf8cff, 0x161233, '#bf8cff');
             this.playSound('click');
         });
 
@@ -1156,9 +1156,9 @@ export class Game extends Phaser.Scene {
         }
 
         // Add new
-        const color = msg.includes('VICTORY') ? '#00e676' :
-                      msg.includes('DEFEAT') ? '#ff3c00' :
-                      msg.includes('Reaction') ? '#00e5ff' :
+        const color = msg.includes('VICTORY') ? '#a67032' :
+                      msg.includes('DEFEAT') ? '#df1b2d' :
+                      msg.includes('Reaction') ? '#bf8cff' :
                       msg.includes('---') ? '#d4af37' : '#cbd5e1';
 
         let targetY = 15;
@@ -1339,7 +1339,7 @@ export class Game extends Phaser.Scene {
                 const borderHighlight = this.add.graphics();
                 
                 // Outer glow shadow ring
-                borderHighlight.lineStyle(1.5, 0x00e5ff, 0.45);
+                borderHighlight.lineStyle(1.5, 0xbf8cff, 0.45);
                 borderHighlight.strokeRoundedRect(
                     x - borderW / 2 - 2, 
                     y - borderH / 2 - 2, 
@@ -1410,7 +1410,7 @@ export class Game extends Phaser.Scene {
             // Float hover
             cardObj.on('pointerover', () => {
                 if (this.phase === 'discard') {
-                    cardObj.setTint(0xff3c00);
+                    cardObj.setTint(0xdf1b2d);
                 } else if (!hasSelected) {
                     cardObj.setScale(0.7);
                 }
@@ -1435,10 +1435,10 @@ export class Game extends Phaser.Scene {
                 const badgeY = y - hHalf + 8;
                 
                 const elementColors = {
-                    fire: 0xff3c00,
-                    earth: 0x00e676,
-                    water: 0x00b0ff,
-                    air: 0x00e5ff
+                    fire: 0xdf1b2d,
+                    earth: 0xa67032,
+                    water: 0x1084e9,
+                    air: 0xbf8cff
                 };
                 const elementColorHex = elementColors[el] || 0xffffff;
 
@@ -1473,7 +1473,7 @@ export class Game extends Phaser.Scene {
                     selBadgeG.strokeCircle(badgeX, badgeY, 11);
                 } else {
                     selBadgeG.fillStyle(0x040212, 0.95);
-                    selBadgeG.lineStyle(2, 0x00e5ff, 0.95);
+                    selBadgeG.lineStyle(2, 0xbf8cff, 0.95);
                     selBadgeG.fillCircle(badgeX, badgeY, 11);
                     selBadgeG.strokeCircle(badgeX, badgeY, 11);
                 }
@@ -1484,7 +1484,7 @@ export class Game extends Phaser.Scene {
                     fontFamily: '"Outfit", sans-serif',
                     fontSize: '11px',
                     fontWeight: '800',
-                    color: isAllSelected ? '#040212' : '#00e5ff'
+                    color: isAllSelected ? '#040212' : '#bf8cff'
                 }).setOrigin(0.5);
                 this.playerBoardGroup.add(selText);
             }
@@ -1534,10 +1534,10 @@ export class Game extends Phaser.Scene {
                 const badgeY = y - hHalf + 8;
 
                 const elementColors = {
-                    fire: 0xff3c00,
-                    earth: 0x00e676,
-                    water: 0x00b0ff,
-                    air: 0x00e5ff
+                    fire: 0xdf1b2d,
+                    earth: 0xa67032,
+                    water: 0x1084e9,
+                    air: 0xbf8cff
                 };
                 const elementColorHex = elementColors[el] || 0xffffff;
 
@@ -1582,7 +1582,7 @@ export class Game extends Phaser.Scene {
             if (spell.name === 'Firestorm' && cycle === 'air') isEmp = true;
             const isWeak = this.isWeakenedByCycle(spell.element, cycle);
             
-            const colors = { fire: 0xff3c00, earth: 0x00e676, water: 0x00b0ff, air: 0x00e5ff };
+            const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff };
             const colorHex = colors[spell.element] || 0x4e3ea0;
 
             const elementIcon = spell.element === 'fire' ? '🔥' :
@@ -1592,9 +1592,9 @@ export class Game extends Phaser.Scene {
             // 1. Set Title
             this.primedSpellTitle.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
             this.primedSpellTitle.setColor(
-                spell.element === 'fire' ? '#ff3c00' :
-                spell.element === 'earth' ? '#00e676' :
-                spell.element === 'water' ? '#00b0ff' : '#00e5ff'
+                spell.element === 'fire' ? '#df1b2d' :
+                spell.element === 'earth' ? '#a67032' :
+                spell.element === 'water' ? '#1084e9' : '#bf8cff'
             );
 
             // 2. Set Combo Recipe
@@ -1613,11 +1613,11 @@ export class Game extends Phaser.Scene {
             // 4. Set Cycle Advantage Banner
             if (isEmp) {
                 this.primedSpellAdvantage.setText('⚡ EMPOWERED (+3 STATS)');
-                this.primedSpellAdvantage.setColor('#00e676');
+                this.primedSpellAdvantage.setColor('#a67032');
                 this.primedSpellAdvantage.setVisible(true);
             } else if (isWeak) {
                 this.primedSpellAdvantage.setText('⚠ WEAKENED (-2 STATS)');
-                this.primedSpellAdvantage.setColor('#ff3c00');
+                this.primedSpellAdvantage.setColor('#df1b2d');
                 this.primedSpellAdvantage.setVisible(true);
             } else {
                 this.primedSpellAdvantage.setText('⚪ ENVIRONMENT NEUTRAL');
@@ -1634,14 +1634,14 @@ export class Game extends Phaser.Scene {
         } else {
             // Invalid combination
             this.primedSpellTitle.setText('INVALID COMBO');
-            this.primedSpellTitle.setColor('#ff3c00');
+            this.primedSpellTitle.setColor('#df1b2d');
             this.primedSpellCombo.setText('FORMULA UNKNOWN');
             this.primedSpellDesc.setText('Select valid elemental cards on your board to prime a spell.');
             this.primedSpellAdvantage.setVisible(false);
 
             // Draw warning background
             this.primedSpellBg.fillStyle(0x090518, 0.95);
-            this.primedSpellBg.lineStyle(2, 0xff3c00, 0.6);
+            this.primedSpellBg.lineStyle(2, 0xdf1b2d, 0.6);
             this.primedSpellBg.fillRoundedRect(0, 0, panelW, panelH, 10);
             this.primedSpellBg.strokeRoundedRect(0, 0, panelW, panelH, 10);
         }
@@ -1902,7 +1902,7 @@ export class Game extends Phaser.Scene {
             this.cycleIndex = 1;
             this.logMessage('The Cycle is forced to FIRE by Wildfire!');
             this.cycleCenterText.setText('FIRE');
-            this.cycleCenterText.setColor('#ff3c00');
+            this.cycleCenterText.setColor('#df1b2d');
             this.triggerCycleParticles('fire');
             this.tweens.add({
                 targets: this.cycleContainer,
@@ -1931,8 +1931,8 @@ export class Game extends Phaser.Scene {
             this.logMessage(`Aether Storm advances the Cycle twice to ${advEl.toUpperCase()}!`);
             this.cycleCenterText.setText(advEl.toUpperCase());
             this.cycleCenterText.setColor(
-                advEl === 'fire' ? '#ff3c00' : advEl === 'earth' ? '#00e676' :
-                advEl === 'water' ? '#00b0ff' : '#00e5ff'
+                advEl === 'fire' ? '#df1b2d' : advEl === 'earth' ? '#a67032' :
+                advEl === 'water' ? '#1084e9' : '#bf8cff'
             );
             this.triggerCycleParticles(advEl);
             this.tweens.add({
@@ -2459,14 +2459,14 @@ export class Game extends Phaser.Scene {
         const overG = this.add.graphics();
         overG.fillStyle(0x040212, 0.9);
         overG.fillRoundedRect(w / 2 - 250, h / 2 - 180, 500, 300, 15);
-        overG.lineStyle(2, outcome === 'VICTORY' ? 0x00e676 : 0xff3c00, 0.7);
+        overG.lineStyle(2, outcome === 'VICTORY' ? 0xa67032 : 0xdf1b2d, 0.7);
         overG.strokeRoundedRect(w / 2 - 250, h / 2 - 180, 500, 300, 15);
 
         const title = this.add.text(w / 2, h / 2 - 100, outcome, {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '52px',
             fontWeight: '800',
-            color: outcome === 'VICTORY' ? '#00e676' : '#ff3c00',
+            color: outcome === 'VICTORY' ? '#a67032' : '#df1b2d',
             letterSpacing: 2
         }).setOrigin(0.5);
 
@@ -2506,7 +2506,7 @@ export class Game extends Phaser.Scene {
             const drawBtnHover = () => {
                 rBg.clear();
                 rBg.fillStyle(0x161233, 0.95);
-                rBg.lineStyle(2, 0x00e5ff, 1);
+                rBg.lineStyle(2, 0xbf8cff, 1);
                 rBg.fillRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
                 rBg.strokeRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
             };
@@ -2516,7 +2516,7 @@ export class Game extends Phaser.Scene {
             const z = this.add.zone(w / 2, h / 2 + 50, 240, 50).setInteractive({ useHandCursor: true });
             z.on('pointerover', () => {
                 drawBtnHover();
-                rText.setColor('#00e5ff');
+                rText.setColor('#bf8cff');
                 this.playSound('click');
             });
             z.on('pointerout', () => {
@@ -2550,7 +2550,7 @@ export class Game extends Phaser.Scene {
             const drawRemHover = () => {
                 remBg.clear();
                 remBg.fillStyle(0x161233, 0.95);
-                remBg.lineStyle(2, 0x00e5ff, 1);
+                remBg.lineStyle(2, 0xbf8cff, 1);
                 remBg.fillRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
                 remBg.strokeRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
             };
@@ -2560,7 +2560,7 @@ export class Game extends Phaser.Scene {
             const zRem = this.add.zone(w / 2 - 120, h / 2 + 50, 210, 50).setInteractive({ useHandCursor: true });
             zRem.on('pointerover', () => {
                 drawRemHover();
-                remText.setColor('#00e5ff');
+                remText.setColor('#bf8cff');
                 this.playSound('click');
             });
             zRem.on('pointerout', () => {
@@ -2886,7 +2886,7 @@ export class Game extends Phaser.Scene {
             padding: { x: 24, y: 12 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        btnText.on('pointerover', () => btnText.setColor('#00e5ff'));
+        btnText.on('pointerover', () => btnText.setColor('#bf8cff'));
         btnText.on('pointerout', () => btnText.setColor('#ffffff'));
         btnText.on('pointerdown', () => {
             this.cleanupOnline();
@@ -2938,7 +2938,7 @@ export class Game extends Phaser.Scene {
 
     showLogTooltip(spell, x, y) {
         if (!this.logTooltip) return;
-        const colors = { fire: 0xff3c00, earth: 0x00e676, water: 0x00b0ff, air: 0x00e5ff };
+        const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff };
         const colorHex = colors[spell.element] || 0x4e3ea0;
 
         const elementIcon = spell.element === 'fire' ? '🔥' :
@@ -2946,9 +2946,9 @@ export class Game extends Phaser.Scene {
                             spell.element === 'water' ? '💧' : '🌪️';
         this.logTooltipTitle.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
         this.logTooltipTitle.setColor(
-            spell.element === 'fire' ? '#ff3c00' :
-            spell.element === 'earth' ? '#00e676' :
-            spell.element === 'water' ? '#00b0ff' : '#00e5ff'
+            spell.element === 'fire' ? '#df1b2d' :
+            spell.element === 'earth' ? '#a67032' :
+            spell.element === 'water' ? '#1084e9' : '#bf8cff'
         );
 
         let comboStr = '';

@@ -6,16 +6,16 @@
     --border-glow: rgba(255, 255, 255, 0.1);
     
     /* Elemental Colors */
-    --color-fire: #ff3c00;
+    --color-fire: #df1b2d;
     --color-fire-glow: rgba(255, 60, 0, 0.6);
     
-    --color-earth: #00e676;
+    --color-earth: #a67032;
     --color-earth-glow: rgba(0, 230, 118, 0.6);
     
-    --color-water: #00b0ff;
+    --color-water: #1084e9;
     --color-water-glow: rgba(0, 176, 255, 0.6);
     
-    --color-air: #00e5ff;
+    --color-air: #bf8cff;
     --color-air-glow: rgba(0, 229, 255, 0.6);
     
     --color-neutral: #e0e0e0;
@@ -296,8 +296,8 @@ html, body {
 .test-range-tab:hover {
     width: 52px;
     background: rgba(22, 18, 51, 0.95);
-    border-color: #00e5ff;
-    color: #00e5ff;
+    border-color: #bf8cff;
+    color: #bf8cff;
     box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
 }
 
@@ -519,7 +519,7 @@ html, body {
 .toggle-btn.btn-active-ai {
     background: rgba(0, 230, 118, 0.05);
     border-color: rgba(0, 230, 118, 0.3);
-    color: #00e676;
+    color: #a67032;
     box-shadow: 0 0 10px rgba(0, 230, 118, 0.1);
 }
 
@@ -676,8 +676,8 @@ html, body {
     transform: translateX(-50%) translateY(-20px);
     background: rgba(13, 11, 28, 0.85);
     backdrop-filter: blur(12px);
-    border: 1.5px solid #00e676;
-    color: #00e676;
+    border: 1.5px solid #a67032;
+    color: #a67032;
     padding: 10px 24px;
     border-radius: 20px;
     font-family: 'Outfit', sans-serif;
