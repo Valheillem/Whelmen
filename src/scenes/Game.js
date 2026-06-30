@@ -569,10 +569,10 @@ export class Game extends Phaser.Scene {
 
         // 4 Elements around the circle
         const ringPositions = [
-            { x: 0, y: -65, color: 0xff3c00, icon: '🔥', label: 'FIRE' },
-            { x: 65, y: 0, color: 0x00e676, icon: '🌿', label: 'EARTH' },
-            { x: 0, y: 65, color: 0x00e5ff, icon: '🌪️', label: 'AIR' },
-            { x: -65, y: 0, color: 0x00b0ff, icon: '💧', label: 'WATER' }
+            { x: 0, y: -65, color: 0xff3c00, icon: 'icon_fire', label: 'FIRE' },
+            { x: 65, y: 0, color: 0x00e676, icon: 'icon_earth', label: 'EARTH' },
+            { x: 0, y: 65, color: 0x00e5ff, icon: 'icon_air', label: 'AIR' },
+            { x: -65, y: 0, color: 0x00b0ff, icon: 'icon_water', label: 'WATER' }
         ];
 
         ringPositions.forEach((pos) => {
@@ -581,9 +581,7 @@ export class Game extends Phaser.Scene {
             glow.strokeCircle(pos.x, pos.y, 22);
             this.cycleContainer.add(glow);
 
-            const label = this.add.text(pos.x, pos.y, pos.icon, {
-                fontSize: '24px'
-            }).setOrigin(0.5);
+            const label = this.add.image(pos.x, pos.y, pos.icon).setDisplaySize(28, 28);
             this.cycleContainer.add(label);
             this.cycleLabels.push(label);
         });
