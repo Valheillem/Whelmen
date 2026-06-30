@@ -558,12 +558,12 @@ export class Game extends Phaser.Scene {
         this.cycleLabels = [];
 
         // Core cycle dial drawing
-        const bgDial = this.add.graphics();
-        bgDial.fillStyle(0x0f0b24, 0.9);
-        bgDial.lineStyle(2, 0x4e3ea0, 0.4);
-        bgDial.fillCircle(0, 0, 95);
-        bgDial.strokeCircle(0, 0, 95);
-        this.cycleContainer.add(bgDial);
+        this.bgDial = this.add.graphics();
+        this.bgDial.fillStyle(0x0f0b24, 0.9);
+        this.bgDial.lineStyle(2, 0x4e3ea0, 0.4);
+        this.bgDial.fillCircle(0, 0, 95);
+        this.bgDial.strokeCircle(0, 0, 95);
+        this.cycleContainer.add(this.bgDial);
 
         // 4 Elements around the circle
         const ringPositions = [
@@ -592,19 +592,40 @@ export class Game extends Phaser.Scene {
             color: '#a0a0b0'
         }).setOrigin(0.5);
         this.cycleContainer.add(this.cycleCenterText);
+
+        this.updateCycleDisplayColor(this.cycleElements[this.cycleIndex]);
+    }
+
+    updateCycleDisplayColor(element) {
+        if (!this.bgDial || !this.cycleCenterText) return;
+
+        const color = element === 'fire' ? 0xdf1b2d :
+                      element === 'water' ? 0x257ee4 :
+                      element === 'earth' ? 0x4db15b :
+                      element === 'air' ? 0x9247d5 : 0x4e3ea0; // neutral fallback
+
+        const hexColor = element === 'fire' ? '#df1b2d' :
+                         element === 'water' ? '#257ee4' :
+                         element === 'earth' ? '#4db15b' :
+                         element === 'air' ? '#9247d5' : '#ffffff';
+
+        // Update center text
+        this.cycleCenterText.setText(element.toUpperCase());
+        this.cycleCenterText.setColor(hexColor);
+
+        // Update wheel ring color
+        this.bgDial.clear();
+        this.bgDial.fillStyle(0x0f0b24, 0.9);
+        this.bgDial.lineStyle(2, color, 0.4);
+        this.bgDial.fillCircle(0, 0, 95);
+        this.bgDial.strokeCircle(0, 0, 95);
     }
 
     triggerCycleParticles(element) {
         if (element === 'neutral') return;
         const emitter = this.emitters[element];
         emitter.explode(40, this.scale.width / 2, this.scale.height / 2 - 40);
-        this.cycleCenterText.setText(element.toUpperCase());
-        this.cycleCenterText.setColor(
-            element === 'fire' ? '#df1b2d' :
-            element === 'water' ? '#257ee4' :
-            element === 'earth' ? '#4db15b' :
-            element === 'air' ? '#9247d5' : '#ffffff'
-        );
+        this.updateCycleDisplayColor(element);
     }
 
     playElementalBurst(x, y, element) {
@@ -2928,6 +2949,7 @@ export class Game extends Phaser.Scene {
         // Update cycle indicator rotation directly
         if (this.cycleContainer) {
             this.cycleContainer.rotation = this.cycleIndex * (Math.PI / 2);
+            this.updateCycleDisplayColor(this.cycleElements[this.cycleIndex]);
         }
         this.updateComboPreview();
 
