@@ -119,16 +119,23 @@ export class Game extends Phaser.Scene {
 
     createCardCanvas(key, w, h, drawFn) {
         if (this.textures.exists(key)) return;
+        // Render at 3x resolution for crisp icons, then register with Phaser
+        const scale = 3;
         let canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
+        canvas.width = w * scale;
+        canvas.height = h * scale;
         let ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.scale(scale, scale);
         drawFn(ctx);
         this.textures.addCanvas(key, canvas);
     }
 
     create() {
         // Generate beautiful custom card textures dynamically using canvas
+        // Note: createCardCanvas renders at 3x internally, so all coordinates
+        // here are in logical 100x150 space and get scaled up automatically.
         const cardWidth = 100;
         const cardHeight = 150;
 
