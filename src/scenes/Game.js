@@ -165,9 +165,8 @@ export class Game extends Phaser.Scene {
             grad.addColorStop(1, '#0f0300');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
             ctx.strokeStyle = '#ff3c00'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
-            ctx.fillStyle = '#ff8a50'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('FIRE', 12, 22);
             let img = this.textures.get('icon_fire').getSourceImage();
-            ctx.drawImage(img, cardWidth/2 - 25, cardHeight/2 - 15, 50, 50);
+            ctx.drawImage(img, cardWidth/2 - 40, cardHeight/2 - 40, 80, 80);
         });
 
         // Earth Card
@@ -178,9 +177,8 @@ export class Game extends Phaser.Scene {
             grad.addColorStop(1, '#020d05');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
             ctx.strokeStyle = '#00e676'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
-            ctx.fillStyle = '#b9f6ca'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('EARTH', 12, 22);
             let img = this.textures.get('icon_earth').getSourceImage();
-            ctx.drawImage(img, cardWidth/2 - 25, cardHeight/2 - 15, 50, 50);
+            ctx.drawImage(img, cardWidth/2 - 40, cardHeight/2 - 40, 80, 80);
         });
 
         // Water Card
@@ -191,9 +189,8 @@ export class Game extends Phaser.Scene {
             grad.addColorStop(1, '#020b14');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
             ctx.strokeStyle = '#00b0ff'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
-            ctx.fillStyle = '#80d8ff'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('WATER', 12, 22);
             let img = this.textures.get('icon_water').getSourceImage();
-            ctx.drawImage(img, cardWidth/2 - 25, cardHeight/2 - 15, 50, 50);
+            ctx.drawImage(img, cardWidth/2 - 40, cardHeight/2 - 40, 80, 80);
         });
 
         // Air Card
@@ -204,9 +201,8 @@ export class Game extends Phaser.Scene {
             grad.addColorStop(1, '#010c10');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
             ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
-            ctx.fillStyle = '#84ffff'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('AIR', 12, 22);
             let img = this.textures.get('icon_air').getSourceImage();
-            ctx.drawImage(img, cardWidth/2 - 25, cardHeight/2 - 15, 50, 50);
+            ctx.drawImage(img, cardWidth/2 - 40, cardHeight/2 - 40, 80, 80);
         });
 
         const w = this.scale.width;
@@ -581,7 +577,7 @@ export class Game extends Phaser.Scene {
             glow.strokeCircle(pos.x, pos.y, 22);
             this.cycleContainer.add(glow);
 
-            const label = this.add.image(pos.x, pos.y, pos.icon).setDisplaySize(28, 28);
+            const label = this.add.image(pos.x, pos.y, pos.icon).setDisplaySize(44, 44);
             this.cycleContainer.add(label);
             this.cycleLabels.push(label);
         });
