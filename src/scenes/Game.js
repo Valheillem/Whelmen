@@ -447,7 +447,7 @@ export class Game extends Phaser.Scene {
         // Rotate graphic dial
         this.tweens.add({
             targets: this.cycleContainer,
-            rotation: (this.cycleIndex) * (Math.PI / 2),
+            rotation: -(this.cycleIndex - 1) * (Math.PI / 2),
             duration: 500,
             ease: 'Cubic.easeOut'
         });
@@ -2008,7 +2008,7 @@ export class Game extends Phaser.Scene {
             this.triggerCycleParticles('fire');
             this.tweens.add({
                 targets: this.cycleContainer,
-                rotation: (1) * (Math.PI / 2),
+                rotation: -(1 - 1) * (Math.PI / 2), // Fire is index 1
                 duration: 500,
                 ease: 'Cubic.easeOut'
             });
@@ -2039,7 +2039,7 @@ export class Game extends Phaser.Scene {
             this.triggerCycleParticles(advEl);
             this.tweens.add({
                 targets: this.cycleContainer,
-                rotation: (this.cycleIndex) * (Math.PI / 2),
+                rotation: -(this.cycleIndex - 1) * (Math.PI / 2),
                 duration: 500,
                 ease: 'Cubic.easeOut'
             });
@@ -2948,7 +2948,7 @@ export class Game extends Phaser.Scene {
         this.updateDeckDiscardDisplay();
         // Update cycle indicator rotation directly
         if (this.cycleContainer) {
-            this.cycleContainer.rotation = this.cycleIndex * (Math.PI / 2);
+            this.cycleContainer.rotation = -(this.cycleIndex - 1) * (Math.PI / 2);
             this.updateCycleDisplayColor(this.cycleElements[this.cycleIndex]);
         }
         this.updateComboPreview();
@@ -3294,7 +3294,7 @@ export class Game extends Phaser.Scene {
                 // Rotate visual dial
                 this.tweens.add({
                     targets: this.cycleContainer,
-                    rotation: (idx) * (Math.PI / 2),
+                    rotation: -(idx - 1) * (Math.PI / 2),
                     duration: 500,
                     ease: 'Cubic.easeOut'
                 });
