@@ -601,9 +601,49 @@ export class Game extends Phaser.Scene {
         this.cycleCenterText.setText(element.toUpperCase());
         this.cycleCenterText.setColor(
             element === 'fire' ? '#df1b2d' :
-            element === 'earth' ? '#a67032' :
-            element === 'water' ? '#1084e9' : '#bf8cff'
+            element === 'water' ? '#257ee4' :
+            element === 'earth' ? '#4db15b' :
+            element === 'air' ? '#9247d5' : '#ffffff'
         );
+    }
+
+    playElementalBurst(x, y, element) {
+        // Play corresponding sound effect
+        if (element === 'fire') {
+            this.playSound('fire'); // Sizzle
+        } else if (element === 'water') {
+            this.playSound('water'); // Splash
+        } else if (element === 'earth') {
+            this.playSound('earth'); // Thud
+        } else if (element === 'air') {
+            this.playSound('air'); // Whoosh
+        }
+
+        // Create a localized particle explosion at the card's position
+        const color = element === 'fire' ? 0xdf1b2d :
+                      element === 'water' ? 0x257ee4 :
+                      element === 'earth' ? 0x4db15b :
+                      element === 'air' ? 0x9247d5 : 0xffffff;
+
+        const emitter = this.add.particles(0, 0, 'particle', {
+            x: x,
+            y: y,
+            speed: { min: 50, max: 200 },
+            angle: { min: 180, max: 360 }, // Burst upwards
+            scale: { start: 0.6, end: 0 },
+            tint: color,
+            alpha: { start: 1, end: 0 },
+            lifespan: 600,
+            gravityY: 400, // Particles fall down
+            blendMode: 'ADD'
+        });
+
+        emitter.explode(30);
+
+        // Cleanup emitter after explosion finishes
+        this.time.delayedCall(1000, () => {
+            emitter.destroy();
+        });
     }
 
     drawPlayerStats() {
@@ -1653,22 +1693,61 @@ export class Game extends Phaser.Scene {
     playHandCardToBoard(index) {
         if (this.actionUsedThisTurn) return;
 
-        const el = this.player.hand.splice(index, 1)[0];
-        this.player.board.push(el);
-
+        const el = this.player.hand[index];
         this.actionUsedThisTurn = true;
         this.playSound('draw');
         this.logMessage(`Player plays [${el.toUpperCase()}] mana to board.`);
-
-        this.updatePlayerHandDisplay();
-        this.updatePlayerBoardDisplay();
-        this.updatePlayerLifeDisplay();
-
         this.enablePlayerControls(false);
 
-        // Auto end turn after 400ms to keep play loop crisp and fast!
-        this.time.delayedCall(450, () => {
-            this.endTurn();
+        // Calculate Start Position (from hand)
+        const startX = this.playerZone.x + 60 + index * 90;
+        const startY = this.playerZone.y + 80;
+
+        // Apply state changes to calculate target layout
+        this.player.hand.splice(index, 1);
+        this.player.board.push(el);
+
+        const uniqueElements = [...new Set(this.player.board)];
+        const elIndex = uniqueElements.indexOf(el);
+        const centerX = 240;
+        const spaceX = 100;
+        const targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+        const targetY = this.scale.height - 280;
+
+        // Create the phantom card sprite
+        const phantom = this.add.image(startX, startY, `card_${el}`)
+            .setScale(0.8)
+            .setDepth(100);
+
+        // Hide the original card in hand immediately (if it hasn't been destroyed by render yet)
+        if (this.playerHandGroup) {
+            const handCards = this.playerHandGroup.getChildren();
+            if (handCards[index]) handCards[index].setVisible(false);
+        }
+
+        // Tween phantom to the board
+        this.tweens.add({
+            targets: phantom,
+            x: targetX,
+            y: targetY,
+            scaleX: 0.65,
+            scaleY: 0.65,
+            angle: (Math.random() - 0.5) * 15, // slight dramatic rotation
+            duration: 350,
+            ease: 'Power2',
+            onComplete: () => {
+                phantom.destroy();
+                this.updatePlayerHandDisplay();
+                this.updatePlayerBoardDisplay();
+                this.updatePlayerLifeDisplay();
+                
+                this.playElementalBurst(targetX, targetY, el);
+
+                // Auto end turn after completion
+                this.time.delayedCall(450, () => {
+                    this.endTurn();
+                });
+            }
         });
     }
 
