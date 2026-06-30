@@ -111,6 +111,23 @@ export class Game extends Phaser.Scene {
     }
 
     preload() {
+        this.load.image('icon_fire', 'assets/icons/Fire.png');
+        this.load.image('icon_earth', 'assets/icons/Earth.png');
+        this.load.image('icon_water', 'assets/icons/Water.png');
+        this.load.image('icon_air', 'assets/icons/Air.png');
+    }
+
+    createCardCanvas(key, w, h, drawFn) {
+        if (this.textures.exists(key)) return;
+        let canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        let ctx = canvas.getContext('2d');
+        drawFn(ctx);
+        this.textures.addCanvas(key, canvas);
+    }
+
+    create() {
         // Generate beautiful custom card textures dynamically using canvas
         const cardWidth = 100;
         const cardHeight = 150;
@@ -149,7 +166,8 @@ export class Game extends Phaser.Scene {
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
             ctx.strokeStyle = '#ff3c00'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
             ctx.fillStyle = '#ff8a50'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('FIRE', 12, 22);
-            ctx.fillStyle = '#ff3c00'; ctx.font = '42px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🔥', cardWidth/2, cardHeight/2 + 10);
+            let img = this.textures.get('icon_fire').getSourceImage();
+            ctx.drawImage(img, cardWidth/2 - 25, cardHeight/2 - 15, 50, 50);
         });
 
         // Earth Card
@@ -161,7 +179,8 @@ export class Game extends Phaser.Scene {
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
             ctx.strokeStyle = '#00e676'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
             ctx.fillStyle = '#b9f6ca'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('EARTH', 12, 22);
-            ctx.fillStyle = '#00e676'; ctx.font = '42px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🌿', cardWidth/2, cardHeight/2 + 10);
+            let img = this.textures.get('icon_earth').getSourceImage();
+            ctx.drawImage(img, cardWidth/2 - 25, cardHeight/2 - 15, 50, 50);
         });
 
         // Water Card
@@ -173,7 +192,8 @@ export class Game extends Phaser.Scene {
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
             ctx.strokeStyle = '#00b0ff'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
             ctx.fillStyle = '#80d8ff'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('WATER', 12, 22);
-            ctx.fillStyle = '#00b0ff'; ctx.font = '42px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('💧', cardWidth/2, cardHeight/2 + 10);
+            let img = this.textures.get('icon_water').getSourceImage();
+            ctx.drawImage(img, cardWidth/2 - 25, cardHeight/2 - 15, 50, 50);
         });
 
         // Air Card
@@ -185,20 +205,10 @@ export class Game extends Phaser.Scene {
             ctx.fillStyle = grad; ctx.fillRect(0, 0, cardWidth, cardHeight);
             ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, cardWidth - 8, cardHeight - 8);
             ctx.fillStyle = '#84ffff'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('AIR', 12, 22);
-            ctx.fillStyle = '#00e5ff'; ctx.font = '42px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🌪️', cardWidth/2, cardHeight/2 + 10);
+            let img = this.textures.get('icon_air').getSourceImage();
+            ctx.drawImage(img, cardWidth/2 - 25, cardHeight/2 - 15, 50, 50);
         });
-    }
 
-    createCardCanvas(key, w, h, drawFn) {
-        let canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        let ctx = canvas.getContext('2d');
-        drawFn(ctx);
-        this.textures.addCanvas(key, canvas);
-    }
-
-    create() {
         const w = this.scale.width;
         const h = this.scale.height;
 
