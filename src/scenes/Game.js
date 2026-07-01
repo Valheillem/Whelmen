@@ -223,6 +223,7 @@ export class Game extends Phaser.Scene {
         this.sharedDiscard = [];
         this.cycleElements = ['neutral', 'fire', 'earth', 'air', 'water'];
         this.cycleIndex = 0; // Neutral start
+        this.firstCycleIndex = Math.floor(Math.random() * 4) + 1; // 1 to 4
         this.turn = 'player'; // Player starts
         this.phase = 'action'; // Starting action phase
         this.actionUsedThisTurn = false; // Player can do 1 action per turn
@@ -435,10 +436,11 @@ export class Game extends Phaser.Scene {
     }
 
     rotateCycle() {
-        this.cycleIndex = (this.cycleIndex + 1) % this.cycleElements.length;
-        // Make cycle Neutral to start, and loop fire/earth/air/water from there
         if (this.cycleIndex === 0) {
-            this.cycleIndex = 1; // Direct loop bypass neutral if you want, let's keep neutral once
+            this.cycleIndex = this.firstCycleIndex || 1;
+        } else {
+            this.cycleIndex = (this.cycleIndex + 1) % this.cycleElements.length;
+            if (this.cycleIndex === 0) this.cycleIndex = 1;
         }
         
         const el = this.cycleElements[this.cycleIndex];
@@ -2028,8 +2030,12 @@ export class Game extends Phaser.Scene {
                 this.updateAIHandDisplay(); this.updateAILifeDisplay();
             }
             for (let i = 0; i < 2; i++) {
-                this.cycleIndex = (this.cycleIndex + 1) % this.cycleElements.length;
-                if (this.cycleIndex === 0) this.cycleIndex = 1;
+                if (this.cycleIndex === 0) {
+                    this.cycleIndex = this.firstCycleIndex || 1;
+                } else {
+                    this.cycleIndex = (this.cycleIndex + 1) % this.cycleElements.length;
+                    if (this.cycleIndex === 0) this.cycleIndex = 1;
+                }
             }
             const advEl = this.cycleElements[this.cycleIndex];
             this.logMessage(`Aether Storm advances the Cycle twice to ${advEl.toUpperCase()}!`);
@@ -2758,6 +2764,7 @@ export class Game extends Phaser.Scene {
             deck: this.sharedDeck.slice(),
             discard: this.sharedDiscard.slice(),
             cycleIndex: this.cycleIndex,
+            firstCycleIndex: this.firstCycleIndex,
             turn: this.turn === 'player' ? myKey : oppKey,
             phase: this.phase,
             actionUsed: this.actionUsedThisTurn,
@@ -2845,6 +2852,7 @@ export class Game extends Phaser.Scene {
 
         // Update cycle
         this.cycleIndex = state.cycleIndex || 0;
+        this.firstCycleIndex = state.firstCycleIndex || 1;
 
         // Map MY data to this.player
         this.player.hand = (state[`${myKey}Hand`] || []).slice();
