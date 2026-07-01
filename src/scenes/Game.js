@@ -306,7 +306,7 @@ export class Game extends Phaser.Scene {
         }
     }
 
-    drawCard() {
+    drawCard(silent = false) {
         if (this.sharedDeck.length === 0) {
             if (this.sharedDiscard.length === 0) {
                 this.logMessage("Deck and Discard are empty!");
@@ -318,7 +318,7 @@ export class Game extends Phaser.Scene {
             this.shuffle(this.sharedDeck);
             this.updateDeckDiscardDisplay();
         }
-        this.playSound('draw');
+        if (!silent) this.playSound('draw');
         const card = this.sharedDeck.pop();
         this.updateDeckDiscardDisplay();
         return card;
@@ -326,8 +326,8 @@ export class Game extends Phaser.Scene {
 
     dealStartingHands() {
         for (let i = 0; i < 8; i++) {
-            this.player.hand.push(this.drawCard());
-            this.ai.hand.push(this.drawCard());
+            this.player.hand.push(this.drawCard(true));
+            this.ai.hand.push(this.drawCard(true));
         }
         this.updatePlayerHandDisplay();
         this.updateAIHandDisplay();
