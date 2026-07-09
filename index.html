@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Whelmen - Elemental Card Duel</title>
-    <link rel="stylesheet" href="./src/styles.css?v=1.1.25">
+    <link rel="stylesheet" href="./src/styles.css?v=1.1.26">
 </head>
 <body>
     <div id="game-container"></div>
@@ -29,7 +29,7 @@
 
     <!-- How To Play Modal -->
     <div id="tutorial-overlay" class="overlay">
-        <div class="modal-card" id="tutorial-modal">
+        <div class="modal-card tutorial-modal-card" id="tutorial-modal">
             <button class="modal-close" id="close-tutorial">&times;</button>
             <h2 class="modal-title">Rules of Whelmen</h2>
             <div class="tutorial-content">
@@ -67,7 +67,7 @@
                 <h3>Spell Database (Combinations)</h3>
                 <div class="spellbook-content">
                     <div class="spell-tier">
-                        <h3 class="tier-title">Tier 1: Basic Invocations</h3>
+                        <h3 class="tier-title">Tier 1: Sprite</h3>
                         <div class="spell-grid">
                             <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div></div><div class="spell-name element-earth">Pebble Shield</div><div class="spell-desc">+2 Shield</div></div>
                             <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div></div><div class="spell-name element-fire">Ember Poke</div><div class="spell-desc">2 DMG</div></div>
@@ -77,7 +77,7 @@
                     </div>
 
                     <div class="spell-tier">
-                        <h3 class="tier-title">Tier 2: Advanced Weaving</h3>
+                        <h3 class="tier-title">Tier 2: Elemental</h3>
                         <div class="spell-grid">
                             <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Combustion</div><div class="spell-desc">5 DMG</div></div>
                             <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Stone Wall</div><div class="spell-desc">+5 Shield</div></div>
@@ -91,7 +91,7 @@
                     </div>
 
                     <div class="spell-tier">
-                        <h3 class="tier-title">Tier 3: Master Incantations</h3>
+                        <h3 class="tier-title">Tier 3: Dynastic</h3>
                         <div class="spell-grid">
                             <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Cataclysm</div><div class="spell-desc">10 DMG (15 if Cycle is Fire)</div></div>
                             <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Deluge</div><div class="spell-desc">Both players draw 3 cards</div></div>
@@ -110,7 +110,7 @@
 
     <!-- In-Game How To Play Modal (No Grid) -->
     <div id="tutorial-overlay-ingame" class="overlay">
-        <div class="modal-card" id="tutorial-modal-ingame">
+        <div class="modal-card tutorial-modal-card" id="tutorial-modal-ingame">
             <button class="modal-close" id="close-tutorial-ingame">&times;</button>
             <h2 class="modal-title">Rules of Whelmen</h2>
             <div class="tutorial-content">
@@ -156,7 +156,7 @@
             
             <div class="spellbook-content">
                 <div class="spell-tier">
-                    <h3 class="tier-title">Tier 1: Basic Invocations</h3>
+                    <h3 class="tier-title">Tier 1: Sprite</h3>
                     <div class="spell-grid">
                         <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div></div><div class="spell-name element-earth">Pebble Shield</div><div class="spell-desc">+2 Shield</div></div>
                         <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div></div><div class="spell-name element-fire">Ember Poke</div><div class="spell-desc">2 DMG</div></div>
@@ -166,7 +166,7 @@
                 </div>
 
                 <div class="spell-tier">
-                    <h3 class="tier-title">Tier 2: Advanced Weaving</h3>
+                    <h3 class="tier-title">Tier 2: Elemental</h3>
                     <div class="spell-grid">
                         <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Combustion</div><div class="spell-desc">5 DMG</div></div>
                         <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Stone Wall</div><div class="spell-desc">+5 Shield</div></div>
@@ -180,7 +180,7 @@
                 </div>
 
                 <div class="spell-tier">
-                    <h3 class="tier-title">Tier 3: Master Incantations</h3>
+                    <h3 class="tier-title">Tier 3: Dynastic</h3>
                     <div class="spell-grid">
                         <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Cataclysm</div><div class="spell-desc">10 DMG (15 if Cycle is Fire)</div></div>
                         <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Deluge</div><div class="spell-desc">Both players draw 3 cards</div></div>
@@ -201,6 +201,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <script src="./phaser.js"></script>
-    <script type="module" src="./src/main.js?v=1.1.25"></script>
+    <script type="module" src="./src/main.js?v=1.1.26"></script>
 </body>
 </html>

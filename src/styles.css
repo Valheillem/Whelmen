@@ -190,13 +190,13 @@ html, body {
 }
 
 /* Tutorial Layout */
-#tutorial-modal .modal-card {
+.tutorial-modal-card {
     width: 800px;
     max-width: 95%;
     text-align: left;
 }
 
-#tutorial-modal .tutorial-content {
+.tutorial-modal-card .tutorial-content {
     max-height: calc(85vh - 120px);
     overflow-y: auto;
     padding-right: 15px;
@@ -206,25 +206,25 @@ html, body {
 }
 
 /* Scrollbar styling */
-#tutorial-modal .tutorial-content::-webkit-scrollbar {
+.tutorial-modal-card .tutorial-content::-webkit-scrollbar {
     width: 6px;
 }
 
-#tutorial-modal .tutorial-content::-webkit-scrollbar-track {
+.tutorial-modal-card .tutorial-content::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 3px;
 }
 
-#tutorial-modal .tutorial-content::-webkit-scrollbar-thumb {
+.tutorial-modal-card .tutorial-content::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 3px;
 }
 
-#tutorial-modal .tutorial-content::-webkit-scrollbar-thumb:hover {
+.tutorial-modal-card .tutorial-content::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
-#tutorial-modal h3 {
+.tutorial-modal-card h3 {
     font-family: 'Cinzel', serif;
     color: #ffffff;
     font-size: 1.2rem;
@@ -234,21 +234,21 @@ html, body {
     padding-bottom: 5px;
 }
 
-#tutorial-modal h3:first-of-type {
+.tutorial-modal-card h3:first-of-type {
     margin-top: 0;
 }
 
-#tutorial-modal p {
+.tutorial-modal-card p {
     margin-bottom: 12px;
 }
 
-#tutorial-modal ul {
+.tutorial-modal-card ul {
     margin-bottom: 15px;
     padding-left: 10px;
     list-style-type: none;
 }
 
-#tutorial-modal li {
+.tutorial-modal-card li {
     margin-bottom: 6px;
 }
 
