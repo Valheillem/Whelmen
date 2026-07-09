@@ -35,8 +35,7 @@ export class Start extends Phaser.Scene {
         this.add.rectangle(0, 0, width, height, 0x040212).setOrigin(0);
 
         // 2. Add Soft Glowing Nebulas
-        this.add.image(width * 0.25, height * 0.3, 'nebula').setScale(4);
-        this.add.image(width * 0.75, height * 0.7, 'nebula').setScale(3);
+        // Removed as per request
 
         // 3. Add Star Particle Emitter for dynamic star drift
         const starEmitter = this.add.particles(0, 0, 'star', {
@@ -73,8 +72,8 @@ export class Start extends Phaser.Scene {
             color: '#ffffff',
             align: 'center'
         }).setOrigin(0.5);
-        titleText.setStroke('#4e3ea0', 16);
-        titleText.setShadow(0, 0, 'rgba(78, 62, 160, 0.8)', 30, true, true);
+        // Aura removed
+
 
         const subTitleText = this.add.text(width / 2, height / 2 - 110, 'THE ELEMENTAL DUELING GAME', {
             fontFamily: '"Inter", sans-serif',
