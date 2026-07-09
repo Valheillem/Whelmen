@@ -629,7 +629,6 @@ html, body {
     font-family: 'Cinzel', serif;
     font-weight: 700;
     font-size: 0.85rem;
-    color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -849,6 +848,6 @@ html, body {
 .spell-entry .spell-desc {
     font-family: 'Inter', sans-serif;
     font-size: 0.8rem;
-    color: #000000;
+    color: #000000 !important;
     line-height: 1.3;
 }
