@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap');
 
 :root {
     --bg-dark: #040212;
@@ -101,7 +101,7 @@ html, body {
 }
 
 .modal-title {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Cinzel', serif;
     font-weight: 800;
     font-size: 2rem;
     margin-bottom: 20px;
@@ -225,7 +225,7 @@ html, body {
 }
 
 #tutorial-modal h3 {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Cinzel', serif;
     color: #ffffff;
     font-size: 1.2rem;
     margin-top: 25px;
@@ -326,7 +326,7 @@ html, body {
 }
 
 .panel-title {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 1.25rem;
     font-weight: 800;
     letter-spacing: 1px;
@@ -392,7 +392,7 @@ html, body {
 }
 
 .panel-section-title {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 0.8rem;
     font-weight: 700;
     color: #8b5cf6;
@@ -415,7 +415,7 @@ html, body {
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     color: #ffffff;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Cinzel', serif;
     font-weight: 700;
     font-size: 0.85rem;
     padding: 8px 4px;
@@ -626,7 +626,7 @@ html, body {
 }
 
 .spell-name {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Cinzel', serif;
     font-weight: 700;
     font-size: 0.85rem;
     color: #ffffff;
@@ -673,7 +673,7 @@ html, body {
     color: #a67032;
     padding: 10px 24px;
     border-radius: 20px;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Cinzel', serif;
     font-weight: 700;
     font-size: 1rem;
     letter-spacing: 0.5px;

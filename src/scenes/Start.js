@@ -31,48 +31,41 @@ export class Start extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 1. Add Background Dark Space
-        this.add.rectangle(0, 0, width, height, 0x040212).setOrigin(0);
+        // 1. Add Background Dark Leather/Stone Space
+        this.add.rectangle(0, 0, width, height, 0x1a1410).setOrigin(0);
 
         // 2. Add Soft Glowing Nebulas
         // Removed as per request
 
-        // 3. Add Star Particle Emitter for dynamic star drift
-        const starEmitter = this.add.particles(0, 0, 'star', {
-            x: { min: 0, max: width },
-            y: { min: 0, max: height },
-            speedY: { min: 5, max: 20 },
-            speedX: { min: -5, max: 5 },
-            scale: { min: 0.2, max: 0.8 },
-            alpha: { min: 0.1, max: 0.7 },
-            lifespan: 10000,
-            frequency: 150
-        });
+        // 3. Add Star Particle Emitter
+        // Removed for feudal aesthetic
 
-        // 4. Create Pulsing Elemental Rings in the center
-        this.rings = [];
-        const ringColors = [0xdf1b2d, 0xa67032, 0xbf8cff, 0x1084e9]; // Fire, Earth, Air, Water
-        ringColors.forEach((color, i) => {
-            let ring = this.add.graphics();
-            ring.lineStyle(2, color, 0.2 + i * 0.05);
-            ring.strokeCircle(width / 2, height / 2 - 130, 180 + i * 25);
-            this.rings.push({
-                graphic: ring,
-                speed: 0.002 * (i % 2 === 0 ? 1 : -1),
-                radius: 180 + i * 25,
-                color: color
-            });
-        });
+        // 4. Create Static Iron Emblem
+        let emblem = this.add.graphics();
+        emblem.lineStyle(4, 0x3a3a3a, 0.8);
+        emblem.strokeCircle(width / 2, height / 2 - 130, 220);
+        emblem.lineStyle(2, 0x4a4a4a, 0.6);
+        emblem.strokeCircle(width / 2, height / 2 - 130, 205);
+        emblem.lineStyle(1, 0x5a5a5a, 0.4);
+        for(let i=0; i<12; i++) {
+            let angle = (i * 30) * Math.PI / 180;
+            let x1 = width/2 + Math.cos(angle)*205;
+            let y1 = height/2 - 130 + Math.sin(angle)*205;
+            let x2 = width/2 + Math.cos(angle)*220;
+            let y2 = height/2 - 130 + Math.sin(angle)*220;
+            emblem.strokeLineShape(new Phaser.Geom.Line(x1,y1,x2,y2));
+        }
 
         // 5. Add Main Title - "WHELMEN"
         const titleText = this.add.text(width / 2, height / 2 - 190, 'WHELMEN', {
-            fontFamily: '"Outfit", "Inter", sans-serif',
-            fontSize: '84px',
+            fontFamily: '"Cinzel", serif',
+            fontSize: '92px',
             fontWeight: '800',
-            color: '#ffffff',
+            color: '#d4af37',
             align: 'center'
         }).setOrigin(0.5);
-        // Aura removed
+        titleText.setShadow(2, 4, 'rgba(0, 0, 0, 0.8)', 0, true, true);
+        titleText.setStroke('#2a1e12', 4);
 
 
         // Subtitle removed as requested
@@ -124,10 +117,10 @@ export class Start extends Phaser.Scene {
     createMenuButton(x, y, label, onClick) {
         const btnBg = this.add.graphics().setPosition(x, y);
         const btnText = this.add.text(x, y, label, {
-            fontFamily: '"Outfit", "Inter", sans-serif',
-            fontSize: '20px',
+            fontFamily: '"Cinzel", serif',
+            fontSize: '22px',
             fontWeight: '700',
-            color: '#ffffff',
+            color: '#f4ebd8',
             letterSpacing: 2
         }).setOrigin(0.5);
 
@@ -136,26 +129,39 @@ export class Start extends Phaser.Scene {
 
         const drawNormal = () => {
             btnBg.clear();
-            btnBg.lineStyle(1.5, 0x4e3ea0, 0.6);
-            btnBg.fillStyle(0x0d0b1c, 0.85);
-            btnBg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 8);
-            btnBg.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 8);
+            btnBg.lineStyle(2, 0x4a4a4a, 1); // Iron border
+            btnBg.fillStyle(0x261a12, 0.9); // Dark wood fill
+            btnBg.fillRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            btnBg.strokeRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            
+            // Add iron rivets in corners
+            btnBg.fillStyle(0x1a1a1a, 1);
+            btnBg.fillCircle(-btnWidth / 2 + 8, -btnHeight / 2 + 8, 3);
+            btnBg.fillCircle(btnWidth / 2 - 8, -btnHeight / 2 + 8, 3);
+            btnBg.fillCircle(-btnWidth / 2 + 8, btnHeight / 2 - 8, 3);
+            btnBg.fillCircle(btnWidth / 2 - 8, btnHeight / 2 - 8, 3);
         };
 
         const drawHover = () => {
             btnBg.clear();
-            btnBg.lineStyle(2, 0xbf8cff, 1);
-            btnBg.fillStyle(0x161233, 0.95);
-            btnBg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 8);
-            btnBg.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 8);
+            btnBg.lineStyle(2, 0xd4af37, 1); // Gold border
+            btnBg.fillStyle(0x3d2b1f, 0.95); // Lighter wood fill
+            btnBg.fillRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            btnBg.strokeRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            
+            btnBg.fillStyle(0x4a4a4a, 1);
+            btnBg.fillCircle(-btnWidth / 2 + 8, -btnHeight / 2 + 8, 3);
+            btnBg.fillCircle(btnWidth / 2 - 8, -btnHeight / 2 + 8, 3);
+            btnBg.fillCircle(-btnWidth / 2 + 8, btnHeight / 2 - 8, 3);
+            btnBg.fillCircle(btnWidth / 2 - 8, btnHeight / 2 - 8, 3);
         };
 
         const drawFlash = () => {
             btnBg.clear();
             btnBg.lineStyle(2, 0xffffff, 1);
-            btnBg.fillStyle(0xffffff, 0.15);
-            btnBg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 8);
-            btnBg.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 8);
+            btnBg.fillStyle(0xd4af37, 0.5);
+            btnBg.fillRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            btnBg.strokeRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
         };
 
         // Draw initial state
@@ -166,7 +172,7 @@ export class Start extends Phaser.Scene {
 
         zone.on('pointerover', () => {
             drawHover();
-            btnText.setColor('#bf8cff');
+            btnText.setColor('#d4af37');
             
             // Floating micro-scale effect
             this.tweens.add({
@@ -180,7 +186,7 @@ export class Start extends Phaser.Scene {
 
         zone.on('pointerout', () => {
             drawNormal();
-            btnText.setColor('#ffffff');
+            btnText.setColor('#f4ebd8');
             
             this.tweens.add({
                 targets: [btnText, btnBg],
