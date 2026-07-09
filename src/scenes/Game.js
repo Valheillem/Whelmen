@@ -1784,21 +1784,21 @@ export class Game extends Phaser.Scene {
     }
 
     handleSpellBookOption() {
-        const tutorialModal = document.getElementById('tutorial-overlay');
-        if (tutorialModal) {
-            tutorialModal.classList.add('active');
+        const spellbookModal = document.getElementById('spellbook-overlay');
+        if (spellbookModal) {
+            spellbookModal.classList.add('active');
             
             // Set up close actions
-            const closeBtn = document.getElementById('close-tutorial');
+            const closeBtn = document.getElementById('close-spellbook');
             if (closeBtn) {
                 closeBtn.onclick = () => {
-                    tutorialModal.classList.remove('active');
+                    spellbookModal.classList.remove('active');
                 };
             }
             
-            tutorialModal.onclick = (e) => {
-                if (e.target === tutorialModal) {
-                    tutorialModal.classList.remove('active');
+            spellbookModal.onclick = (e) => {
+                if (e.target === spellbookModal) {
+                    spellbookModal.classList.remove('active');
                 }
             };
         }
