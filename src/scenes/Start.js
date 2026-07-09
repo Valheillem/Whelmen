@@ -75,17 +75,11 @@ export class Start extends Phaser.Scene {
         // Aura removed
 
 
-        const subTitleText = this.add.text(width / 2, height / 2 - 110, 'THE ELEMENTAL DUELING GAME', {
-            fontFamily: '"Inter", sans-serif',
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#a0a0b0',
-            letterSpacing: 4
-        }).setOrigin(0.5);
+        // Subtitle removed as requested
 
         // Animate title float
         this.tweens.add({
-            targets: [titleText, subTitleText],
+            targets: [titleText],
             y: '-=15',
             duration: 2500,
             yoyo: true,
