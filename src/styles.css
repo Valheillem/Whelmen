@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap');
 
 :root {
-    --bg-dark: #040212;
-    --bg-panel: rgba(13, 11, 28, 0.75);
-    --border-glow: rgba(255, 255, 255, 0.1);
+    --bg-dark: #1a1410;
+    --bg-panel: rgba(38, 26, 18, 0.85);
+    --border-glow: rgba(212, 175, 55, 0.2);
     
     /* Elemental Colors */
     --color-fire: #df1b2d;

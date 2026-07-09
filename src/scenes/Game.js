@@ -213,10 +213,10 @@ export class Game extends Phaser.Scene {
         this.synth = new AudioSynthHelper();
 
         // Background space
-        this.add.rectangle(0, 0, w, h, 0x040212).setOrigin(0);
+        this.add.rectangle(0, 0, w, h, 0x1a1410).setOrigin(0);
 
         // Grid overlay
-        this.grid = this.add.grid(w/2, h/2, w, h, 80, 80, 0x4e3ea0, 0.03, 0xffffff, 0.01);
+        this.grid = this.add.grid(w/2, h/2, w, h, 80, 80, 0x4a4a4a, 0.03, 0xffffff, 0.01);
 
         // Core Game variables
         this.sharedDeck = [];
@@ -561,8 +561,8 @@ export class Game extends Phaser.Scene {
 
         // Core cycle dial drawing
         this.bgDial = this.add.graphics();
-        this.bgDial.fillStyle(0x0f0b24, 0.9);
-        this.bgDial.lineStyle(2, 0x4e3ea0, 0.4);
+        this.bgDial.fillStyle(0x261a12, 0.9);
+        this.bgDial.lineStyle(2, 0x4a4a4a, 0.4);
         this.bgDial.fillCircle(0, 0, 95);
         this.bgDial.strokeCircle(0, 0, 95);
         this.cycleContainer.add(this.bgDial);
@@ -604,7 +604,7 @@ export class Game extends Phaser.Scene {
         const color = element === 'fire' ? 0xdf1b2d :
                       element === 'water' ? 0x257ee4 :
                       element === 'earth' ? 0x4db15b :
-                      element === 'air' ? 0x9247d5 : 0x4e3ea0; // neutral fallback
+                      element === 'air' ? 0x9247d5 : 0x4a4a4a; // neutral fallback
 
         const hexColor = element === 'fire' ? '#df1b2d' :
                          element === 'water' ? '#257ee4' :
@@ -617,7 +617,7 @@ export class Game extends Phaser.Scene {
 
         // Update wheel ring color
         this.bgDial.clear();
-        this.bgDial.fillStyle(0x0f0b24, 0.9);
+        this.bgDial.fillStyle(0x261a12, 0.9);
         this.bgDial.lineStyle(2, color, 0.4);
         this.bgDial.fillCircle(0, 0, 95);
         this.bgDial.strokeCircle(0, 0, 95);
@@ -903,7 +903,7 @@ export class Game extends Phaser.Scene {
             // Draw a clean, semi-transparent card slot outline for empty discard
             const cardW = 100 * 0.75;
             const cardH = 150 * 0.75;
-            this.discardOutlineG.lineStyle(1.5, 0x4e3ea0, 0.4);
+            this.discardOutlineG.lineStyle(1.5, 0x4a4a4a, 0.4);
             this.discardOutlineG.strokeRoundedRect(
                 w / 2 + 270 - cardW / 2, 
                 h / 2 - 40 - cardH / 2, 
@@ -1004,14 +1004,21 @@ export class Game extends Phaser.Scene {
 
         const drawState = (lineColor, fill, textColor) => {
             g.clear();
-            g.lineStyle(1.5, lineColor, 1);
-            g.fillStyle(fill, 0.85);
-            g.fillRoundedRect(x - btnW/2, y - btnH/2, btnW, btnH, 6);
-            g.strokeRoundedRect(x - btnW/2, y - btnH/2, btnW, btnH, 6);
+            g.lineStyle(2, lineColor, 1);
+            g.fillStyle(fill, 0.9);
+            g.fillRect(x - btnW/2, y - btnH/2, btnW, btnH);
+            g.strokeRect(x - btnW/2, y - btnH/2, btnW, btnH);
+            
+            // Rivets
+            g.fillStyle(0x1a1a1a, 1);
+            g.fillCircle(x - btnW/2 + 6, y - btnH/2 + 6, 2);
+            g.fillCircle(x + btnW/2 - 6, y - btnH/2 + 6, 2);
+            g.fillCircle(x - btnW/2 + 6, y + btnH/2 - 6, 2);
+            g.fillCircle(x + btnW/2 - 6, y + btnH/2 - 6, 2);
             text.setColor(textColor);
         };
 
-        drawState(0x4e3ea0, 0x0d0b1c, '#888899'); // Default disabled state style
+        drawState(0x4a4a4a, 0x261a12, '#888899'); // Default disabled state style
 
         const zone = this.add.zone(x, y, btnW, btnH).setInteractive({ useHandCursor: true });
 
@@ -1019,22 +1026,22 @@ export class Game extends Phaser.Scene {
 
         zone.on('pointerover', () => {
             if (!enabled) return;
-            drawState(0xbf8cff, 0x161233, '#bf8cff');
+            drawState(0xbf8cff, 0x3d2b1f, '#bf8cff');
             this.playSound('click');
         });
 
         zone.on('pointerout', () => {
             if (!enabled) return;
-            drawState(0x4e3ea0, 0x0d0b1c, '#ffffff');
+            drawState(0x4a4a4a, 0x261a12, '#ffffff');
         });
 
         zone.on('pointerdown', () => {
             if (!enabled) return;
-            drawState(0xffffff, 0x4e3ea0, '#ffffff');
+            drawState(0xffffff, 0x4a4a4a, '#ffffff');
             this.time.delayedCall(100, () => {
                 onClick();
                 // Redraw normal state
-                if (enabled) drawState(0x4e3ea0, 0x0d0b1c, '#ffffff');
+                if (enabled) drawState(0x4a4a4a, 0x261a12, '#ffffff');
             });
         });
 
@@ -1042,10 +1049,10 @@ export class Game extends Phaser.Scene {
             setEnabled: (state) => {
                 enabled = state;
                 if (state) {
-                    drawState(0x4e3ea0, 0x0d0b1c, '#ffffff');
+                    drawState(0x4a4a4a, 0x261a12, '#ffffff');
                     zone.setInteractive();
                 } else {
-                    drawState(0x221a44, 0x05040a, '#555566');
+                    drawState(0x1a1410, 0x05040a, '#555566');
                     zone.disableInteractive();
                 }
             }
@@ -1094,8 +1101,8 @@ export class Game extends Phaser.Scene {
 
         // Drawer backing
         const logBg = this.add.graphics();
-        logBg.fillStyle(0x070512, 0.8);
-        logBg.lineStyle(1, 0x4e3ea0, 0.25);
+        logBg.fillStyle(0x1a1410, 0.8);
+        logBg.lineStyle(1, 0x4a4a4a, 0.25);
         logBg.fillRoundedRect(0, 0, 340, 380, 8);
         logBg.strokeRoundedRect(0, 0, 340, 380, 8);
         this.logContainer.add(logBg);
@@ -1510,7 +1517,7 @@ export class Game extends Phaser.Scene {
                 const elementColorHex = elementColors[el] || 0xffffff;
 
                 const countBadgeG = this.add.graphics();
-                countBadgeG.fillStyle(0x0d0b1c, 0.95);
+                countBadgeG.fillStyle(0x261a12, 0.95);
                 countBadgeG.lineStyle(1.5, elementColorHex, 0.9);
                 countBadgeG.fillCircle(badgeX, badgeY, 11);
                 countBadgeG.strokeCircle(badgeX, badgeY, 11);
@@ -1539,7 +1546,7 @@ export class Game extends Phaser.Scene {
                     selBadgeG.fillCircle(badgeX, badgeY, 11);
                     selBadgeG.strokeCircle(badgeX, badgeY, 11);
                 } else {
-                    selBadgeG.fillStyle(0x040212, 0.95);
+                    selBadgeG.fillStyle(0x1a1410, 0.95);
                     selBadgeG.lineStyle(2, 0xbf8cff, 0.95);
                     selBadgeG.fillCircle(badgeX, badgeY, 11);
                     selBadgeG.strokeCircle(badgeX, badgeY, 11);
@@ -1609,7 +1616,7 @@ export class Game extends Phaser.Scene {
                 const elementColorHex = elementColors[el] || 0xffffff;
 
                 const countBadgeG = this.add.graphics();
-                countBadgeG.fillStyle(0x0d0b1c, 0.95);
+                countBadgeG.fillStyle(0x261a12, 0.95);
                 countBadgeG.lineStyle(1.5, elementColorHex, 0.9);
                 countBadgeG.fillCircle(badgeX, badgeY, 11);
                 countBadgeG.strokeCircle(badgeX, badgeY, 11);
@@ -1650,7 +1657,7 @@ export class Game extends Phaser.Scene {
             const isWeak = this.isWeakenedByCycle(spell.element, cycle);
             
             const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff };
-            const colorHex = colors[spell.element] || 0x4e3ea0;
+            const colorHex = colors[spell.element] || 0x4a4a4a;
 
             const elementIcon = spell.element === 'fire' ? '🔥' :
                                 spell.element === 'earth' ? '🌿' :
@@ -2567,7 +2574,7 @@ export class Game extends Phaser.Scene {
 
         // Dark shield overlay
         const overG = this.add.graphics();
-        overG.fillStyle(0x040212, 0.9);
+        overG.fillStyle(0x1a1410, 0.9);
         overG.fillRoundedRect(w / 2 - 250, h / 2 - 180, 500, 300, 15);
         overG.lineStyle(2, outcome === 'VICTORY' ? 0xa67032 : 0xdf1b2d, 0.7);
         overG.strokeRoundedRect(w / 2 - 250, h / 2 - 180, 500, 300, 15);
@@ -2607,15 +2614,15 @@ export class Game extends Phaser.Scene {
 
             const drawBtnNormal = () => {
                 rBg.clear();
-                rBg.fillStyle(0x0d0b1c, 0.95);
-                rBg.lineStyle(1.5, 0x4e3ea0, 0.7);
+                rBg.fillStyle(0x261a12, 0.95);
+                rBg.lineStyle(1.5, 0x4a4a4a, 0.7);
                 rBg.fillRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
                 rBg.strokeRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
             };
 
             const drawBtnHover = () => {
                 rBg.clear();
-                rBg.fillStyle(0x161233, 0.95);
+                rBg.fillStyle(0x3d2b1f, 0.95);
                 rBg.lineStyle(2, 0xbf8cff, 1);
                 rBg.fillRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
                 rBg.strokeRoundedRect(w / 2 - 120, h / 2 + 25, 240, 50, 6);
@@ -2651,15 +2658,15 @@ export class Game extends Phaser.Scene {
 
             const drawRemNormal = () => {
                 remBg.clear();
-                remBg.fillStyle(0x0d0b1c, 0.95);
-                remBg.lineStyle(1.5, 0x4e3ea0, 0.7);
+                remBg.fillStyle(0x261a12, 0.95);
+                remBg.lineStyle(1.5, 0x4a4a4a, 0.7);
                 remBg.fillRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
                 remBg.strokeRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
             };
 
             const drawRemHover = () => {
                 remBg.clear();
-                remBg.fillStyle(0x161233, 0.95);
+                remBg.fillStyle(0x3d2b1f, 0.95);
                 remBg.lineStyle(2, 0xbf8cff, 1);
                 remBg.fillRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
                 remBg.strokeRoundedRect(w / 2 - 225, h / 2 + 25, 210, 50, 6);
@@ -2693,15 +2700,15 @@ export class Game extends Phaser.Scene {
 
             const drawMenuNormal = () => {
                 menuBg.clear();
-                menuBg.fillStyle(0x0d0b1c, 0.95);
-                menuBg.lineStyle(1.5, 0x4e3ea0, 0.7);
+                menuBg.fillStyle(0x261a12, 0.95);
+                menuBg.lineStyle(1.5, 0x4a4a4a, 0.7);
                 menuBg.fillRoundedRect(w / 2 + 15, h / 2 + 25, 210, 50, 6);
                 menuBg.strokeRoundedRect(w / 2 + 15, h / 2 + 25, 210, 50, 6);
             };
 
             const drawMenuHover = () => {
                 menuBg.clear();
-                menuBg.fillStyle(0x161233, 0.95);
+                menuBg.fillStyle(0x3d2b1f, 0.95);
                 menuBg.lineStyle(2, 0xffab40, 1); // elegant warm orange highlight for Main Menu
                 menuBg.fillRoundedRect(w / 2 + 15, h / 2 + 25, 210, 50, 6);
                 menuBg.strokeRoundedRect(w / 2 + 15, h / 2 + 25, 210, 50, 6);
@@ -2979,7 +2986,7 @@ export class Game extends Phaser.Scene {
         this.enablePlayerControls(false);
 
         const bg = this.add.graphics();
-        bg.fillStyle(0x040212, 0.9);
+        bg.fillStyle(0x1a1410, 0.9);
         bg.fillRoundedRect(w / 2 - 250, h / 2 - 100, 500, 200, 15);
         bg.lineStyle(2, 0xffab40, 0.7);
         bg.strokeRoundedRect(w / 2 - 250, h / 2 - 100, 500, 200, 15);
@@ -3052,7 +3059,7 @@ export class Game extends Phaser.Scene {
     showLogTooltip(spell, x, y) {
         if (!this.logTooltip) return;
         const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff };
-        const colorHex = colors[spell.element] || 0x4e3ea0;
+        const colorHex = colors[spell.element] || 0x4a4a4a;
 
         const elementIcon = spell.element === 'fire' ? '🔥' :
                             spell.element === 'earth' ? '🌿' :

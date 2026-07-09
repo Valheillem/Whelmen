@@ -1,6 +1,6 @@
-import { Start } from './scenes/Start.js?v=1.1.21';
-import { Lobby } from './scenes/Lobby.js?v=1.1.21';
-import { Game } from './scenes/Game.js?v=1.1.21';
+import { Start } from './scenes/Start.js?v=1.1.22';
+import { Lobby } from './scenes/Lobby.js?v=1.1.22';
+import { Game } from './scenes/Game.js?v=1.1.22';
 
 const config = {
     type: Phaser.AUTO,
@@ -9,7 +9,7 @@ const config = {
     parent: 'game-container',
     width: 1560,
     height: 720,
-    backgroundColor: '#040212',
+    backgroundColor: '#1a1410',
     pixelArt: false,
     resolution: window.devicePixelRatio || 1,
     autoRound: true,
