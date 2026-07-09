@@ -1983,8 +1983,8 @@ export class Game extends Phaser.Scene {
         }
 
         // Custom effects: card draw immediately
-        if (spell.name === 'Breeze' || spell.name === 'Splash Cure' || spell.name === 'Spring of Life' || spell.name === 'Mudslide' || spell.name === 'Gaia\'s Blessing') {
-            const drawCount = spell.name === 'Spring of Life' || spell.name === 'Gaia\'s Blessing' ? 2 : 1;
+        if (spell.name === 'Breeze' || spell.name === 'Splash Cure' || spell.name === 'Spring of Life' || spell.name === 'Mudslide' || spell.name === 'Pillar\'s Blessing') {
+            const drawCount = spell.name === 'Spring of Life' || spell.name === 'Pillar\'s Blessing' ? 2 : 1;
             for (let i=0; i<drawCount; i++) {
                 const drawn = this.drawCard();
                 if (drawn) {
@@ -2558,7 +2558,7 @@ export class Game extends Phaser.Scene {
                 'earth,earth,earth': { name: 'Fortress', element: 'earth', damage: 0, shield: 10, desc: '+10 Shield, immune to next attack' },
                 'air,air,air': { name: 'Tornado', element: 'air', damage: 0, shield: 0, desc: 'Opponent discards 3 cards' },
                 'air,fire,fire': { name: 'Wildfire', element: 'fire', damage: 8, shield: 0, desc: '8 DMG + force Cycle to Fire' },
-                'earth,earth,water': { name: 'Gaia\'s Blessing', element: 'earth', damage: 0, shield: 6, desc: '+6 Shield, draw 2 cards' },
+                'earth,earth,water': { name: 'Pillar\'s Blessing', element: 'earth', damage: 0, shield: 6, desc: '+6 Shield, draw 2 cards' },
                 'fire,water,water': { name: 'Tsunami', element: 'water', damage: 6, shield: 0, desc: '6 DMG, destroy 2 enemy board mana' },
                 'air,fire,water': { name: 'Aether Storm', element: 'air', damage: 5, shield: 0, desc: '5 DMG, draw 2 cards, advance Cycle twice' },
                 'air,air,fire': { name: 'Zephyr Ignite', element: 'air', damage: 6, shield: 0, desc: '6 DMG, can take another action' },
