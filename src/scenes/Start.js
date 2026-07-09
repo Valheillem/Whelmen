@@ -107,10 +107,12 @@ export class Start extends Phaser.Scene {
 
         this.createMenuButton(width / 2, height / 2 + 130, 'HOW TO PLAY', () => {
             document.getElementById('tutorial-overlay').classList.add('active');
+            this.input.enabled = false;
         });
 
         this.createMenuButton(width / 2, height / 2 + 190, 'SHARE GAME', () => {
             document.getElementById('share-overlay').classList.add('active');
+            this.input.enabled = false;
         });
     }
 
@@ -308,14 +310,14 @@ export class Start extends Phaser.Scene {
         };
 
         // --- Modal close functions ---
-        closeShare.onclick = () => shareOverlay.classList.remove('active');
-        closeTutorial.onclick = () => tutorialOverlay.classList.remove('active');
+        closeShare.onclick = () => { shareOverlay.classList.remove('active'); this.input.enabled = true; };
+        closeTutorial.onclick = () => { tutorialOverlay.classList.remove('active'); this.input.enabled = true; };
 
         shareOverlay.onclick = (e) => {
-            if (e.target === shareOverlay) shareOverlay.classList.remove('active');
+            if (e.target === shareOverlay) { shareOverlay.classList.remove('active'); this.input.enabled = true; }
         };
         tutorialOverlay.onclick = (e) => {
-            if (e.target === tutorialOverlay) tutorialOverlay.classList.remove('active');
+            if (e.target === tutorialOverlay) { tutorialOverlay.classList.remove('active'); this.input.enabled = true; }
         };
     }
 

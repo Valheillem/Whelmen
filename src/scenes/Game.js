@@ -1792,18 +1792,21 @@ export class Game extends Phaser.Scene {
         const tutorialModal = document.getElementById('tutorial-overlay-ingame');
         if (tutorialModal) {
             tutorialModal.classList.add('active');
+            this.input.enabled = false;
             
             // Set up close actions
             const closeBtn = document.getElementById('close-tutorial-ingame');
             if (closeBtn) {
                 closeBtn.onclick = () => {
                     tutorialModal.classList.remove('active');
+                    this.input.enabled = true;
                 };
             }
             
             tutorialModal.onclick = (e) => {
                 if (e.target === tutorialModal) {
                     tutorialModal.classList.remove('active');
+                    this.input.enabled = true;
                 }
             };
         }
@@ -1813,18 +1816,21 @@ export class Game extends Phaser.Scene {
         const spellbookModal = document.getElementById('spellbook-overlay');
         if (spellbookModal) {
             spellbookModal.classList.add('active');
+            this.input.enabled = false;
             
             // Set up close actions
             const closeBtn = document.getElementById('close-spellbook');
             if (closeBtn) {
                 closeBtn.onclick = () => {
                     spellbookModal.classList.remove('active');
+                    this.input.enabled = true;
                 };
             }
             
             spellbookModal.onclick = (e) => {
                 if (e.target === spellbookModal) {
                     spellbookModal.classList.remove('active');
+                    this.input.enabled = true;
                 }
             };
         }
