@@ -963,6 +963,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // Action Menu Container
+        this.btnHowToPlay = this.createActionButton(w - 180, h - 290, 'HOW TO PLAY', () => this.handleHowToPlayOption());
         this.btnSpellBook = this.createActionButton(w - 180, h - 230, 'SPELL BOOK', () => this.handleSpellBookOption());
         this.btnCastSpell = this.createActionButton(w - 180, h - 170, 'CAST SPELL', () => this.handleCastSpellOption());
         this.btnPassDraw = this.createActionButton(w - 180, h - 110, 'PASS & DRAW', () => this.handlePassDrawOption());
@@ -1061,6 +1062,7 @@ export class Game extends Phaser.Scene {
 
     enablePlayerControls(state) {
         if (this.phase === 'discard' || this.phase === 'discard_request_active') {
+            this.btnHowToPlay.setEnabled(true);
             this.btnSpellBook.setEnabled(true);
             this.btnCastSpell.setEnabled(false);
             this.btnPassDraw.setEnabled(false);
@@ -1068,6 +1070,7 @@ export class Game extends Phaser.Scene {
         }
 
         if (this.phase === 'reaction' || this.phase === 'reaction_request_active') {
+            this.btnHowToPlay.setEnabled(true);
             this.btnSpellBook.setEnabled(true);
             // Can cast shield reaction spell if combo selected
             this.btnCastSpell.setEnabled(this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
@@ -1076,10 +1079,12 @@ export class Game extends Phaser.Scene {
         }
 
         if (!state) {
+            this.btnHowToPlay.setEnabled(true);
             this.btnSpellBook.setEnabled(true);
             this.btnCastSpell.setEnabled(false);
             this.btnPassDraw.setEnabled(false);
         } else {
+            this.btnHowToPlay.setEnabled(true);
             this.btnSpellBook.setEnabled(true);
             this.btnPassDraw.setEnabled(!this.actionUsedThisTurn);
             this.btnCastSpell.setEnabled(!this.actionUsedThisTurn && this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
@@ -1781,6 +1786,27 @@ export class Game extends Phaser.Scene {
                 });
             }
         });
+    }
+
+    handleHowToPlayOption() {
+        const tutorialModal = document.getElementById('tutorial-overlay-ingame');
+        if (tutorialModal) {
+            tutorialModal.classList.add('active');
+            
+            // Set up close actions
+            const closeBtn = document.getElementById('close-tutorial-ingame');
+            if (closeBtn) {
+                closeBtn.onclick = () => {
+                    tutorialModal.classList.remove('active');
+                };
+            }
+            
+            tutorialModal.onclick = (e) => {
+                if (e.target === tutorialModal) {
+                    tutorialModal.classList.remove('active');
+                }
+            };
+        }
     }
 
     handleSpellBookOption() {

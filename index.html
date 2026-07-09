@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Whelmen - Elemental Card Duel</title>
-    <link rel="stylesheet" href="./src/styles.css?v=1.1.23">
+    <link rel="stylesheet" href="./src/styles.css?v=1.1.24">
 </head>
 <body>
     <div id="game-container"></div>
@@ -56,7 +56,8 @@
                 <h3>The Elemental Cycle Order</h3>
                 <ul>
                     <li><strong>Dominating Advantage:</strong> <span class="element-water">Water</span> beats <span class="element-fire">Fire</span> beats <span class="element-earth">Earth</span> beats <span class="element-air">Air</span> beats <span class="element-water">Water</span>.</li>
-                    <li><strong>Complements (Synergy Pairs):</strong> <span class="element-fire">Fire</span> and <span class="element-air">Air</span> complement each other. <span class="element-earth">Earth</span> and <span class="element-water">Water</span> complement each other.</li>
+                    <li><strong>Constructive Pairs:</strong> <span class="element-fire">Fire</span> and <span class="element-air">Air</span> construct each other. <span class="element-earth">Earth</span> and <span class="element-water">Water</span> construct each other.</li>
+                    <li><strong>Destructive Pairs:</strong> <span class="element-fire">Fire</span> and <span class="element-water">Water</span> destruct each other. <span class="element-earth">Earth</span> and <span class="element-air">Air</span> destruct each other.</li>
                 </ul>
 
                 <h3>Reactions (Defensive Window)</h3>
@@ -64,37 +65,85 @@
                 <p>If you have active mana cards on your board, you can select them to cast a defensive reaction spell (like <em>Pebble Shield</em> or <em>Mudslide</em>). Reaction spells resolve <strong>before</strong> the attack hits, setting up shields to protect your precious cards!</p>
 
                 <h3>Spell Database (Combinations)</h3>
+                <div class="spellbook-content">
+                    <div class="spell-tier">
+                        <h3 class="tier-title">Tier 1: Basic Invocations</h3>
+                        <div class="spell-grid">
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div></div><div class="spell-name element-earth">Pebble Shield</div><div class="spell-desc">+2 Shield</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div></div><div class="spell-name element-fire">Ember Poke</div><div class="spell-desc">2 DMG</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div></div><div class="spell-name element-water">Splash Cure</div><div class="spell-desc">Draw 1 card</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div></div><div class="spell-name element-air">Breeze</div><div class="spell-desc">Swap 1 card from hand with board</div></div>
+                        </div>
+                    </div>
+
+                    <div class="spell-tier">
+                        <h3 class="tier-title">Tier 2: Advanced Weaving</h3>
+                        <div class="spell-grid">
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Combustion</div><div class="spell-desc">5 DMG</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Stone Wall</div><div class="spell-desc">+5 Shield</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Spring of Life</div><div class="spell-desc">Draw 2 cards</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Gust</div><div class="spell-desc">Opponent discards 1 card</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot air"></div></div><div class="spell-name element-fire">Firestorm</div><div class="spell-desc">4 DMG (7 if Cycle is Fire/Air)</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-earth">Mudslide</div><div class="spell-desc">+3 Shield, draw 1 card</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot fire"></div></div><div class="spell-name element-water">Steam Blast</div><div class="spell-desc">3 DMG, opp's next spell deals -2 DMG</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot air"></div></div><div class="spell-name element-earth">Dust Devil</div><div class="spell-desc">2 DMG, destroy 1 opp board mana</div></div>
+                        </div>
+                    </div>
+
+                    <div class="spell-tier">
+                        <h3 class="tier-title">Tier 3: Master Incantations</h3>
+                        <div class="spell-grid">
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Cataclysm</div><div class="spell-desc">10 DMG (15 if Cycle is Fire)</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Deluge</div><div class="spell-desc">Both players draw 3 cards</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Fortress</div><div class="spell-desc">+10 Shield, immune to next attack</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Tornado</div><div class="spell-desc">Opponent discards 3 cards</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot air"></div></div><div class="spell-name element-fire">Wildfire</div><div class="spell-desc">8 DMG, force Cycle to Fire</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-earth">Gaia's Blessing</div><div class="spell-desc">+6 Shield, draw 2 cards</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot fire"></div></div><div class="spell-name element-water">Tsunami</div><div class="spell-desc">6 DMG, destroy 2 opp board mana</div></div>
+                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot water"></div><div class="dot air"></div></div><div class="spell-name element-fire">Aether Storm</div><div class="spell-desc">5 DMG, draw 2, advance Cycle twice</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-Game How To Play Modal (No Grid) -->
+    <div id="tutorial-overlay-ingame" class="overlay">
+        <div class="modal-card" id="tutorial-modal-ingame">
+            <button class="modal-close" id="close-tutorial-ingame">&times;</button>
+            <h2 class="modal-title">Rules of Whelmen</h2>
+            <div class="tutorial-content">
+                <h3>Basic Premise</h3>
+                <p>You are an elemental mage dueling an opponent. In <strong>Whelmen</strong>, there is no separate life bar—your <strong>cards are your health and your mana</strong>.</p>
+                <p>Your total health is represented by the active cards remaining in your <strong>Hand</strong> and placed on your <strong>Board</strong>. If your cards run out, you are defeated!</p>
+
+                <h3>The Turn Structure</h3>
+                <p>At the start of your turn, you draw 1 card from the shared deck. Then, you may perform <strong>ONE</strong> of the following actions:</p>
                 <ul>
-                    <li><strong>Tier 1 Spells (1 Card):</strong></li>
-                    <ul>
-                        <li><span class="element-earth">Earth: Pebble Shield</span> (+2 Shield)</li>
-                        <li><span class="element-fire">Fire: Ember Poke</span> (2 DMG)</li>
-                        <li><span class="element-water">Water: Splash Cure</span> (Draw 1 card)</li>
-                        <li><span class="element-air">Air: Breeze</span> (Swap 1 card from hand with board)</li>
-                    </ul>
-                    <li><strong>Tier 2 Spells (2 Cards):</strong></li>
-                    <ul>
-                        <li><span class="element-fire">Fire+Fire: Combustion</span> (5 DMG)</li>
-                        <li><span class="element-earth">Earth+Earth: Stone Wall</span> (+5 Shield)</li>
-                        <li><span class="element-water">Water+Water: Spring of Life</span> (Draw 2 cards)</li>
-                        <li><span class="element-air">Air+Air: Gust</span> (Opponent discards 1 card)</li>
-                        <li><span class="element-fire">Fire+Air: Firestorm</span> (4 DMG, 7 if Cycle is Fire/Air)</li>
-                        <li><span class="element-earth">Earth+Water: Mudslide</span> (+3 Shield, draw 1 card)</li>
-                        <li><span class="element-water">Water+Fire: Steam Blast</span> (3 DMG, opponent's next spell deals -2 DMG)</li>
-                        <li><span class="element-earth">Earth+Air: Dust Devil</span> (2 DMG, destroy 1 opponent board mana)</li>
-                    </ul>
-                    <li><strong>Tier 3 Spells (3 Cards):</strong></li>
-                    <ul>
-                        <li><span class="element-fire">Fire+Fire+Fire: Cataclysm</span> (10 DMG, 15 if Cycle is Fire)</li>
-                        <li><span class="element-water">Water+Water+Water: Deluge</span> (Both players draw 3 cards)</li>
-                        <li><span class="element-earth">Earth+Earth+Earth: Fortress</span> (+10 Shield, immune to next attack)</li>
-                        <li><span class="element-air">Air+Air+Air: Tornado</span> (Opponent discards 3 cards)</li>
-                        <li><span class="element-fire">Fire+Fire+Air: Wildfire</span> (8 DMG, force Cycle to Fire)</li>
-                        <li><span class="element-earth">Earth+Earth+Water: Gaia's Blessing</span> (+6 Shield, draw 2 cards)</li>
-                        <li><span class="element-water">Water+Water+Fire: Tsunami</span> (6 DMG, destroy 2 opponent board mana)</li>
-                        <li><span class="element-fire">Fire+Water+Air: Aether Storm</span> (5 DMG, draw 2 cards, advance Cycle twice)</li>
-                    </ul>
+                    <li><strong>Play Mana:</strong> Move 1 card from your hand to the board as mana. You can only play 1 mana card per turn.</li>
+                    <li><strong>Cast a Spell:</strong> Select up to 3 mana cards on your board and consume them to cast a spell. Casting a spell consumes your active cards, reducing your overall health!</li>
+                    <li><strong>Pass:</strong> Skip playing mana or casting a spell to draw 1 additional card.</li>
                 </ul>
+
+                <h3>The Environmental Cycle</h3>
+                <p>A predictable, elemental weather cycle rotates every single turn in this order:</p>
+                <p style="text-align: center; font-weight: bold; margin: 10px 0;">Neutral ➔ <span class="element-fire">Fire</span> ➔ <span class="element-earth">Earth</span> ➔ <span class="element-air">Air</span> ➔ <span class="element-water">Water</span> ➔ <span class="element-fire">Fire</span></p>
+                <ul>
+                    <li>Casting a spell matching the active Cycle element makes it <strong>Empowered</strong> (e.g., Firestorm does 7 damage instead of 4).</li>
+                    <li>Casting a spell that is dominated by the active Cycle element makes it <strong>Weakened</strong> (e.g., a Fire spell when the Cycle is Water).</li>
+                </ul>
+
+                <h3>The Elemental Cycle Order</h3>
+                <ul>
+                    <li><strong>Dominating Advantage:</strong> <span class="element-water">Water</span> beats <span class="element-fire">Fire</span> beats <span class="element-earth">Earth</span> beats <span class="element-air">Air</span> beats <span class="element-water">Water</span>.</li>
+                    <li><strong>Constructive Pairs:</strong> <span class="element-fire">Fire</span> and <span class="element-air">Air</span> construct each other. <span class="element-earth">Earth</span> and <span class="element-water">Water</span> construct each other.</li>
+                    <li><strong>Destructive Pairs:</strong> <span class="element-fire">Fire</span> and <span class="element-water">Water</span> destruct each other. <span class="element-earth">Earth</span> and <span class="element-air">Air</span> destruct each other.</li>
+                </ul>
+
+                <h3>Reactions (Defensive Window)</h3>
+                <p>When your opponent casts an offensive spell, you will enter a brief <strong>Reaction Phase</strong>.</p>
+                <p>If you have active mana cards on your board, you can select them to cast a defensive reaction spell (like <em>Pebble Shield</em> or <em>Mudslide</em>). Reaction spells resolve <strong>before</strong> the attack hits, setting up shields to protect your precious cards!</p>
             </div>
         </div>
     </div>
@@ -152,6 +201,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <script src="./phaser.js"></script>
-    <script type="module" src="./src/main.js?v=1.1.23"></script>
+    <script type="module" src="./src/main.js?v=1.1.24"></script>
 </body>
 </html>

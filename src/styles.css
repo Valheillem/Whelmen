@@ -736,15 +736,15 @@ html, body {
     background: #f4ebd8; /* Light parchment paper */
     border: 3px solid #4a3b2c; /* Dark leather/wood border */
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(140, 107, 74, 0.2);
-    color: #2a1e12; /* Dark ink text */
+    color: #000000; /* Black ink text */
     width: 900px;
     max-width: 95%;
 }
 
 .spellbook-title {
-    color: #2a1e12;
+    color: #000000;
     background: none;
-    -webkit-text-fill-color: #2a1e12;
+    -webkit-text-fill-color: #000000;
     border-bottom: 2px solid #8c6b4a;
     padding-bottom: 15px;
     margin-bottom: 20px;
@@ -789,7 +789,7 @@ html, body {
 .tier-title {
     font-family: 'Cinzel', serif;
     font-size: 1.4rem;
-    color: #4a3b2c;
+    color: #000000;
     border-bottom: 1px dashed #c7a783;
     padding-bottom: 5px;
     margin-bottom: 15px;
@@ -849,6 +849,6 @@ html, body {
 .spell-entry .spell-desc {
     font-family: 'Inter', sans-serif;
     font-size: 0.8rem;
-    color: #4a3b2c;
+    color: #000000;
     line-height: 1.3;
 }
