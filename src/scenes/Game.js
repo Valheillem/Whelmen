@@ -118,7 +118,7 @@ export class Game extends Phaser.Scene {
         this.load.image('icon_earth', 'assets/icons/Earth.png');
         this.load.image('icon_water', 'assets/icons/Water.png');
         this.load.image('icon_air', 'assets/icons/Air.png');
-        this.load.image('game-bg', './assets/WHELMEN_background.png');
+        this.load.image('game-bg', './assets/WHELMEN_background_horizontal.png');
     }
 
     createCardCanvas(key, w, h, drawFn) {
