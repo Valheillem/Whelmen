@@ -851,3 +851,17 @@ html, body {
     color: #000000 !important;
     line-height: 1.3;
 }
+
+/* Device Rotation Prompt for In-Game */
+#rotate-overlay {
+    display: none;
+    z-index: 99999;
+}
+
+@media (orientation: portrait) {
+    body.in-game #rotate-overlay {
+        display: flex;
+        opacity: 1;
+        pointer-events: all;
+    }
+}

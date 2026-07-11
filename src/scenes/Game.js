@@ -98,6 +98,7 @@ export class Game extends Phaser.Scene {
     }
 
     init(data) {
+        document.body.classList.add('in-game');
         // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
         this.mode = data?.mode || 'ai';
         this.lobbyCode = data?.lobbyCode || null;
@@ -3501,6 +3502,7 @@ export class Game extends Phaser.Scene {
 
         // 5. Clean up events on Phaser scene shutdown
         this.events.on('shutdown', () => {
+            document.body.classList.remove('in-game');
             const notifEl = document.getElementById('sandbox-notif');
             const tabEl = document.getElementById('sandbox-tab');
             const panelEl = document.getElementById('sandbox-panel');

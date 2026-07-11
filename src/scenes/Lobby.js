@@ -32,7 +32,9 @@ export class Lobby extends Phaser.Scene {
         }).setOrigin(0.5).setStroke('#4e3ea0', 10);
 
         // Back button
-        this.createButton(100, 50, '← BACK', () => {
+        const w = this.scale.width;
+        const h = this.scale.height;
+        this.createButton(w / 2, h - 60, '← BACK', () => {
             this.cleanup();
             this.scene.start('Start');
         });
@@ -56,13 +58,13 @@ export class Lobby extends Phaser.Scene {
         this.choiceContainer = this.add.container(0, 0);
 
         // Create Lobby Button
-        this.createPanelButton(w / 2 - 160, h / 2 - 20, 280, 120, 'CREATE LOBBY', 'Start a new duel and\ninvite a friend', 0x00e676, () => {
+        this.createPanelButton(w / 2, h / 2 - 70, 280, 120, 'CREATE LOBBY', 'Start a new duel and\ninvite a friend', 0x00e676, () => {
             if (this.choiceContainer) this.choiceContainer.destroy(true);
             this.showCreateView();
         });
 
         // Join Lobby Button
-        this.createPanelButton(w / 2 + 160, h / 2 - 20, 280, 120, 'JOIN LOBBY', 'Enter a code to join\nan existing duel', 0x00b0ff, () => {
+        this.createPanelButton(w / 2, h / 2 + 70, 280, 120, 'JOIN LOBBY', 'Enter a code to join\nan existing duel', 0x00b0ff, () => {
             if (this.choiceContainer) this.choiceContainer.destroy(true);
             this.showJoinView();
         });
