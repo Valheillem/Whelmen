@@ -66,7 +66,7 @@ export class Start extends Phaser.Scene {
         }
 
         // 5. Add Main Title - "WHELMEN"
-        const titleText = this.add.text(width / 2, height / 2 - 190, 'WHELMEN', {
+        const titleText = this.add.text(width / 2, height / 2 - 210, 'WHELMEN', {
             fontFamily: '"Cinzel", serif',
             fontSize: '92px',
             fontWeight: '800',
@@ -102,24 +102,29 @@ export class Start extends Phaser.Scene {
         }
 
         // 8. Add Menu Buttons
-        this.createMenuButton(width / 2, height / 2 - 50, 'PLAY VS AI', () => {
+        this.createMenuButton(width / 2, height / 2 - 60, 'PLAY VS AI', () => {
             this.scene.start('Game', { mode: 'ai' });
         });
 
-        this.createMenuButton(width / 2, height / 2 + 10, 'PLAY ONLINE', () => {
+        this.createMenuButton(width / 2, height / 2, 'PLAY ONLINE', () => {
             this.scene.start('Lobby', { action: 'create' });
         });
 
-        this.createMenuButton(width / 2, height / 2 + 70, 'TEST RANGE', () => {
+        this.createMenuButton(width / 2, height / 2 + 60, 'TEST RANGE', () => {
             this.scene.start('Game', { mode: 'test' });
         });
 
-        this.createMenuButton(width / 2, height / 2 + 130, 'HOW TO PLAY', () => {
+        this.createMenuButton(width / 2, height / 2 + 120, 'SPELLBOOK', () => {
+            document.getElementById('spellbook-overlay').classList.add('active');
+            this.input.enabled = false;
+        });
+
+        this.createMenuButton(width / 2, height / 2 + 180, 'HOW TO PLAY', () => {
             document.getElementById('tutorial-overlay').classList.add('active');
             this.input.enabled = false;
         });
 
-        this.createMenuButton(width / 2, height / 2 + 190, 'SHARE GAME', () => {
+        this.createMenuButton(width / 2, height / 2 + 240, 'SHARE GAME', () => {
             document.getElementById('share-overlay').classList.add('active');
             this.input.enabled = false;
         });
@@ -220,8 +225,10 @@ export class Start extends Phaser.Scene {
     setupDOMOverlays() {
         const shareOverlay = document.getElementById('share-overlay');
         const tutorialOverlay = document.getElementById('tutorial-overlay');
+        const spellbookOverlay = document.getElementById('spellbook-overlay');
         const closeShare = document.getElementById('close-share');
         const closeTutorial = document.getElementById('close-tutorial');
+        const closeSpellbook = document.getElementById('close-spellbook');
         const shareLinkInput = document.getElementById('share-link');
         const copyShareBtn = document.getElementById('copy-share-btn');
         const updateQrBtn = document.getElementById('update-qr-btn');
@@ -321,12 +328,16 @@ export class Start extends Phaser.Scene {
         // --- Modal close functions ---
         closeShare.onclick = () => { shareOverlay.classList.remove('active'); this.input.enabled = true; };
         closeTutorial.onclick = () => { tutorialOverlay.classList.remove('active'); this.input.enabled = true; };
+        closeSpellbook.onclick = () => { spellbookOverlay.classList.remove('active'); this.input.enabled = true; };
 
         shareOverlay.onclick = (e) => {
             if (e.target === shareOverlay) { shareOverlay.classList.remove('active'); this.input.enabled = true; }
         };
         tutorialOverlay.onclick = (e) => {
             if (e.target === tutorialOverlay) { tutorialOverlay.classList.remove('active'); this.input.enabled = true; }
+        };
+        spellbookOverlay.onclick = (e) => {
+            if (e.target === spellbookOverlay) { spellbookOverlay.classList.remove('active'); this.input.enabled = true; }
         };
     }
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Whelmen - Elemental Card Duel</title>
-    <link rel="stylesheet" href="./src/styles.css?v=1.1.31">
+    <link rel="stylesheet" href="./src/styles.css?v=1.1.32">
 </head>
 <body>
     <div id="rotate-overlay" class="overlay">
@@ -70,47 +70,6 @@
                 <h3>Reactions (Defensive Window)</h3>
                 <p>When your opponent casts an offensive spell, you will enter a brief <strong>Reaction Phase</strong>.</p>
                 <p>If you have active mana cards on your board, you can select them to cast a defensive reaction spell (like <em>Pebble Shield</em> or <em>Mudslide</em>). Reaction spells resolve <strong>before</strong> the attack hits, setting up shields to protect your precious cards!</p>
-
-                <h3>Spell Database (Combinations)</h3>
-                <div class="spellbook-content">
-                    <div class="spell-tier">
-                        <h3 class="tier-title">Tier 1: Sprite</h3>
-                        <div class="spell-grid">
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div></div><div class="spell-name element-earth">Pebble Shield</div><div class="spell-desc">+2 Shield</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div></div><div class="spell-name element-fire">Ember Poke</div><div class="spell-desc">2 DMG</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div></div><div class="spell-name element-water">Splash Cure</div><div class="spell-desc">Draw 1 card</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div></div><div class="spell-name element-air">Breeze</div><div class="spell-desc">Swap 1 card from hand with board</div></div>
-                        </div>
-                    </div>
-
-                    <div class="spell-tier">
-                        <h3 class="tier-title">Tier 2: Elemental</h3>
-                        <div class="spell-grid">
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Combustion</div><div class="spell-desc">5 DMG</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Stone Wall</div><div class="spell-desc">+5 Shield</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Spring of Life</div><div class="spell-desc">Draw 2 cards</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Gust</div><div class="spell-desc">Opponent discards 1 card</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot air"></div></div><div class="spell-name element-fire">Firestorm</div><div class="spell-desc">4 DMG (7 if Cycle is Fire/Air)</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-earth">Mudslide</div><div class="spell-desc">+3 Shield, draw 1 card</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot fire"></div></div><div class="spell-name element-water">Steam Blast</div><div class="spell-desc">3 DMG, opp's next spell deals -2 DMG</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot air"></div></div><div class="spell-name element-earth">Dust Devil</div><div class="spell-desc">2 DMG, destroy 1 opp board mana</div></div>
-                        </div>
-                    </div>
-
-                    <div class="spell-tier">
-                        <h3 class="tier-title">Tier 3: Dynastic</h3>
-                        <div class="spell-grid">
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Cataclysm</div><div class="spell-desc">10 DMG (15 if Cycle is Fire)</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Deluge</div><div class="spell-desc">Both players draw 3 cards</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Fortress</div><div class="spell-desc">+10 Shield, immune to next attack</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Tornado</div><div class="spell-desc">Opponent discards 3 cards</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot air"></div></div><div class="spell-name element-fire">Wildfire</div><div class="spell-desc">8 DMG, force Cycle to Fire</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-earth">Pillar's Blessing</div><div class="spell-desc">+6 Shield, draw 2 cards</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot fire"></div></div><div class="spell-name element-water">Tsunami</div><div class="spell-desc">6 DMG, destroy 2 opp board mana</div></div>
-                            <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot water"></div><div class="dot air"></div></div><div class="spell-name element-fire">Aether Storm</div><div class="spell-desc">5 DMG, draw 2, advance Cycle twice</div></div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -208,6 +167,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <script src="./phaser.js"></script>
-    <script type="module" src="./src/main.js?v=1.1.31"></script>
+    <script type="module" src="./src/main.js?v=1.1.32"></script>
 </body>
 </html>

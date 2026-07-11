@@ -1,6 +1,6 @@
-import { Start } from './scenes/Start.js?v=1.1.31';
-import { Lobby } from './scenes/Lobby.js?v=1.1.31';
-import { Game } from './scenes/Game.js?v=1.1.31';
+import { Start } from './scenes/Start.js?v=1.1.32';
+import { Lobby } from './scenes/Lobby.js?v=1.1.32';
+import { Game } from './scenes/Game.js?v=1.1.32';
 
 const isPortrait = window.innerHeight > window.innerWidth * 1.2;
 
