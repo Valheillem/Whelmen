@@ -133,12 +133,8 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
-        // Switch to landscape resolution for the game board
-        // Must happen here (not init) because Phaser recreates the camera between init→create
-        this.scale.resize(1560, 720);
-        this.sys.game.renderer.resize(1560, 720);
-        this.cameras.main.setViewport(0, 0, 1560, 720);
-        this.scale.refresh();
+        // Hide the main menu overlay
+        document.getElementById('main-menu-overlay').classList.add('hidden');
 
         // Generate beautiful custom card textures dynamically using canvas
         const cardWidth = 100;

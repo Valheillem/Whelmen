@@ -1,14 +1,14 @@
-import { Start } from './scenes/Start.js?v=1.1.38';
-import { Lobby } from './scenes/Lobby.js?v=1.1.38';
-import { Game } from './scenes/Game.js?v=1.1.38';
+import { Start } from './scenes/Start.js?v=1.2.0';
+import { Lobby } from './scenes/Lobby.js?v=1.2.0';
+import { Game } from './scenes/Game.js?v=1.2.0';
 
 const config = {
     type: Phaser.AUTO,
     title: 'Whelmen',
     description: 'An elemental dueling game.',
     parent: 'game-container',
-    width: 720,
-    height: 1280,
+    width: 1560,
+    height: 720,
     backgroundColor: '#1a1410',
     pixelArt: false,
     resolution: window.devicePixelRatio || 1,

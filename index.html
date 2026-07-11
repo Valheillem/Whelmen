@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Whelmen - Elemental Card Duel</title>
-    <link rel="stylesheet" href="./src/styles.css?v=1.1.38">
+    <link rel="stylesheet" href="./src/styles.css?v=1.2.0">
 </head>
 <body>
     <div id="rotate-overlay" class="overlay">
@@ -15,6 +15,20 @@
         </div>
     </div>
     <div id="game-container"></div>
+
+    <!-- HTML Main Menu Overlay (adapts to any screen size naturally) -->
+    <div id="main-menu-overlay">
+        <div class="menu-emblem-ring"></div>
+        <h1 class="menu-title">WHELMEN</h1>
+        <div class="menu-buttons">
+            <button class="menu-btn" id="btn-play-ai">PLAY VS AI</button>
+            <button class="menu-btn" id="btn-play-online">PLAY ONLINE</button>
+            <button class="menu-btn" id="btn-test-range">TEST RANGE</button>
+            <button class="menu-btn" id="btn-spellbook">SPELLBOOK</button>
+            <button class="menu-btn" id="btn-how-to-play">HOW TO PLAY</button>
+            <button class="menu-btn" id="btn-share-game">SHARE GAME</button>
+        </div>
+    </div>
 
     <!-- QR Code Sharing Modal -->
     <div id="share-overlay" class="overlay">
@@ -167,6 +181,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <script src="./phaser.js"></script>
-    <script type="module" src="./src/main.js?v=1.1.38"></script>
+    <script type="module" src="./src/main.js?v=1.2.0"></script>
 </body>
 </html>

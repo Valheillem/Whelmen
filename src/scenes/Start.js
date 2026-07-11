@@ -28,112 +28,48 @@ export class Start extends Phaser.Scene {
     }
 
     init() {
-        // Attempt to lock portrait orientation on mobile
-        try { screen.orientation.lock('portrait').catch(() => {}); } catch(e) {}
+        // No orientation lock on the menu — let the user hold their phone however they want
     }
 
     create() {
         // Ensure rotate overlay is disabled on the main menu
         document.body.classList.remove('in-game');
 
-        // Set portrait resolution for the menu
-        // Must happen here (not init) because Phaser recreates the camera between init→create
-        this.scale.resize(720, 1280);
-        this.sys.game.renderer.resize(720, 1280);
-        this.cameras.main.setViewport(0, 0, 720, 1280);
-        this.scale.refresh();
+        // Show the HTML main menu overlay (sits on top of the Phaser canvas)
+        const menuOverlay = document.getElementById('main-menu-overlay');
+        menuOverlay.classList.remove('hidden');
 
-        const width = this.scale.width;
-        const height = this.scale.height;
-
-        // 1. Add Background Dark Leather/Stone Space
-        this.add.rectangle(0, 0, width, height, 0x1a1410).setOrigin(0);
-
-        // 2. Add Soft Glowing Nebulas
-        // Removed as per request
-
-        // 3. Add Star Particle Emitter
-        // Removed for feudal aesthetic
-
-        // 4. Create Static Iron Emblem
-        let emblem = this.add.graphics();
-        emblem.lineStyle(4, 0x3a3a3a, 0.8);
-        emblem.strokeCircle(width / 2, height / 2 - 130, 220);
-        emblem.lineStyle(2, 0x4a4a4a, 0.6);
-        emblem.strokeCircle(width / 2, height / 2 - 130, 205);
-        emblem.lineStyle(1, 0x5a5a5a, 0.4);
-        for(let i=0; i<12; i++) {
-            let angle = (i * 30) * Math.PI / 180;
-            let x1 = width/2 + Math.cos(angle)*205;
-            let y1 = height/2 - 130 + Math.sin(angle)*205;
-            let x2 = width/2 + Math.cos(angle)*220;
-            let y2 = height/2 - 130 + Math.sin(angle)*220;
-            emblem.strokeLineShape(new Phaser.Geom.Line(x1,y1,x2,y2));
-        }
-
-        // 5. Add Main Title - "WHELMEN"
-        const titleText = this.add.text(width / 2, height / 2 - 210, 'WHELMEN', {
-            fontFamily: '"Cinzel", serif',
-            fontSize: '92px',
-            fontWeight: '800',
-            color: '#d4af37',
-            align: 'center'
-        }).setOrigin(0.5);
-        titleText.setShadow(2, 4, 'rgba(0, 0, 0, 0.8)', 0, true, true);
-        titleText.setStroke('#2a1e12', 4);
-
-
-        // Subtitle removed as requested
-
-        // Animate title float
-        this.tweens.add({
-            targets: [titleText],
-            y: '-=15',
-            duration: 2500,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
-        });
-
-        // 6. Setup CSS Overlay DOM bindings
+        // Setup CSS Overlay DOM bindings (share, tutorial, spellbook modals)
         this.setupDOMOverlays();
 
-        // 7. Check for lobby invite in URL (?lobby=CODE)
+        // Check for lobby invite in URL (?lobby=CODE)
         const urlParams = new URLSearchParams(window.location.search);
         const lobbyCode = urlParams.get('lobby');
         if (lobbyCode) {
-            // Auto-redirect to Lobby scene to join this lobby
+            menuOverlay.classList.add('hidden');
             this.scene.start('Lobby', { action: 'join', joinCode: lobbyCode.toUpperCase() });
             return;
         }
 
-        // 8. Add Menu Buttons
-        this.createMenuButton(width / 2, height / 2 - 60, 'PLAY VS AI', () => {
-            this.scene.start('Game', { mode: 'ai' });
-        });
+        // Bind HTML menu buttons
+        const hideMenuAndStart = (sceneName, data) => {
+            menuOverlay.classList.add('hidden');
+            this.scene.start(sceneName, data);
+        };
 
-        this.createMenuButton(width / 2, height / 2, 'PLAY ONLINE', () => {
-            this.scene.start('Lobby', { action: 'create' });
-        });
+        document.getElementById('btn-play-ai').onclick = () => hideMenuAndStart('Game', { mode: 'ai' });
+        document.getElementById('btn-play-online').onclick = () => hideMenuAndStart('Lobby', { action: 'create' });
+        document.getElementById('btn-test-range').onclick = () => hideMenuAndStart('Game', { mode: 'test' });
 
-        this.createMenuButton(width / 2, height / 2 + 60, 'TEST RANGE', () => {
-            this.scene.start('Game', { mode: 'test' });
-        });
-
-        this.createMenuButton(width / 2, height / 2 + 120, 'SPELLBOOK', () => {
+        document.getElementById('btn-spellbook').onclick = () => {
             document.getElementById('spellbook-overlay').classList.add('active');
-            this.input.enabled = false;
-        });
-
-        this.createMenuButton(width / 2, height / 2 + 180, 'HOW TO PLAY', () => {
+        };
+        document.getElementById('btn-how-to-play').onclick = () => {
             document.getElementById('tutorial-overlay').classList.add('active');
-            this.input.enabled = false;
-        });
-
-        this.createMenuButton(width / 2, height / 2 + 240, 'SHARE GAME', () => {
+        };
+        document.getElementById('btn-share-game').onclick = () => {
             document.getElementById('share-overlay').classList.add('active');
-            this.input.enabled = false;
-        });
+        };
     }
 
     createMenuButton(x, y, label, onClick) {
