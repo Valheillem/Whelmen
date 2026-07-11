@@ -100,17 +100,14 @@ html, body {
     border: 2px solid rgba(74, 74, 74, 0.4);
 }
 
-.menu-title {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(48px, 12vw, 92px);
-    font-weight: 800;
-    color: #d4af37;
-    text-shadow: 2px 4px 0px rgba(0, 0, 0, 0.8);
-    -webkit-text-stroke: 1px #2a1e12;
-    letter-spacing: 4px;
+.menu-title-icon {
+    width: min(80vw, 400px);
+    max-height: 250px;
+    object-fit: contain;
     margin: 0 0 40px 0;
     animation: titleFloat 5s ease-in-out infinite;
     z-index: 1;
+    filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.6));
 }
 
 @keyframes titleFloat {
