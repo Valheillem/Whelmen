@@ -25,6 +25,14 @@ export class Lobby extends Phaser.Scene {
         // Hide the main menu overlay
         document.getElementById('main-menu-overlay').classList.add('hidden');
 
+        // Change game size for Lobby to match window aspect ratio
+        let isPortrait = window.innerHeight > window.innerWidth;
+        if (isPortrait) {
+            this.scale.setGameSize(720, 1560);
+        } else {
+            this.scale.setGameSize(1560, 720);
+        }
+        
         const w = this.scale.width;
         const h = this.scale.height;
 
@@ -37,7 +45,7 @@ export class Lobby extends Phaser.Scene {
         bgImg.setDisplaySize(w, h);
 
         // Title
-        this.add.text(w / 2, 80, 'ONLINE DUEL', {
+        this.add.text(w / 2, h * 0.15, 'ONLINE DUEL', {
             fontFamily: '"Cinzel", serif',
             fontSize: '48px',
             fontStyle: 'bold',
@@ -45,7 +53,7 @@ export class Lobby extends Phaser.Scene {
         }).setOrigin(0.5).setStroke('#2a1e12', 4).setShadow(2, 4, 'rgba(0,0,0,0.8)', 0, true, true);
 
         // Back button
-        this.createButton(w / 2, h - 60, '← BACK', () => {
+        this.createButton(w / 2, h * 0.85, '← BACK', () => {
             this.cleanup();
             this.scene.start('Start');
         });

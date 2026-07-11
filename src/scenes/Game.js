@@ -137,6 +137,9 @@ export class Game extends Phaser.Scene {
         // Hide the main menu overlay
         document.getElementById('main-menu-overlay').classList.add('hidden');
 
+        // Ensure game size is strictly landscape for the main game board
+        this.scale.setGameSize(1560, 720);
+
         // Generate beautiful custom card textures dynamically using canvas
         const cardWidth = 100;
         const cardHeight = 150;
