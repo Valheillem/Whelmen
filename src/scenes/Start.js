@@ -27,6 +27,13 @@ export class Start extends Phaser.Scene {
         this.textures.addCanvas('nebula', nebulaCanvas);
     }
 
+    init() {
+        // Set portrait resolution for the menu (runs before create)
+        this.scale.resize(720, 1280);
+        // Attempt to lock portrait orientation on mobile
+        try { screen.orientation.lock('portrait').catch(() => {}); } catch(e) {}
+    }
+
     create() {
         // Ensure rotate overlay is disabled on the main menu
         document.body.classList.remove('in-game');
