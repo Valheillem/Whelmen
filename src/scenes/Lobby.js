@@ -16,7 +16,7 @@ export class Lobby extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('title-icon', './assets/WHELMEN_icon.png');
+        this.load.image('lobby-bg', './assets/WHELMEN_background.png');
     }
 
     create() {
@@ -31,11 +31,11 @@ export class Lobby extends Phaser.Scene {
         // Background
         this.add.rectangle(0, 0, w, h, 0x1a1410).setOrigin(0);
 
-        // Watermark Icon
-        const watermark = this.add.image(w / 2, h / 2, 'title-icon');
-        watermark.setAlpha(0.04);
-        const scale = Math.min((w * 0.9) / watermark.width, (h * 0.9) / watermark.height);
-        watermark.setScale(scale);
+        // Background Image (Cover)
+        const bgImg = this.add.image(w / 2, h / 2, 'lobby-bg');
+        bgImg.setAlpha(1);
+        const scale = Math.max(w / bgImg.width, h / bgImg.height);
+        bgImg.setScale(scale);
 
         // Title
         this.add.text(w / 2, 80, 'ONLINE DUEL', {
