@@ -969,24 +969,205 @@ html, body {
     font-size: 1.1rem;
     margin-bottom: 5px;
 }
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.spell-cast-action:hover {
+    background: #7c3aed;
+    border-color: #a78bfa;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+}
+
+.floating-notif {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: rgba(13, 11, 28, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid #a67032;
+    color: #a67032;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 5000;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.floating-notif.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* Mobile Landscape & Low Height Optimizations */
+@media (max-height: 500px) {
+    .modal-card {
+        padding: 20px;
+        border-radius: 12px;
+    }
+    .modal-title {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+    .modal-close {
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    #share-modal canvas, #share-modal img {
+        padding: 8px;
+        margin-bottom: 8px;
+        max-height: 120px;
+        width: auto;
+    }
+    #share-modal .qr-container {
+        margin: 10px 0;
+    }
+}
+
+/* Mobile Landscape Immersive Fullscreen Aspect Ratio Clamp & Border/Margin/Shadow Removal */
+@media (max-height: 500px) and (orientation: landscape) {
+    #game-container {
+        /* Strictly maintain 1560:720 aspect ratio instead of stretching horizontally */
+        width: min(1560px, 100vw, calc(100dvh * 1560 / 720)) !important;
+        height: min(720px, 100dvh, calc(100vw * 720 / 1560)) !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+    }
+}
+
+/* ============================================================
+   GRID-BASED SPELLBOOK (PARCHMENT THEME)
+   ============================================================ */
+.spellbook-modal {
+    background: #f4ebd8; /* Light parchment paper */
+    border: 3px solid #4a3b2c; /* Dark leather/wood border */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(140, 107, 74, 0.2);
+    color: #000000; /* Black ink text */
+    width: 900px;
+    max-width: 95%;
+}
+
+.spellbook-title {
+    color: #000000;
+    background: none;
+    -webkit-text-fill-color: #000000;
+    border-bottom: 2px solid #8c6b4a;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    text-shadow: none;
+}
+
+#close-spellbook {
+    color: #4a3b2c;
+    border-color: rgba(74, 59, 44, 0.2);
+}
+
+#close-spellbook:hover {
+    background: rgba(74, 59, 44, 0.1);
+    border-color: #4a3b2c;
+}
+
+.spellbook-content {
+    overflow-y: auto;
+    padding-right: 15px;
+    text-align: left;
+    max-height: calc(85vh - 100px);
+}
+
+.spellbook-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.spellbook-content::-webkit-scrollbar-track {
+    background: rgba(140, 107, 74, 0.1);
+    border-radius: 4px;
+}
+
+.spellbook-content::-webkit-scrollbar-thumb {
+    background: #8c6b4a;
+    border-radius: 4px;
+}
+
+.spell-tier {
+    margin-bottom: 30px;
+}
+
+.tier-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: #000000;
+    border-bottom: 1px dashed #c7a783;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.spell-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.spell-entry {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid #c7a783;
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.spell-entry:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.combo-dots {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dot.fire { background-color: var(--color-fire); }
+.dot.earth { background-color: var(--color-earth); }
+.dot.water { background-color: var(--color-water); }
+.dot.air { background-color: var(--color-air); }
+
+.spell-entry .spell-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
 
 .spell-entry .spell-desc {
     font-family: 'Inter', sans-serif;
     font-size: 0.8rem;
     color: #000000 !important;
     line-height: 1.3;
-}
-
-/* Device Rotation Prompt for In-Game */
-#rotate-overlay {
-    display: none;
-    z-index: 99999;
-}
-
-@media (orientation: portrait) {
-    body.in-game #rotate-overlay {
-        display: flex;
-        opacity: 1;
-        pointer-events: all;
-    }
 }
