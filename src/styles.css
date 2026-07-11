@@ -111,8 +111,8 @@ html, body {
 }
 
 .menu-title-icon {
-    width: min(90vw, 1200px);
-    max-height: min(45dvh, 450px);
+    width: min(70vw, 900px);
+    max-height: min(35dvh, 350px);
     object-fit: contain;
     margin: 2dvh 0 4dvh 0;
     z-index: 1;
