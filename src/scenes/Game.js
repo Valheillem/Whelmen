@@ -604,7 +604,7 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '15px',
             fontWeight: '800',
-            color: '#a0a0b0'
+            color: '#1a1a1a'
         }).setOrigin(0.5);
         this.cycleContainer.add(this.cycleCenterText);
 
@@ -622,7 +622,7 @@ export class Game extends Phaser.Scene {
         const hexColor = element === 'fire' ? '#df1b2d' :
                          element === 'water' ? '#257ee4' :
                          element === 'earth' ? '#4db15b' :
-                         element === 'air' ? '#9247d5' : '#ffffff';
+                         element === 'air' ? '#9247d5' : '#1a1a1a';
 
         // Update center text
         this.cycleCenterText.setText(element.toUpperCase());
@@ -755,8 +755,8 @@ export class Game extends Phaser.Scene {
 
     drawMagicSigils() {
         const h = this.scale.height;
-        this.drawMagicSigil(240, h - 280, 0xbf8cff); // Player board sigil (cyan)
-        this.drawMagicSigil(240, 260, 0xdf1b2d); // AI board sigil (red)
+        this.drawMagicSigil(240, h - 280, 0x1a1a1a); // Player board sigil
+        this.drawMagicSigil(240, 260, 0x1a1a1a); // AI board sigil
     }
 
     drawMagicSigil(x, y, colorHex) {
@@ -872,7 +872,7 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
-            color: '#a0a0b0',
+            color: '#1a1a1a',
             align: 'center'
         }).setOrigin(0.5, 0);
 
@@ -880,7 +880,7 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
-            color: '#a0a0b0',
+            color: '#1a1a1a',
             align: 'center'
         }).setOrigin(0.5, 0);
 
@@ -916,7 +916,7 @@ export class Game extends Phaser.Scene {
             // Draw a clean, semi-transparent card slot outline for empty discard
             const cardW = 100 * 0.75;
             const cardH = 150 * 0.75;
-            this.discardOutlineG.lineStyle(1.5, 0x4a4a4a, 0.4);
+            this.discardOutlineG.lineStyle(1.5, 0x1a1a1a, 0.6);
             this.discardOutlineG.strokeRoundedRect(
                 w / 2 + 270 - cardW / 2, 
                 h / 2 - 40 - cardH / 2, 
@@ -976,10 +976,10 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // Action Menu Container
-        this.btnHowToPlay = this.createActionButton(w - 180, h - 290, 'HOW TO PLAY', () => this.handleHowToPlayOption());
-        this.btnSpellBook = this.createActionButton(w - 180, h - 230, 'SPELL BOOK', () => this.handleSpellBookOption());
-        this.btnCastSpell = this.createActionButton(w - 180, h - 170, 'CAST SPELL', () => this.handleCastSpellOption());
-        this.btnPassDraw = this.createActionButton(w - 180, h - 110, 'PASS & DRAW', () => this.handlePassDrawOption());
+        this.btnHowToPlay = this.createActionButton(w - 180, h - 250, 'HOW TO PLAY', () => this.handleHowToPlayOption());
+        this.btnSpellBook = this.createActionButton(w - 180, h - 190, 'SPELL BOOK', () => this.handleSpellBookOption());
+        this.btnCastSpell = this.createActionButton(w - 180, h - 130, 'CAST SPELL', () => this.handleCastSpellOption());
+        this.btnPassDraw = this.createActionButton(w - 180, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
 
         // Select Discard prompt overlay container
         this.discardPromptText = this.add.text(w / 2, h / 2 + 100, '', {
@@ -1110,7 +1110,7 @@ export class Game extends Phaser.Scene {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
             fontWeight: '600',
-            color: '#a0a0b0',
+            color: '#1a1a1a',
             letterSpacing: 1
         });
 
