@@ -1,6 +1,6 @@
-import { Start } from './scenes/Start.js?v=1.1.33';
-import { Lobby } from './scenes/Lobby.js?v=1.1.33';
-import { Game } from './scenes/Game.js?v=1.1.33';
+import { Start } from './scenes/Start.js?v=1.1.34';
+import { Lobby } from './scenes/Lobby.js?v=1.1.34';
+import { Game } from './scenes/Game.js?v=1.1.34';
 
 const config = {
     type: Phaser.AUTO,
@@ -19,26 +19,38 @@ const config = {
         Game
     ],
     scale: {
-        mode: Phaser.Scale.ENVELOP,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        expandParent: true
     },
     dom: {
         createContainer: true
     },
 }
 
-new Phaser.Game(config);
+const game = new Phaser.Game(config);
 
-// Lock scroll and center viewport on mobile orientation switch or resize
+// Lock scroll, update CSS custom prop, and force Phaser to recalculate canvas scaling
+let resizeTimeout;
 const resetViewport = () => {
     window.scrollTo(0, 0);
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+    // Debounce Phaser refresh to avoid rapid-fire calls during resize drag
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        if (game && game.scale) {
+            game.scale.refresh();
+        }
+    }, 100);
 };
 
 window.addEventListener('resize', resetViewport);
 window.addEventListener('orientationchange', () => {
-    setTimeout(resetViewport, 150); // Timeout allows the browser's viewport bounds to recalculate fully
+    // Longer timeout for orientation change — browser viewport dimensions
+    // aren't immediately available after the event fires on mobile
+    setTimeout(resetViewport, 300);
 });
 window.addEventListener('load', resetViewport);
 document.addEventListener('DOMContentLoaded', resetViewport);
