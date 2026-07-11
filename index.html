@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./src/styles.css?v=1.2.17">
+    <link rel="stylesheet" href="./src/styles.css?v=1.2.18">
 </head>
 <body>
     <div id="rotate-overlay" class="overlay">
@@ -22,13 +22,36 @@
     <!-- HTML Main Menu Overlay (adapts to any screen size naturally) -->
     <div id="main-menu-overlay">
         <img src="./assets/WHELMEN_icon.png" alt="Whelmen" class="menu-title-icon" />
-        <div class="menu-buttons">
+        <div class="menu-buttons" id="view-main-buttons">
             <button class="menu-btn" id="btn-play-ai">PLAY VS AI</button>
             <button class="menu-btn" id="btn-play-online">PLAY ONLINE</button>
             <button class="menu-btn" id="btn-test-range">TEST RANGE</button>
             <button class="menu-btn" id="btn-spellbook">SPELLBOOK</button>
             <button class="menu-btn" id="btn-how-to-play">HOW TO PLAY</button>
             <button class="menu-btn" id="btn-share-game">SHARE GAME</button>
+        </div>
+
+        <div class="menu-buttons" id="view-lobby-choice" style="display: none; width: 100%; align-items: center;">
+            <div style="font-family: 'Cinzel', serif; font-size: clamp(32px, 8vw, 48px); color: #d4af37; text-align: center; margin-bottom: 30px; font-weight: bold; text-shadow: 2px 2px 0px rgba(0,0,0,0.8); -webkit-text-stroke: 1px #2a1e12;">ONLINE DUEL</div>
+            <button class="menu-btn" id="btn-lobby-create" style="padding: 20px 40px; font-size: clamp(20px, 5vw, 28px); margin-bottom: 15px; width: min(80vw, 400px);">CREATE LOBBY</button>
+            <button class="menu-btn" id="btn-lobby-join" style="padding: 20px 40px; font-size: clamp(20px, 5vw, 28px); margin-bottom: 40px; width: min(80vw, 400px);">JOIN LOBBY</button>
+            <button class="menu-btn" id="btn-lobby-choice-back" style="width: min(60vw, 250px);">← BACK</button>
+        </div>
+
+        <div class="menu-buttons" id="view-lobby-create" style="display: none; width: 100%; align-items: center;">
+            <div id="lobby-create-status" style="font-family: 'Outfit', sans-serif; font-size: 20px; color: #00e5ff; margin-bottom: 15px; text-align: center;">Creating lobby...</div>
+            <div id="lobby-create-code" style="font-family: 'Outfit', sans-serif; font-size: 56px; font-weight: bold; color: #ffffff; letter-spacing: 4px; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; display: none;"></div>
+            <div id="lobby-create-qr" style="display: none; justify-content: center; align-items: center; width: 150px; height: 150px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 10px;"></div>
+            <div id="lobby-create-url" style="font-family: 'Inter', sans-serif; font-size: 12px; color: #a0a0b0; text-align: center; max-width: 80vw; word-wrap: break-word; margin-bottom: 30px; display: none;"></div>
+            <div style="font-family: 'Inter', sans-serif; font-size: 14px; color: #a0a0b0; text-align: center; margin-bottom: 20px;">Share the code or QR with your opponent</div>
+            <button class="menu-btn" id="btn-lobby-create-back" style="width: min(60vw, 250px);">← CANCEL</button>
+        </div>
+
+        <div class="menu-buttons" id="view-lobby-join" style="display: none; width: 100%; align-items: center;">
+            <div id="lobby-join-status" style="font-family: 'Outfit', sans-serif; font-size: 20px; color: #a0a0b0; margin-bottom: 20px; text-align: center;">Enter the lobby code:</div>
+            <input type="text" id="input-lobby-code" class="lobby-input" placeholder="e.g. BLAZE" style="width: min(90vw, 360px); padding: 16px; font-size: 24px; font-family: 'Outfit', sans-serif; text-align: center; text-transform: uppercase; letter-spacing: 3px; background: rgba(26, 20, 16, 0.95); color: #ffffff; border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 8px; outline: none; margin-bottom: 30px; transition: border-color 0.2s;" onfocus="this.style.borderColor='#ffdd77'" onblur="this.style.borderColor='rgba(212, 175, 55, 0.6)'" />
+            <button class="menu-btn" id="btn-lobby-join-submit" style="padding: 16px 40px; font-size: 24px; margin-bottom: 40px; width: min(80vw, 360px);">JOIN DUEL</button>
+            <button class="menu-btn" id="btn-lobby-join-back" style="width: min(60vw, 250px);">← BACK</button>
         </div>
     </div>
 
@@ -183,6 +206,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <script src="./phaser.js"></script>
-    <script type="module" src="./src/main.js?v=1.2.17"></script>
+    <script type="module" src="./src/main.js?v=1.2.18"></script>
 </body>
 </html>
