@@ -28,9 +28,6 @@ export class Start extends Phaser.Scene {
     }
 
     init() {
-        // Set portrait resolution for the menu (runs before create)
-        this.scale.resize(720, 1280);
-        this.cameras.main.setSize(720, 1280);
         // Attempt to lock portrait orientation on mobile
         try { screen.orientation.lock('portrait').catch(() => {}); } catch(e) {}
     }
@@ -38,6 +35,13 @@ export class Start extends Phaser.Scene {
     create() {
         // Ensure rotate overlay is disabled on the main menu
         document.body.classList.remove('in-game');
+
+        // Set portrait resolution for the menu
+        // Must happen here (not init) because Phaser recreates the camera between init→create
+        this.scale.resize(720, 1280);
+        this.sys.game.renderer.resize(720, 1280);
+        this.cameras.main.setViewport(0, 0, 720, 1280);
+        this.scale.refresh();
 
         const width = this.scale.width;
         const height = this.scale.height;

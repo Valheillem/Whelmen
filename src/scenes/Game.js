@@ -99,9 +99,6 @@ export class Game extends Phaser.Scene {
 
     init(data) {
         document.body.classList.add('in-game');
-        // Switch to landscape resolution for the game board (runs before create)
-        this.scale.resize(1560, 720);
-        this.cameras.main.setSize(1560, 720);
         // Attempt to lock orientation to landscape for the game board
         try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
         // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
@@ -136,6 +133,13 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
+        // Switch to landscape resolution for the game board
+        // Must happen here (not init) because Phaser recreates the camera between init→create
+        this.scale.resize(1560, 720);
+        this.sys.game.renderer.resize(1560, 720);
+        this.cameras.main.setViewport(0, 0, 1560, 720);
+        this.scale.refresh();
+
         // Generate beautiful custom card textures dynamically using canvas
         const cardWidth = 100;
         const cardHeight = 150;
