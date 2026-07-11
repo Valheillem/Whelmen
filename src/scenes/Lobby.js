@@ -16,15 +16,6 @@ export class Lobby extends Phaser.Scene {
     }
 
     create() {
-        // Adapt resolution for portrait devices
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        if (vh > vw * 1.2) {
-            this.scale.resize(720, 1280);
-        } else {
-            this.scale.resize(1560, 720);
-        }
-
         const w = this.scale.width;
         const h = this.scale.height;
 

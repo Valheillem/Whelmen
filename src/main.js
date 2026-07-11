@@ -1,16 +1,14 @@
-import { Start } from './scenes/Start.js?v=1.1.32';
-import { Lobby } from './scenes/Lobby.js?v=1.1.32';
-import { Game } from './scenes/Game.js?v=1.1.32';
-
-const isPortrait = window.innerHeight > window.innerWidth * 1.2;
+import { Start } from './scenes/Start.js?v=1.1.33';
+import { Lobby } from './scenes/Lobby.js?v=1.1.33';
+import { Game } from './scenes/Game.js?v=1.1.33';
 
 const config = {
     type: Phaser.AUTO,
     title: 'Whelmen',
     description: 'An elemental dueling game.',
     parent: 'game-container',
-    width: isPortrait ? 720 : 1560,
-    height: isPortrait ? 1280 : 720,
+    width: 1560,
+    height: 720,
     backgroundColor: '#1a1410',
     pixelArt: false,
     resolution: window.devicePixelRatio || 1,
@@ -21,7 +19,7 @@ const config = {
         Game
     ],
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.ENVELOP,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     dom: {
