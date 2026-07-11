@@ -99,6 +99,8 @@ export class Game extends Phaser.Scene {
 
     init(data) {
         document.body.classList.add('in-game');
+        // Attempt to lock orientation to landscape for the game board
+        try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
         // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
         this.mode = data?.mode || 'ai';
         this.lobbyCode = data?.lobbyCode || null;
@@ -3503,6 +3505,8 @@ export class Game extends Phaser.Scene {
         // 5. Clean up events on Phaser scene shutdown
         this.events.on('shutdown', () => {
             document.body.classList.remove('in-game');
+            // Release orientation lock when returning to menu
+            try { screen.orientation.unlock(); } catch(e) {}
             const notifEl = document.getElementById('sandbox-notif');
             const tabEl = document.getElementById('sandbox-tab');
             const panelEl = document.getElementById('sandbox-panel');

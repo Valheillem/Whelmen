@@ -16,6 +16,9 @@ export class Lobby extends Phaser.Scene {
     }
 
     create() {
+        // Ensure rotate overlay is disabled in the lobby
+        document.body.classList.remove('in-game');
+
         const w = this.scale.width;
         const h = this.scale.height;
 

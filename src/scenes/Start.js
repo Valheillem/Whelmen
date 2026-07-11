@@ -28,6 +28,9 @@ export class Start extends Phaser.Scene {
     }
 
     create() {
+        // Ensure rotate overlay is disabled on the main menu
+        document.body.classList.remove('in-game');
+
         const width = this.scale.width;
         const height = this.scale.height;
 
