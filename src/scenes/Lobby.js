@@ -8,6 +8,7 @@ export class Lobby extends Phaser.Scene {
     init(data) {
         // Set portrait resolution for the lobby (runs before create)
         this.scale.resize(720, 1280);
+        this.cameras.main.setSize(720, 1280);
         // Attempt to lock portrait orientation on mobile
         try { screen.orientation.lock('portrait').catch(() => {}); } catch(e) {}
 

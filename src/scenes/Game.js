@@ -101,6 +101,7 @@ export class Game extends Phaser.Scene {
         document.body.classList.add('in-game');
         // Switch to landscape resolution for the game board (runs before create)
         this.scale.resize(1560, 720);
+        this.cameras.main.setSize(1560, 720);
         // Attempt to lock orientation to landscape for the game board
         try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
         // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
