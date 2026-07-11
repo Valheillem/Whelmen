@@ -31,11 +31,10 @@ export class Lobby extends Phaser.Scene {
         // Background
         this.add.rectangle(0, 0, w, h, 0x1a1410).setOrigin(0);
 
-        // Background Image (Cover)
+        // Background Image (Stretch to fit)
         const bgImg = this.add.image(w / 2, h / 2, 'lobby-bg');
         bgImg.setAlpha(1);
-        const scale = Math.max(w / bgImg.width, h / bgImg.height);
-        bgImg.setScale(scale);
+        bgImg.setDisplaySize(w, h);
 
         // Title
         this.add.text(w / 2, 80, 'ONLINE DUEL', {
