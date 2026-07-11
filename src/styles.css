@@ -112,17 +112,11 @@ html, body {
 
 .menu-title-icon {
     width: min(90vw, 1125px);
-    max-height: min(50dvh, 560px);
+    max-height: min(45dvh, 500px);
     object-fit: contain;
-    margin: -10dvh 0 clamp(0px, 1dvh, 10px) 0;
-    animation: titleFloat 5s ease-in-out infinite;
+    margin: 5dvh 0 2dvh 0;
     z-index: 1;
     filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.6));
-}
-
-@keyframes titleFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
 }
 
 .menu-buttons {
@@ -131,14 +125,15 @@ html, body {
     gap: 12px;
     z-index: 1;
     width: min(80vw, 360px);
-    margin-top: -2dvh;
+    margin-bottom: 5dvh;
 }
 
 .menu-btn {
     font-family: 'Cinzel', serif;
     font-size: clamp(14px, 4vw, 22px);
-    font-weight: 700;
-    color: #f4ebd8;
+    font-weight: 800;
+    color: #d4af37;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
     letter-spacing: 2px;
     background: rgba(38, 26, 18, 0.9);
     border: 2px solid #4a4a4a;
@@ -172,12 +167,10 @@ html, body {
     box-shadow: calc(100% - 16px) 0 0 0 #1a1a1a;
 }
 
-.menu-btn:hover,
-.menu-btn:focus-visible {
-    border-color: #d4af37;
+.menu-btn:hover {
     background: rgba(61, 43, 31, 0.95);
-    color: #d4af37;
-    transform: scale(1.04);
+    border-color: #d4af37;
+    color: #ffdd77;
 }
 
 .menu-btn:active {

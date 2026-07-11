@@ -282,10 +282,10 @@ export class Lobby extends Phaser.Scene {
         const btnText = this.add.text(x, y, label, {
             fontFamily: '"Cinzel", serif',
             fontSize: '20px',
-            fontWeight: '700',
-            color: '#f4ebd8',
+            fontWeight: '800',
+            color: '#d4af37',
             letterSpacing: 2
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setShadow(2, 2, 'rgba(0,0,0,0.8)', 0, true, true);
 
         const btnWidth = 240;
         const btnHeight = 46;
@@ -319,7 +319,7 @@ export class Lobby extends Phaser.Scene {
         drawNormal();
         const zone = this.add.zone(x, y, btnWidth, btnHeight).setInteractive({ useHandCursor: true });
         zone.on('pointerover', () => { drawHover(); btnText.setColor('#d4af37'); });
-        zone.on('pointerout', () => { drawNormal(); btnText.setColor('#f4ebd8'); });
+        zone.on('pointerout', () => { drawNormal(); btnText.setColor('#d4af37'); });
         zone.on('pointerdown', onClick);
 
         return this.add.container(0, 0, [btnBg, btnText, zone]);
@@ -332,8 +332,8 @@ export class Lobby extends Phaser.Scene {
             fontFamily: '"Cinzel", serif',
             fontSize: '24px',
             fontStyle: 'bold',
-            color: '#f4ebd8'
-        }).setOrigin(0.5);
+            color: '#d4af37'
+        }).setOrigin(0.5).setShadow(2, 2, 'rgba(0,0,0,0.8)', 0, true, true);
 
         const subT = this.add.text(x, y + 25, subtitle, {
             fontFamily: '"Inter", sans-serif',
@@ -378,7 +378,7 @@ export class Lobby extends Phaser.Scene {
 
         zone.on('pointerout', () => {
             drawNormal();
-            titleT.setColor('#f4ebd8');
+            titleT.setColor('#d4af37');
         });
 
         zone.on('pointerdown', onClick);
