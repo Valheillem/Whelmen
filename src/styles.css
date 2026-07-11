@@ -101,10 +101,10 @@ html, body {
 }
 
 .menu-title-icon {
-    width: min(90vw, 600px);
-    max-height: 350px;
+    width: min(90vw, 900px);
+    max-height: min(40dvh, 450px);
     object-fit: contain;
-    margin: 0 0 40px 0;
+    margin: 0 0 clamp(10px, 4dvh, 40px) 0;
     animation: titleFloat 5s ease-in-out infinite;
     z-index: 1;
     filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.6));
