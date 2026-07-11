@@ -15,6 +15,10 @@ export class Lobby extends Phaser.Scene {
         this.unsubscribe = null;
     }
 
+    preload() {
+        this.load.image('title-icon', './assets/WHELMEN_icon.png');
+    }
+
     create() {
         // Ensure rotate overlay is disabled in the lobby
         document.body.classList.remove('in-game');
@@ -25,16 +29,21 @@ export class Lobby extends Phaser.Scene {
         const h = this.scale.height;
 
         // Background
-        this.add.rectangle(0, 0, w, h, 0x040212).setOrigin(0);
-        this.add.grid(w / 2, h / 2, w, h, 80, 80, 0x4e3ea0, 0.03, 0xffffff, 0.01);
+        this.add.rectangle(0, 0, w, h, 0x1a1410).setOrigin(0);
+
+        // Watermark Icon
+        const watermark = this.add.image(w / 2, h / 2, 'title-icon');
+        watermark.setAlpha(0.04);
+        const scale = Math.min((w * 0.9) / watermark.width, (h * 0.9) / watermark.height);
+        watermark.setScale(scale);
 
         // Title
-        this.add.text(w / 2, 50, 'ONLINE DUEL', {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '42px',
+        this.add.text(w / 2, 80, 'ONLINE DUEL', {
+            fontFamily: '"Cinzel", serif',
+            fontSize: '48px',
             fontStyle: 'bold',
-            color: '#ffffff'
-        }).setOrigin(0.5).setStroke('#4e3ea0', 10);
+            color: '#d4af37'
+        }).setOrigin(0.5).setStroke('#2a1e12', 4).setShadow(2, 4, 'rgba(0,0,0,0.8)', 0, true, true);
 
         // Back button
         this.createButton(w / 2, h - 60, '← BACK', () => {
@@ -270,71 +279,113 @@ export class Lobby extends Phaser.Scene {
 
     // ---- UI HELPERS ----
     createButton(x, y, label, onClick) {
-        const text = this.add.text(x, y, label, {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '16px',
-            fontStyle: 'bold',
-            color: '#ffffff',
-            letterSpacing: 1,
-            backgroundColor: 'rgba(13,11,28,0.9)',
-            padding: { x: 20, y: 10 }
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        const btnBg = this.add.graphics().setPosition(x, y);
+        const btnText = this.add.text(x, y, label, {
+            fontFamily: '"Cinzel", serif',
+            fontSize: '20px',
+            fontWeight: '700',
+            color: '#f4ebd8',
+            letterSpacing: 2
+        }).setOrigin(0.5);
 
-        text.on('pointerover', () => text.setColor('#00e5ff'));
-        text.on('pointerout', () => text.setColor('#ffffff'));
-        text.on('pointerdown', onClick);
+        const btnWidth = 240;
+        const btnHeight = 46;
 
-        return text;
+        const drawNormal = () => {
+            btnBg.clear();
+            btnBg.lineStyle(2, 0x4a4a4a, 1);
+            btnBg.fillStyle(0x261a12, 0.9);
+            btnBg.fillRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            btnBg.strokeRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            btnBg.fillStyle(0x1a1a1a, 1);
+            btnBg.fillCircle(-btnWidth / 2 + 8, -btnHeight / 2 + 8, 3);
+            btnBg.fillCircle(btnWidth / 2 - 8, -btnHeight / 2 + 8, 3);
+            btnBg.fillCircle(-btnWidth / 2 + 8, btnHeight / 2 - 8, 3);
+            btnBg.fillCircle(btnWidth / 2 - 8, btnHeight / 2 - 8, 3);
+        };
+
+        const drawHover = () => {
+            btnBg.clear();
+            btnBg.lineStyle(2, 0xd4af37, 1);
+            btnBg.fillStyle(0x3d2b1f, 0.95);
+            btnBg.fillRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            btnBg.strokeRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight);
+            btnBg.fillStyle(0x4a4a4a, 1);
+            btnBg.fillCircle(-btnWidth / 2 + 8, -btnHeight / 2 + 8, 3);
+            btnBg.fillCircle(btnWidth / 2 - 8, -btnHeight / 2 + 8, 3);
+            btnBg.fillCircle(-btnWidth / 2 + 8, btnHeight / 2 - 8, 3);
+            btnBg.fillCircle(btnWidth / 2 - 8, btnHeight / 2 - 8, 3);
+        };
+
+        drawNormal();
+        const zone = this.add.zone(x, y, btnWidth, btnHeight).setInteractive({ useHandCursor: true });
+        zone.on('pointerover', () => { drawHover(); btnText.setColor('#d4af37'); });
+        zone.on('pointerout', () => { drawNormal(); btnText.setColor('#f4ebd8'); });
+        zone.on('pointerdown', onClick);
+
+        return this.add.container(0, 0, [btnBg, btnText, zone]);
     }
 
     createPanelButton(x, y, w, h, title, subtitle, glowColor, onClick) {
-        const g = this.add.graphics();
-        g.fillStyle(0x0d0b1c, 0.9);
-        g.lineStyle(2, glowColor, 0.5);
-        g.fillRoundedRect(x - w / 2, y - h / 2, w, h, 12);
-        g.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 12);
+        const btnBg = this.add.graphics().setPosition(x, y);
 
         const titleT = this.add.text(x, y - 15, title, {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '20px',
+            fontFamily: '"Cinzel", serif',
+            fontSize: '24px',
             fontStyle: 'bold',
-            color: '#ffffff'
+            color: '#f4ebd8'
         }).setOrigin(0.5);
 
         const subT = this.add.text(x, y + 25, subtitle, {
             fontFamily: '"Inter", sans-serif',
-            fontSize: '13px',
-            color: '#a0a0b0',
+            fontSize: '14px',
+            color: '#d4af37',
             align: 'center'
         }).setOrigin(0.5);
 
+        const drawNormal = () => {
+            btnBg.clear();
+            btnBg.lineStyle(2, 0x4a4a4a, 1);
+            btnBg.fillStyle(0x261a12, 0.9);
+            btnBg.fillRect(-w / 2, -h / 2, w, h);
+            btnBg.strokeRect(-w / 2, -h / 2, w, h);
+            btnBg.fillStyle(0x1a1a1a, 1);
+            btnBg.fillCircle(-w / 2 + 8, -h / 2 + 8, 3);
+            btnBg.fillCircle(w / 2 - 8, -h / 2 + 8, 3);
+            btnBg.fillCircle(-w / 2 + 8, h / 2 - 8, 3);
+            btnBg.fillCircle(w / 2 - 8, h / 2 - 8, 3);
+        };
+
+        const drawHover = () => {
+            btnBg.clear();
+            btnBg.lineStyle(2, 0xd4af37, 1);
+            btnBg.fillStyle(0x3d2b1f, 0.95);
+            btnBg.fillRect(-w / 2, -h / 2, w, h);
+            btnBg.strokeRect(-w / 2, -h / 2, w, h);
+            btnBg.fillStyle(0x4a4a4a, 1);
+            btnBg.fillCircle(-w / 2 + 8, -h / 2 + 8, 3);
+            btnBg.fillCircle(w / 2 - 8, -h / 2 + 8, 3);
+            btnBg.fillCircle(-w / 2 + 8, h / 2 - 8, 3);
+            btnBg.fillCircle(w / 2 - 8, h / 2 - 8, 3);
+        };
+
+        drawNormal();
         const zone = this.add.zone(x, y, w, h).setInteractive({ useHandCursor: true });
 
         zone.on('pointerover', () => {
-            g.clear();
-            g.fillStyle(0x161233, 0.95);
-            g.lineStyle(2, glowColor, 1);
-            g.fillRoundedRect(x - w / 2, y - h / 2, w, h, 12);
-            g.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 12);
-            titleT.setColor('#' + glowColor.toString(16).padStart(6, '0'));
+            drawHover();
+            titleT.setColor('#d4af37');
         });
 
         zone.on('pointerout', () => {
-            g.clear();
-            g.fillStyle(0x0d0b1c, 0.9);
-            g.lineStyle(2, glowColor, 0.5);
-            g.fillRoundedRect(x - w / 2, y - h / 2, w, h, 12);
-            g.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 12);
-            titleT.setColor('#ffffff');
+            drawNormal();
+            titleT.setColor('#f4ebd8');
         });
 
         zone.on('pointerdown', onClick);
 
         if (this.choiceContainer) {
-            this.choiceContainer.add(g);
-            this.choiceContainer.add(titleT);
-            this.choiceContainer.add(subT);
-            this.choiceContainer.add(zone);
+            this.choiceContainer.add([btnBg, titleT, subT, zone]);
         }
     }
 }
