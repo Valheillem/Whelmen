@@ -16,6 +16,15 @@ export class Lobby extends Phaser.Scene {
     }
 
     create() {
+        // Adapt resolution for portrait devices
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        if (vh > vw * 1.2) {
+            this.scale.resize(720, 1280);
+        } else {
+            this.scale.resize(1560, 720);
+        }
+
         const w = this.scale.width;
         const h = this.scale.height;
 
@@ -32,8 +41,6 @@ export class Lobby extends Phaser.Scene {
         }).setOrigin(0.5).setStroke('#4e3ea0', 10);
 
         // Back button
-        const w = this.scale.width;
-        const h = this.scale.height;
         this.createButton(w / 2, h - 60, '← BACK', () => {
             this.cleanup();
             this.scene.start('Start');

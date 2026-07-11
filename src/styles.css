@@ -46,8 +46,8 @@ html, body {
 }
 
 #game-container {
-    width: min(1560px, 100vw, calc(100dvh * 1560 / 720)) !important;
-    height: min(720px, 100dvh, calc(100vw * 720 / 1560)) !important;
+    width: 100vw !important;
+    height: 100dvh !important;
     position: relative;
     overflow: hidden;
 }

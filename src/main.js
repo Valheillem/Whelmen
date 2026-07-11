@@ -1,6 +1,6 @@
-import { Start } from './scenes/Start.js?v=1.1.29';
-import { Lobby } from './scenes/Lobby.js?v=1.1.29';
-import { Game } from './scenes/Game.js?v=1.1.29';
+import { Start } from './scenes/Start.js?v=1.1.30';
+import { Lobby } from './scenes/Lobby.js?v=1.1.30';
+import { Game } from './scenes/Game.js?v=1.1.30';
 
 const config = {
     type: Phaser.AUTO,
@@ -19,7 +19,7 @@ const config = {
         Game
     ],
     scale: {
-        mode: Phaser.Scale.ENVELOP,
+        mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     dom: {

@@ -99,6 +99,8 @@ export class Game extends Phaser.Scene {
 
     init(data) {
         document.body.classList.add('in-game');
+        // Always force landscape resolution for the game board
+        this.scale.resize(1560, 720);
         // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
         this.mode = data?.mode || 'ai';
         this.lobbyCode = data?.lobbyCode || null;
