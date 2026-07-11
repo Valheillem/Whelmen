@@ -118,6 +118,7 @@ export class Game extends Phaser.Scene {
         this.load.image('icon_earth', 'assets/icons/Earth.png');
         this.load.image('icon_water', 'assets/icons/Water.png');
         this.load.image('icon_air', 'assets/icons/Air.png');
+        this.load.image('game-bg', './assets/WHELMEN_background.png');
     }
 
     createCardCanvas(key, w, h, drawFn) {
@@ -220,6 +221,9 @@ export class Game extends Phaser.Scene {
 
         // Background space
         this.add.rectangle(0, 0, w, h, 0x1a1410).setOrigin(0);
+        const bgImg = this.add.image(w / 2, h / 2, 'game-bg');
+        bgImg.setAlpha(1);
+        bgImg.setDisplaySize(w, h);
 
         // Grid overlay
         this.grid = this.add.grid(w/2, h/2, w, h, 80, 80, 0x4a4a4a, 0.03, 0xffffff, 0.01);

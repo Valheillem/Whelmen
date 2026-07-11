@@ -69,16 +69,18 @@ export class Lobby extends Phaser.Scene {
         this.choiceContainer = this.add.container(0, 0);
 
         // Create Lobby Button
-        this.createPanelButton(w / 2, h / 2 - 70, 280, 120, 'CREATE LOBBY', 'Start a new duel and\ninvite a friend', 0x00e676, () => {
+        const hostBtn = this.createButton(w / 2, h / 2 - 30, 'CREATE LOBBY', () => {
             if (this.choiceContainer) this.choiceContainer.destroy(true);
             this.showCreateView();
         });
+        this.choiceContainer.add(hostBtn);
 
         // Join Lobby Button
-        this.createPanelButton(w / 2, h / 2 + 70, 280, 120, 'JOIN LOBBY', 'Enter a code to join\nan existing duel', 0x00b0ff, () => {
+        const joinBtn = this.createButton(w / 2, h / 2 + 30, 'JOIN LOBBY', () => {
             if (this.choiceContainer) this.choiceContainer.destroy(true);
             this.showJoinView();
         });
+        this.choiceContainer.add(joinBtn);
     }
 
     // ---- CREATE LOBBY VIEW ----
