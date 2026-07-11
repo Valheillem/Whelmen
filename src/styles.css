@@ -226,6 +226,10 @@ html, body {
     transform: scale(1);
 }
 
+.overlay.active #share-modal {
+    transform: scale(0.9);
+}
+
 .modal-title {
     font-family: 'Cinzel', serif;
     font-weight: 800;
