@@ -356,13 +356,8 @@ export class Game extends Phaser.Scene {
         let char = who === 'player' ? this.player : this.ai;
         let opp = who === 'player' ? this.ai : this.player;
 
-        // Decrease statuses
-        for (let k in char.status) {
-            if (char.status[k] > 0) char.status[k]--;
-        }
-
-        // Apply start of turn effects
-        if (char.status.everyoneDraw3 === 1) {
+        // Apply start of turn effects BEFORE decrementing
+        if (char.status.everyoneDraw3 > 0) {
             for(let i=0;i<3;i++) { 
                 let d = this.drawCard(); if(d) char.hand.push(d); 
                 let d2 = this.drawCard(); if(d2) opp.hand.push(d2); 
@@ -373,7 +368,7 @@ export class Game extends Phaser.Scene {
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
         
-        if (char.status.discardReplaceHand === 1) {
+        if (char.status.discardReplaceHand > 0) {
             let chCount = char.hand.length; let opCount = opp.hand.length;
             while(char.hand.length>0) this.sharedDiscard.push(char.hand.pop());
             while(opp.hand.length>0) this.sharedDiscard.push(opp.hand.pop());
@@ -385,9 +380,9 @@ export class Game extends Phaser.Scene {
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
 
-        if (char.status.rotateHands === 1) {
-            let temp = char.hand;
-            char.hand = opp.hand;
+        if (char.status.rotateHands > 0) {
+            let temp = [...char.hand];
+            char.hand = [...opp.hand];
             opp.hand = temp;
             char.status.rotateHands = 0; opp.status.rotateHands = 0;
             this.logMessage("Hands were rotated!");
@@ -395,7 +390,7 @@ export class Game extends Phaser.Scene {
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
         
-        if (char.status.oppDraw4 === 1) {
+        if (char.status.oppDraw4 > 0) {
             for(let i=0;i<4;i++) { let d = this.drawCard(); if(d) opp.hand.push(d); }
             char.status.oppDraw4 = 0;
             this.logMessage("Opponent is forced to draw 4 mana!");
@@ -408,6 +403,11 @@ export class Game extends Phaser.Scene {
             this.logMessage(`${who.toUpperCase()} draws extra mana from Shield!`);
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
+        }
+
+        // Decrease statuses AFTER applying effects
+        for (let k in char.status) {
+            if (char.status[k] > 0) char.status[k]--;
         }
         
         this.phase = 'action';
@@ -2126,7 +2126,7 @@ export class Game extends Phaser.Scene {
         // Apply self buffs immediately (like shields)
         if (finalShield > 0) {
             if (attChar.status.shieldDamageDebuff > 0) {
-                this.applyDamage(attacker, 1);
+                this.forceDiscardRandom(attacker, 1);
                 this.logMessage(`${attacker.toUpperCase()} takes 1 damage from unstable shield!`);
             }
             attChar.shield += finalShield;
@@ -2167,7 +2167,7 @@ export class Game extends Phaser.Scene {
             // Direct hit
             if (finalDmg > 0) {
                 if (defChar.status.retaliationDamage > 0) {
-                    this.applyDamage(attacker, 1);
+                    this.forceDiscardRandom(attacker, 1);
                     this.logMessage(`${defender.toUpperCase()} retaliates for 1 damage!`);
                 }
                 this.applyDamage(defender, finalDmg, false);
@@ -2414,15 +2414,14 @@ export class Game extends Phaser.Scene {
 
             this.playSound('draw');
             this.logMessage(`AI plays [${el.toUpperCase()}] mana to board.`);
-        if (this.ai.status.manaPlayDamage > 0) {
-            this.applyDamage('player', 1);
-            this.logMessage(`AI's mana play deals 1 damage to Player!`);
-        }
-        if (this.player.status.oppManaPlayDamage > 0) {
-            this.applyDamage('ai', 1);
-            this.logMessage(`AI takes 1 damage from playing mana due to Player Surge!`);
-        }
-        
+            if (this.ai.status.manaPlayDamage > 0) {
+                this.forceDiscardRandom('player', 1);
+                this.logMessage(`AI's mana play deals 1 damage to Player!`);
+            }
+            if (this.player.status.oppManaPlayDamage > 0) {
+                this.forceDiscardRandom('ai', 1);
+                this.logMessage(`AI takes 1 damage from playing mana due to Player Surge!`);
+            }
             
             this.updateAIHandDisplay();
             this.updateAIBoardDisplay();
