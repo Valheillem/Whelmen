@@ -91,12 +91,16 @@
                     <li><strong>Pass:</strong> Skip playing mana or casting a spell to draw 1 additional card.</li>
                 </ul>
 
-                <h3>The Environmental Cycle</h3>
+                                                <h3>The Environmental Cycle</h3>
                 <p>A predictable, elemental weather cycle rotates every single turn in this order:</p>
                 <p style="text-align: center; font-weight: bold; margin: 10px 0;">Neutral ➔ <span class="element-fire">Fire</span> ➔ <span class="element-earth">Earth</span> ➔ <span class="element-air">Air</span> ➔ <span class="element-water">Water</span> ➔ <span class="element-fire">Fire</span></p>
+
+                <h3>The Elemental Cycle Order</h3>
+                <p>Spells are categorized by how their component elements interact with each other and the active Cycle.</p>
                 <ul>
-                    <li>Casting a spell matching the active Cycle element makes it <strong>Empowered</strong> (e.g., Firestorm does 7 damage instead of 4).</li>
-                    <li>Casting a spell that is dominated by the active Cycle element makes it <strong>Weakened</strong> (e.g., a Fire spell when the Cycle is Water).</li>
+                    <li><strong>Constructive Spells:</strong> Contain complementary elements (<span class="element-air">Air</span>/<span class="element-fire">Fire</span> or <span class="element-water">Water</span>/<span class="element-earth">Earth</span>). They are empowered when their primary element matches the active Cycle.</li>
+                    <li><strong>Destructive Spells:</strong> Contain conflicting elements (e.g. <span class="element-air">Air</span>/<span class="element-water">Water</span>). They are empowered when their opposite element matches the active Cycle (<span class="element-air">Air</span> is opposite to <span class="element-earth">Earth</span>, <span class="element-water">Water</span> is opposite to <span class="element-fire">Fire</span>).</li>
+                    <li><strong>Prestructive Spells:</strong> Perfectly balanced components (Neutral). They are empowered only when the active Cycle does not match ANY of the spell's components.</li>
                 </ul>
 
                 <h3>The Elemental Cycle Order</h3>
@@ -131,12 +135,16 @@
                     <li><strong>Pass:</strong> Skip playing mana or casting a spell to draw 1 additional card.</li>
                 </ul>
 
-                <h3>The Environmental Cycle</h3>
+                                                <h3>The Environmental Cycle</h3>
                 <p>A predictable, elemental weather cycle rotates every single turn in this order:</p>
                 <p style="text-align: center; font-weight: bold; margin: 10px 0;">Neutral ➔ <span class="element-fire">Fire</span> ➔ <span class="element-earth">Earth</span> ➔ <span class="element-air">Air</span> ➔ <span class="element-water">Water</span> ➔ <span class="element-fire">Fire</span></p>
+
+                <h3>The Elemental Cycle Order</h3>
+                <p>Spells are categorized by how their component elements interact with each other and the active Cycle.</p>
                 <ul>
-                    <li>Casting a spell matching the active Cycle element makes it <strong>Empowered</strong> (e.g., Firestorm does 7 damage instead of 4).</li>
-                    <li>Casting a spell that is dominated by the active Cycle element makes it <strong>Weakened</strong> (e.g., a Fire spell when the Cycle is Water).</li>
+                    <li><strong>Constructive Spells:</strong> Contain complementary elements (<span class="element-air">Air</span>/<span class="element-fire">Fire</span> or <span class="element-water">Water</span>/<span class="element-earth">Earth</span>). They are empowered when their primary element matches the active Cycle.</li>
+                    <li><strong>Destructive Spells:</strong> Contain conflicting elements (e.g. <span class="element-air">Air</span>/<span class="element-water">Water</span>). They are empowered when their opposite element matches the active Cycle (<span class="element-air">Air</span> is opposite to <span class="element-earth">Earth</span>, <span class="element-water">Water</span> is opposite to <span class="element-fire">Fire</span>).</li>
+                    <li><strong>Prestructive Spells:</strong> Perfectly balanced components (Neutral). They are empowered only when the active Cycle does not match ANY of the spell's components.</li>
                 </ul>
 
                 <h3>The Elemental Cycle Order</h3>
@@ -160,14 +168,106 @@
             <h2 class="modal-title spellbook-title">Tome of Spells</h2>
             
             <div class="spellbook-content">
-                <div class="spell-tier">
+<div class="spell-tier">
                     <h3 class="tier-title">Tier 1: Sprite</h3>
                     <div class="spell-grid">
-                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div></div><div class="spell-name element-earth">Pebble Shield</div><div class="spell-desc">+2 Shield</div></div>
-                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div></div><div class="spell-name element-fire">Ember Poke</div><div class="spell-desc">2 DMG</div></div>
-                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div></div><div class="spell-name element-water">Splash Cure</div><div class="spell-desc">Draw 1 card</div></div>
-                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div></div><div class="spell-name element-air">Breeze</div><div class="spell-desc">Swap 1 card from hand with board</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div></div><div class="spell-name element-air">Breeze</div><div class="spell-desc">Drain 1. Synergy: Constructive: 2 drain</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div></div><div class="spell-name element-water">Stream</div><div class="spell-desc">Draw 1. Synergy: Constructive: 2 draw</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div></div><div class="spell-name element-fire">Spark</div><div class="spell-desc">1 DMG. Synergy: Constructive: 3 damage</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div></div><div class="spell-name element-earth">Shell</div><div class="spell-desc">+3 Shield. Synergy: Constructive: 5 shield</div></div>
                     </div>
+                </div>
+
+                <div class="spell-tier">
+                    <h3 class="tier-title">Tier 2: Elemental</h3>
+                    <div class="spell-grid">
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Gust</div><div class="spell-desc">Drain 2. Synergy: Constructive: 3 drain</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Rain</div><div class="spell-desc">Draw 2. Synergy: Constructive: 3 draw</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Blast</div><div class="spell-desc">3 DMG. Synergy: Constructive: 5 damage</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Carapace</div><div class="spell-desc">+5 Shield. Synergy: Constructive: 8 shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Ignition</div><div class="spell-desc">1 DMG, Drain 1. Synergy: Prestructive: Next round, 2 mana can be played</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Haze</div><div class="spell-desc">1 DMG, Draw 1. Synergy: Prestructive: Next round, all players lose hand mana as they draw mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Quake</div><div class="spell-desc">1 DMG, +3 Shield. Synergy: Prestructive: Next round, applying Shield deals 1 damage</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div></div><div class="spell-name element-neutral">Dust</div><div class="spell-desc">+3 Shield, Drain 1. Synergy: Prestructive: Next round, damage has a 50% chance of missing</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Typhoon</div><div class="spell-desc">Draw 1, Drain 1. Synergy: Prestructive: Next round, drawn mana is immediately played</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Enrich</div><div class="spell-desc">+3 Shield, Draw 1. Synergy: Prestructive: Next round, everyone draws 3 mana</div></div>
+                    </div>
+                </div>
+
+                <div class="spell-tier">
+                    <h3 class="tier-title">Tier 3: Dynastic</h3>
+                    <div class="spell-grid">
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot fire"></div></div><div class="spell-name element-air">Firestorm</div><div class="spell-desc">1 DMG, Drain 2. Synergy: Constructive: Next played mana deals 1 damage to opponent</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-earth">Fortress</div><div class="spell-desc">+5 Shield, Draw 1. Synergy: Constructive: Next turn, draw an extra mana if you still have shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Wildfire</div><div class="spell-desc">3 DMG, Drain 1. Synergy: Constructive: Next turn, play 2 spells instead of 1</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Quagmire</div><div class="spell-desc">+3 Shield, Draw 2. Synergy: Constructive: Next turn, you can redraw up to 2 mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Billow</div><div class="spell-desc">1 DMG, Draw 2. Synergy: Destructive: Cycle the top 3 deck cards</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-fire">Vaporize</div><div class="spell-desc">3 DMG, Draw 1. Synergy: Destructive: Destroy the top 3 deck cards</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Surge</div><div class="spell-desc">3 DMG, +3 Shield. Synergy: Destructive: Next mana played by opponent deals 1 damage to them</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-earth">Crucible</div><div class="spell-desc">1 DMG, +5 Shield. Synergy: Destructive: Next round, deal 1 retaliation damage to attacking opponents</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot water"></div></div><div class="spell-name element-air">Hurricane</div><div class="spell-desc">Draw 1, Drain 2. Synergy: Destructive: Next round, opponent can't draw mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Flood</div><div class="spell-desc">Draw 2, Drain 1. Synergy: Destructive: Next round, opponent draws 4 mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Tower</div><div class="spell-desc">+5 Shield, Drain 1. Synergy: Destructive: Next round, opponent's spells have 50% chance of failing</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot earth"></div></div><div class="spell-name element-air">Scour</div><div class="spell-desc">+3 Shield, Drain 2. Synergy: Destructive: Remove opponent's Shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Tempest</div><div class="spell-desc">Drain 3. Synergy: Force Cycle to Air</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Pillar</div><div class="spell-desc">+8 Shield. Synergy: Force Cycle to Earth</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Blaze</div><div class="spell-desc">5 DMG. Synergy: Force Cycle to Fire</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Deluge</div><div class="spell-desc">Draw 3. Synergy: Force Cycle to Water</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Mudslide</div><div class="spell-desc">+3 Shield, Draw 1, Drain 1. Synergy: Prestructive: Next round, everyone discards and replaces their hand</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Tide</div><div class="spell-desc">1 DMG, Draw 1, Drain 1. Synergy: Prestructive: Next round, everyone rotates hands clockwise</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Aegis</div><div class="spell-desc">1 DMG, +3 Shield, Draw 1. Synergy: Prestructive: Next round, no damage can be dealt</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Cataclysm</div><div class="spell-desc">1 DMG, +3 Shield, Drain 1. Synergy: Prestructive: Next round, spells are randomly targeted (including self)</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                </div>
+
+                <div class="spell-tier">
+                    <h3 class="tier-title">Tier 2: Elemental</h3>
+                    <div class="spell-grid">
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Gust</div><div class="spell-desc">Drain 2. Synergy: Constructive: 3 drain</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Rain</div><div class="spell-desc">Draw 2. Synergy: Constructive: 3 draw</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Blast</div><div class="spell-desc">3 DMG. Synergy: Constructive: 5 damage</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Carapace</div><div class="spell-desc">+5 Shield. Synergy: Constructive: 8 shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Ignition</div><div class="spell-desc">1 DMG, Drain 1. Synergy: Prestructive: Next round, 2 mana can be played</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Haze</div><div class="spell-desc">1 DMG, Draw 1. Synergy: Prestructive: Next round, all players lose hand mana as they draw mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Quake</div><div class="spell-desc">1 DMG, +3 Shield. Synergy: Prestructive: Next round, applying Shield deals 1 damage</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div></div><div class="spell-name element-neutral">Dust</div><div class="spell-desc">+3 Shield, Drain 1. Synergy: Prestructive: Next round, damage has a 50% chance of missing</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Typhoon</div><div class="spell-desc">Draw 1, Drain 1. Synergy: Prestructive: Next round, drawn mana is immediately played</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Enrich</div><div class="spell-desc">+3 Shield, Draw 1. Synergy: Prestructive: Next round, everyone draws 3 mana</div></div>
+                    </div>
+                </div>
+
+                <div class="spell-tier">
+                    <h3 class="tier-title">Tier 3: Dynastic</h3>
+                    <div class="spell-grid">
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot fire"></div></div><div class="spell-name element-air">Firestorm</div><div class="spell-desc">1 DMG, Drain 2. Synergy: Constructive: Next played mana deals 1 damage to opponent</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-earth">Fortress</div><div class="spell-desc">+5 Shield, Draw 1. Synergy: Constructive: Next turn, draw an extra mana if you still have shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Wildfire</div><div class="spell-desc">3 DMG, Drain 1. Synergy: Constructive: Next turn, play 2 spells instead of 1</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Quagmire</div><div class="spell-desc">+3 Shield, Draw 2. Synergy: Constructive: Next turn, you can redraw up to 2 mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Billow</div><div class="spell-desc">1 DMG, Draw 2. Synergy: Destructive: Cycle the top 3 deck cards</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-fire">Vaporize</div><div class="spell-desc">3 DMG, Draw 1. Synergy: Destructive: Destroy the top 3 deck cards</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Surge</div><div class="spell-desc">3 DMG, +3 Shield. Synergy: Destructive: Next mana played by opponent deals 1 damage to them</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-earth">Crucible</div><div class="spell-desc">1 DMG, +5 Shield. Synergy: Destructive: Next round, deal 1 retaliation damage to attacking opponents</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot water"></div></div><div class="spell-name element-air">Hurricane</div><div class="spell-desc">Draw 1, Drain 2. Synergy: Destructive: Next round, opponent can't draw mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Flood</div><div class="spell-desc">Draw 2, Drain 1. Synergy: Destructive: Next round, opponent draws 4 mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Tower</div><div class="spell-desc">+5 Shield, Drain 1. Synergy: Destructive: Next round, opponent's spells have 50% chance of failing</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot earth"></div></div><div class="spell-name element-air">Scour</div><div class="spell-desc">+3 Shield, Drain 2. Synergy: Destructive: Remove opponent's Shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Tempest</div><div class="spell-desc">Drain 3. Synergy: Force Cycle to Air</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Pillar</div><div class="spell-desc">+8 Shield. Synergy: Force Cycle to Earth</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Blaze</div><div class="spell-desc">5 DMG. Synergy: Force Cycle to Fire</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Deluge</div><div class="spell-desc">Draw 3. Synergy: Force Cycle to Water</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Mudslide</div><div class="spell-desc">+3 Shield, Draw 1, Drain 1. Synergy: Prestructive: Next round, everyone discards and replaces their hand</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Tide</div><div class="spell-desc">1 DMG, Draw 1, Drain 1. Synergy: Prestructive: Next round, everyone rotates hands clockwise</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Aegis</div><div class="spell-desc">1 DMG, +3 Shield, Draw 1. Synergy: Prestructive: Next round, no damage can be dealt</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Cataclysm</div><div class="spell-desc">1 DMG, +3 Shield, Drain 1. Synergy: Prestructive: Next round, spells are randomly targeted (including self)</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
                 </div>
 
                 <div class="spell-tier">
