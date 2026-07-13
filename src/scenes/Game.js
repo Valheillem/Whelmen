@@ -2499,6 +2499,70 @@ export class Game extends Phaser.Scene {
     }
 
     // --- AI STRATEGIC AGENT ---
+    getValidBoardCombos(board) {
+        const results = [];
+        const n = board.length;
+        if (n === 0) return results;
+        
+        // 1-card combos
+        for (let i = 0; i < n; i++) results.push([i]);
+        
+        // 2-card combos
+        for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+                results.push([i, j]);
+            }
+        }
+        
+        // 3-card combos
+        if (n >= 3) {
+            results.push([0, 1, 2]);
+        }
+        
+        return results;
+    }
+
+    scoreAISpell(spell, isReaction, incomingDamage) {
+        let score = 0;
+        const cycle = this.cycleElements[this.cycleIndex];
+        
+        let isEmp = false;
+        if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
+        else if (spell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[spell.element]) isEmp = true;
+        else if (spell.synergyType === 'prestructive' && !spell.combo.includes(cycle)) isEmp = true;
+
+        if (isReaction) {
+            if (spell.shield > 0) {
+                score += spell.shield * 10;
+                if (spell.shield >= incomingDamage) score += 20; // Bonus for fully blocking
+                if (isEmp) score += 5;
+                score -= spell.combo.length; // Tie-breaker: use fewer cards
+            } else {
+                return -1; // Not a defensive spell
+            }
+        } else {
+            score += spell.damage * 10;
+            score += spell.shield * 8;
+            score += spell.draw * 5;
+            score += spell.drain * 6;
+            
+            if (isEmp) score += 15; // Strongly prefer empowered spells
+            
+            // Situational adjustments
+            if (this.ai.life <= 4) {
+                score += spell.shield * 10; // Desperate for shield
+                score += spell.drain * 10; // Desperate to drain opponent's capability
+            }
+            if (this.player.life <= 4) {
+                score += spell.damage * 15; // Go for the kill
+            }
+            
+            score += spell.combo.length; 
+        }
+        
+        return score;
+    }
+
     runAITurn() {
         if (this.phase === 'gameover') return;
 
@@ -2550,32 +2614,28 @@ export class Game extends Phaser.Scene {
 
         // 2. Try to form a spell combo from board
         if (this.ai.board.length >= 2) {
-            // Select up to 3 cards from board
-            let comboIndices = [];
-            
-            // Check weather alignment if possible
-            const activeCycle = this.cycleElements[this.cycleIndex];
-            const matchingIndex = this.ai.board.indexOf(activeCycle);
+            const combos = this.getValidBoardCombos(this.ai.board);
+            let bestSpell = null;
+            let bestComboIndices = null;
+            let bestScore = -1;
 
-            if (matchingIndex > -1) {
-                comboIndices.push(matchingIndex);
-            }
-
-            // Fill combo to 2 or 3 cards
-            this.ai.board.forEach((el, idx) => {
-                if (comboIndices.length < 3 && !comboIndices.includes(idx)) {
-                    comboIndices.push(idx);
+            combos.forEach(indices => {
+                const elements = indices.map(idx => this.ai.board[idx]);
+                const spell = this.getSpellFromCombo(elements);
+                if (spell) {
+                    const score = this.scoreAISpell(spell, false, 0);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestSpell = spell;
+                        bestComboIndices = indices;
+                    }
                 }
             });
 
-            // Perform cast
-            const elements = comboIndices.map(idx => this.ai.board[idx]);
-            const spell = this.getSpellFromCombo(elements);
-
-            if (spell) {
+            if (bestSpell) {
                 // Consume
-                comboIndices.sort((a,b) => b-a);
-                comboIndices.forEach(idx => {
+                bestComboIndices.sort((a,b) => b-a);
+                bestComboIndices.forEach(idx => {
                     const consumed = this.ai.board.splice(idx, 1)[0];
                     this.sharedDiscard.push(consumed);
                 });
@@ -2584,11 +2644,11 @@ export class Game extends Phaser.Scene {
                 this.updateAILifeDisplay();
                 this.updateDeckDiscardDisplay();
 
-                this.logMessage(`AI casts: ${spell.name}!`);
+                this.logMessage(`AI casts: ${bestSpell.name}!`);
 
                 const w = this.scale.width;
-                this.triggerSpellVisual(spell.element, w / 2 + 100, 200, w / 2 + 100, 500, () => {
-                    this.initiateAttack('ai', 'player', spell);
+                this.triggerSpellVisual(bestSpell.element, w / 2 + 100, 200, w / 2 + 100, 500, () => {
+                    this.initiateAttack('ai', 'player', bestSpell);
                 });
                 return;
             }
@@ -2628,27 +2688,28 @@ export class Game extends Phaser.Scene {
         if (this.ai.board.length === 0) return null;
         if (this.mode === 'test' && this.dummyMode === 'passive') return null;
 
-        // Smart Reaction selection:
-        // Try to find Earth (Pebble Shield) or Earth+Earth (Stone Wall) or Earth+Water (Mudslide)
-        let earthIndex = this.ai.board.indexOf('earth');
-        let waterIndex = this.ai.board.indexOf('water');
+        const combos = this.getValidBoardCombos(this.ai.board);
+        let bestSpell = null;
+        let bestComboIndices = null;
+        let bestScore = -1;
 
-        let combo = [];
-        if (earthIndex > -1) {
-            combo.push(earthIndex);
-            // Can make Mudslide?
-            if (waterIndex > -1 && incomingDamage > 3) {
-                combo.push(waterIndex);
-            }
-        }
-
-        if (combo.length > 0) {
-            const elements = combo.map(idx => this.ai.board[idx]);
+        combos.forEach(indices => {
+            const elements = indices.map(idx => this.ai.board[idx]);
             const spell = this.getSpellFromCombo(elements);
+            if (spell) {
+                const score = this.scoreAISpell(spell, true, incomingDamage);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestSpell = spell;
+                    bestComboIndices = indices;
+                }
+            }
+        });
 
+        if (bestSpell && bestScore > -1) {
             // Consume board mana
-            combo.sort((a,b) => b-a);
-            combo.forEach(idx => {
+            bestComboIndices.sort((a,b) => b-a);
+            bestComboIndices.forEach(idx => {
                 const consumed = this.ai.board.splice(idx, 1)[0];
                 this.sharedDiscard.push(consumed);
             });
@@ -2656,7 +2717,7 @@ export class Game extends Phaser.Scene {
             this.updateAIBoardDisplay();
             this.updateAILifeDisplay();
             this.updateDeckDiscardDisplay();
-            return spell;
+            return bestSpell;
         }
 
         return null;
