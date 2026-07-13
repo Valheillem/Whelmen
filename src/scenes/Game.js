@@ -631,6 +631,10 @@ export class Game extends Phaser.Scene {
     }
 
     triggerSpellVisual(element, startX, startY, endX, endY, onComplete) {
+        if (element === 'n/a' || !this.emitters[element]) {
+            element = 'air'; // Default to a valid element to prevent crash
+        }
+        
         this.playSound(element === 'earth' ? 'shield' : element);
         
         let visual = this.add.circle(startX, startY, 20, 
