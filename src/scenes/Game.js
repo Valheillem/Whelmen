@@ -391,9 +391,9 @@ export class Game extends Phaser.Scene {
         }
         
         if (char.status.oppDraw4 > 0) {
-            for(let i=0;i<4;i++) { let d = this.drawCard(); if(d) opp.hand.push(d); }
+            for(let i=0;i<4;i++) { let d = this.drawCard(); if(d) char.hand.push(d); }
             char.status.oppDraw4 = 0;
-            this.logMessage("Opponent is forced to draw 4 mana!");
+            this.logMessage(`${who.toUpperCase()} is flooded with 4 extra mana!`);
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
@@ -401,6 +401,22 @@ export class Game extends Phaser.Scene {
         if (char.status.extraDrawIfShield > 0 && char.shield > 0) {
             let d = this.drawCard(); if(d) char.hand.push(d);
             this.logMessage(`${who.toUpperCase()} draws extra mana from Shield!`);
+            this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
+            this.updateAIHandDisplay(); this.updateAILifeDisplay();
+        }
+
+        // Quagmire redrawMana: discard up to 2 hand cards and draw replacements
+        if (char.status.redrawMana > 0 && char.hand.length > 0) {
+            const redrawCount = Math.min(2, char.hand.length);
+            for (let i = 0; i < redrawCount; i++) {
+                const discIdx = Math.floor(Math.random() * char.hand.length);
+                this.sharedDiscard.push(char.hand.splice(discIdx, 1)[0]);
+            }
+            for (let i = 0; i < redrawCount; i++) {
+                let d = this.drawCard(); if(d) char.hand.push(d);
+            }
+            char.status.redrawMana = 0;
+            this.logMessage(`${who.toUpperCase()} redraws ${redrawCount} mana!`);
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
@@ -430,13 +446,29 @@ export class Game extends Phaser.Scene {
         }
     
         if (card) {
+            // Check autoPlayDraw: drawn mana goes to board instead of hand
+            if (char.status.autoPlayDraw > 0 && char.board.length < 3) {
+                char.board.push(card);
+                this.logMessage(`${who.toUpperCase()}'s drawn mana is auto-played to board!`);
+            } else {
+                char.hand.push(card);
+            }
+
+            // Check loseManaOnDraw: lose a hand card when drawing
+            if (char.status.loseManaOnDraw > 0 && char.hand.length > 0) {
+                const lostIdx = Math.floor(Math.random() * char.hand.length);
+                const lost = char.hand.splice(lostIdx, 1)[0];
+                this.sharedDiscard.push(lost);
+                this.logMessage(`${who.toUpperCase()} lost a hand mana from drawing!`);
+            }
+
             if (who === 'player') {
-                this.player.hand.push(card);
                 this.updatePlayerHandDisplay();
+                this.updatePlayerBoardDisplay();
                 this.updatePlayerLifeDisplay();
             } else {
-                this.ai.hand.push(card);
                 this.updateAIHandDisplay();
+                this.updateAIBoardDisplay();
                 this.updateAILifeDisplay();
             }
         }
@@ -1734,25 +1766,29 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.setVisible(true);
 
         if (spell) {
-            // Check weather Cycle advantage
+            // Check synergy using the new three-way system
             const cycle = this.cycleElements[this.cycleIndex];
-            let isEmp = spell.element === cycle;
-            if (spell.name === 'Firestorm' && cycle === 'air') isEmp = true;
-            const isWeak = this.isWeakenedByCycle(spell.element, cycle);
+            let isEmp = false;
+            if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
+            else if (spell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[spell.element]) isEmp = true;
+            else if (spell.synergyType === 'prestructive' && spell.combo && !spell.combo.includes(cycle)) isEmp = true;
+            else if (spell.synergyType === 'force_cycle') isEmp = true;
             
-            const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff };
+            const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff, 'n/a': 0x4a4a4a };
             const colorHex = colors[spell.element] || 0x4a4a4a;
 
             const elementIcon = spell.element === 'fire' ? '🔥' :
                                 spell.element === 'earth' ? '🌿' :
-                                spell.element === 'water' ? '💧' : '🌪️';
+                                spell.element === 'water' ? '💧' :
+                                spell.element === 'air' ? '🌪️' : '⚖️';
             
             // 1. Set Title
             this.primedSpellTitle.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
             this.primedSpellTitle.setColor(
                 spell.element === 'fire' ? '#df1b2d' :
                 spell.element === 'earth' ? '#a67032' :
-                spell.element === 'water' ? '#1084e9' : '#bf8cff'
+                spell.element === 'water' ? '#1084e9' :
+                spell.element === 'air' ? '#bf8cff' : '#a0a0b0'
             );
 
             // 2. Set Combo Recipe
@@ -1768,17 +1804,13 @@ export class Game extends Phaser.Scene {
             // 3. Set Description
             this.primedSpellDesc.setText(spell.desc);
 
-            // 4. Set Cycle Advantage Banner
+            // 4. Set Cycle Synergy Banner
             if (isEmp) {
-                this.primedSpellAdvantage.setText('⚡ EMPOWERED (+3 STATS)');
+                this.primedSpellAdvantage.setText('⚡ SYNERGY ACTIVE');
                 this.primedSpellAdvantage.setColor('#a67032');
                 this.primedSpellAdvantage.setVisible(true);
-            } else if (isWeak) {
-                this.primedSpellAdvantage.setText('⚠ WEAKENED (-2 STATS)');
-                this.primedSpellAdvantage.setColor('#df1b2d');
-                this.primedSpellAdvantage.setVisible(true);
             } else {
-                this.primedSpellAdvantage.setText('⚪ ENVIRONMENT NEUTRAL');
+                this.primedSpellAdvantage.setText('⚪ NO SYNERGY');
                 this.primedSpellAdvantage.setColor('#a0a0b0');
                 this.primedSpellAdvantage.setVisible(true);
             }
@@ -1859,9 +1891,27 @@ export class Game extends Phaser.Scene {
                 
                 this.playElementalBurst(targetX, targetY, el);
 
-                // Auto end turn after completion
+                // Status hooks for mana play
+                if (this.player.status.manaPlayDamage > 0) {
+                    this.forceDiscardRandom('ai', 1);
+                    this.logMessage(`Player's mana play deals 1 damage to AI!`);
+                }
+                if (this.ai.status.oppManaPlayDamage > 0) {
+                    this.forceDiscardRandom('player', 1);
+                    this.logMessage(`Player takes 1 damage from playing mana due to AI Surge!`);
+                }
+
+                // Check bonusManaPlays: allow a second mana play
                 this.time.delayedCall(450, () => {
-                    this.endTurn();
+                    if (this.player.status.bonusManaPlays > 0) {
+                        this.player.status.bonusManaPlays = 0;
+                        this.actionUsedThisTurn = false;
+                        this.logMessage(`Player can play a second mana!`);
+                        this.phase = 'action';
+                        this.enablePlayerControls(true);
+                    } else {
+                        this.endTurn();
+                    }
                 });
             }
         });
@@ -1956,8 +2006,24 @@ export class Game extends Phaser.Scene {
         this.logMessage("Player chooses Pass to Draw.");
         const extraCard = this.drawCard();
         if (extraCard) {
-            this.player.hand.push(extraCard);
+            // Check autoPlayDraw: drawn mana goes to board instead of hand
+            if (this.player.status.autoPlayDraw > 0 && this.player.board.length < 3) {
+                this.player.board.push(extraCard);
+                this.logMessage(`Player's drawn mana is auto-played to board!`);
+            } else {
+                this.player.hand.push(extraCard);
+            }
+
+            // Check loseManaOnDraw: lose a hand card when drawing
+            if (this.player.status.loseManaOnDraw > 0 && this.player.hand.length > 0) {
+                const lostIdx = Math.floor(Math.random() * this.player.hand.length);
+                const lost = this.player.hand.splice(lostIdx, 1)[0];
+                this.sharedDiscard.push(lost);
+                this.logMessage(`Player lost a hand mana from drawing!`);
+            }
+
             this.updatePlayerHandDisplay();
+            this.updatePlayerBoardDisplay();
             this.updatePlayerLifeDisplay();
         }
 
@@ -2078,7 +2144,7 @@ export class Game extends Phaser.Scene {
         }
 
         if (isEmp) {
-            // Apply Empowered Synergy Effects dynamically
+            // Apply Empowered value overrides (immediate stat changes only)
             if (spell.name === 'Breeze') finalDrain = 2;
             if (spell.name === 'Stream') finalDraw = 2;
             if (spell.name === 'Spark') finalDmg = 3;
@@ -2088,39 +2154,23 @@ export class Game extends Phaser.Scene {
             if (spell.name === 'Blast') finalDmg = 5;
             if (spell.name === 'Carapace') finalShield = 8;
             
-            if (spell.name === 'Ignition') attChar.status.bonusManaPlays = 1;
-            if (spell.name === 'Haze') { this.player.status.loseManaOnDraw = 1; this.ai.status.loseManaOnDraw = 1; }
-            if (spell.name === 'Quake') attChar.status.shieldDamageDebuff = 1;
-            if (spell.name === 'Dust') attChar.status.missChance = 1;
-            if (spell.name === 'Typhoon') attChar.status.autoPlayDraw = 1;
-            if (spell.name === 'Enrich') { this.player.status.everyoneDraw3 = 1; this.ai.status.everyoneDraw3 = 1; }
-            if (spell.name === 'Firestorm') attChar.status.manaPlayDamage = 1;
-            if (spell.name === 'Fortress') attChar.status.extraDrawIfShield = 1;
+            // Immediate synergy effects (not deferred status)
             if (spell.name === 'Wildfire') this.pendingExtraAction = true;
-            if (spell.name === 'Quagmire') attChar.status.redrawMana = 1;
             if (spell.name === 'Billow') { this.logMessage('Top 3 cards cycled!'); for(let i=0;i<3;i++) { let d = this.sharedDeck.shift(); if(d) this.sharedDeck.push(d); } }
             if (spell.name === 'Vaporize') { this.logMessage('Top 3 cards destroyed!'); for(let i=0;i<3;i++) { let d = this.sharedDeck.shift(); if(d) this.sharedDiscard.push(d); } this.updateDeckDiscardDisplay(); }
-            if (spell.name === 'Surge') defChar.status.oppManaPlayDamage = 1;
-            if (spell.name === 'Crucible') attChar.status.retaliationDamage = 1;
-            if (spell.name === 'Hurricane') defChar.status.noDrawDebuff = 1;
-            if (spell.name === 'Flood') defChar.status.oppDraw4 = 1;
-            if (spell.name === 'Tower') defChar.status.spellFailChance = 1;
-            if (spell.name === 'Scour') defChar.status.removeShield = 1; // Wait, actually just remove immediately
             if (spell.name === 'Scour') { defChar.shield = 0; this.updateShieldDisplay(defender); this.logMessage(`${defender.toUpperCase()}'s shield scoured!`); }
-            
-            // Force cycles
-            if (spell.name === 'Tempest' || spell.name === 'Pillar' || spell.name === 'Blaze' || spell.name === 'Deluge') {
-                const el = spell.name === 'Tempest' ? 'air' : spell.name === 'Pillar' ? 'earth' : spell.name === 'Blaze' ? 'fire' : 'water';
-                this.cycleIndex = this.cycleElements.indexOf(el);
-                this.logMessage(`The Cycle is forced to ${el.toUpperCase()}!`);
-                this.cycleCenterText.setText(el.toUpperCase());
-                this.triggerCycleParticles(el);
+        }
+
+        // Force Cycle always triggers (not gated by isEmp)
+        if (spell.synergyType === 'force_cycle') {
+            const fcMap = { 'Tempest': 'air', 'Pillar': 'earth', 'Blaze': 'fire', 'Deluge': 'water' };
+            const fcEl = fcMap[spell.name];
+            if (fcEl) {
+                this.cycleIndex = this.cycleElements.indexOf(fcEl);
+                this.logMessage(`The Cycle is forced to ${fcEl.toUpperCase()}!`);
+                this.cycleCenterText.setText(fcEl.toUpperCase());
+                this.triggerCycleParticles(fcEl);
             }
-            
-            if (spell.name === 'Mudslide') { this.player.status.discardReplaceHand = 1; this.ai.status.discardReplaceHand = 1; }
-            if (spell.name === 'Tide') { this.player.status.rotateHands = 1; this.ai.status.rotateHands = 1; }
-            if (spell.name === 'Aegis') { this.player.status.damageImmunity = 1; this.ai.status.damageImmunity = 1; }
-            if (spell.name === 'Cataclysm') { this.player.status.randomTargeting = 1; this.ai.status.randomTargeting = 1; }
         }
 
         // Apply self buffs immediately (like shields)
@@ -2158,6 +2208,31 @@ export class Game extends Phaser.Scene {
         // Drain logic
         if (finalDrain > 0) {
             this.forceDiscardRandom(defender, finalDrain);
+        }
+
+        // DEFERRED STATUS EFFECTS: Applied AFTER shield/draw/drain so they
+        // don't fire during the same spell that set them (Bug 4 fix)
+        // Statuses checked during action/draw phase use value 2 to survive
+        // the startTurn decrement (they decrement to 1, still > 0 when checked)
+        if (isEmp) {
+            if (spell.name === 'Ignition') attChar.status.bonusManaPlays = 2;
+            if (spell.name === 'Haze') { this.player.status.loseManaOnDraw = 2; this.ai.status.loseManaOnDraw = 2; }
+            if (spell.name === 'Quake') attChar.status.shieldDamageDebuff = 2;
+            if (spell.name === 'Dust') { this.player.status.missChance = 2; this.ai.status.missChance = 2; }
+            if (spell.name === 'Typhoon') attChar.status.autoPlayDraw = 2;
+            if (spell.name === 'Enrich') { this.player.status.everyoneDraw3 = 1; this.ai.status.everyoneDraw3 = 1; }
+            if (spell.name === 'Firestorm') attChar.status.manaPlayDamage = 2;
+            if (spell.name === 'Fortress') attChar.status.extraDrawIfShield = 1;
+            if (spell.name === 'Quagmire') attChar.status.redrawMana = 1;
+            if (spell.name === 'Surge') defChar.status.oppManaPlayDamage = 2;
+            if (spell.name === 'Crucible') attChar.status.retaliationDamage = 1;
+            if (spell.name === 'Hurricane') defChar.status.noDrawDebuff = 2;
+            if (spell.name === 'Flood') defChar.status.oppDraw4 = 1;
+            if (spell.name === 'Tower') defChar.status.spellFailChance = 2;
+            if (spell.name === 'Mudslide') { this.player.status.discardReplaceHand = 1; this.ai.status.discardReplaceHand = 1; }
+            if (spell.name === 'Tide') { this.player.status.rotateHands = 1; this.ai.status.rotateHands = 1; }
+            if (spell.name === 'Aegis') { this.player.status.damageImmunity = 2; this.ai.status.damageImmunity = 2; }
+            if (spell.name === 'Cataclysm') { this.player.status.randomTargeting = 2; this.ai.status.randomTargeting = 2; }
         }
         
         // Trigger reaction window if there's incoming damage and defender has active mana
@@ -2222,26 +2297,30 @@ export class Game extends Phaser.Scene {
     resolveDefendingReaction(reactionSpell) {
 
         const defender = this.reactionCaster;
+        const attacker = this.reactionSource;
         const defChar = defender === 'player' ? this.player : this.ai;
+        const attChar = attacker === 'player' ? this.player : this.ai;
 
         if (reactionSpell) {
             this.logMessage(`${defender.toUpperCase()} casts reaction: ${reactionSpell.name}!`);
 
-            // Apply cycle adjustments to reaction
+            // Apply synergy using the new three-way system
             const cycle = this.cycleElements[this.cycleIndex];
-            const isEmp = reactionSpell.element === cycle;
-            const isWeak = this.isWeakenedByCycle(reactionSpell.element, cycle);
+            let isEmp = false;
+            if (reactionSpell.synergyType === 'constructive' && cycle === reactionSpell.element) isEmp = true;
+            else if (reactionSpell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[reactionSpell.element]) isEmp = true;
+            else if (reactionSpell.synergyType === 'prestructive' && reactionSpell.combo && !reactionSpell.combo.includes(cycle)) isEmp = true;
 
             let rDmg = reactionSpell.damage;
             let rShield = reactionSpell.shield;
 
             if (isEmp) {
-                if (rDmg > 0) rDmg += 3;
-                if (rShield > 0) rShield += 3;
-            }
-            if (isWeak) {
-                if (rDmg > 0) rDmg = Math.max(1, rDmg - 2);
-                if (rShield > 0) rShield = Math.max(1, rShield - 2);
+                // Apply empowered value overrides for reaction spells
+                if (reactionSpell.name === 'Shell') rShield = 5;
+                if (reactionSpell.name === 'Spark') rDmg = 3;
+                if (reactionSpell.name === 'Carapace') rShield = 8;
+                if (reactionSpell.name === 'Blast') rDmg = 5;
+                this.logMessage(`${reactionSpell.name} is empowered by synergy!`);
             }
 
             // Apply reaction shield
@@ -2254,10 +2333,16 @@ export class Game extends Phaser.Scene {
             // Counter damage check
             if (rDmg > 0) {
                 this.logMessage(`Reaction deals ${rDmg} counter damage back!`);
-                this.applyDamage(this.reactionSource, rDmg);
+                this.applyDamage(attacker, rDmg);
             }
         } else {
             this.logMessage(`${defender.toUpperCase()} takes the direct hit.`);
+        }
+
+        // Retaliaton damage: fires when defender has retaliationDamage status
+        if (defChar.status.retaliationDamage > 0) {
+            this.forceDiscardRandom(attacker, 1);
+            this.logMessage(`${defender.toUpperCase()} retaliates for 1 damage!`);
         }
 
         // Apply incoming damage minus final shield
@@ -2428,7 +2513,22 @@ export class Game extends Phaser.Scene {
             this.updateAILifeDisplay();
 
             this.time.delayedCall(1200, () => {
-                this.endTurn();
+                // Check bonusManaPlays: AI gets a second mana play
+                if (this.ai.status.bonusManaPlays > 0 && this.ai.hand.length > 0 && this.ai.board.length < 3) {
+                    this.ai.status.bonusManaPlays = 0;
+                    this.logMessage(`AI plays a second mana!`);
+                    const el2 = this.ai.hand.splice(0, 1)[0];
+                    this.ai.board.push(el2);
+                    this.logMessage(`AI plays [${el2.toUpperCase()}] mana to board.`);
+                    this.updateAIHandDisplay();
+                    this.updateAIBoardDisplay();
+                    this.updateAILifeDisplay();
+                    this.time.delayedCall(1200, () => {
+                        this.endTurn();
+                    });
+                } else {
+                    this.endTurn();
+                }
             });
             return;
         }
@@ -2483,8 +2583,24 @@ export class Game extends Phaser.Scene {
         this.logMessage("AI chooses Pass to Draw.");
         const extra = this.drawCard();
         if (extra) {
-            this.ai.hand.push(extra);
+            // Check autoPlayDraw: drawn mana goes to board instead of hand
+            if (this.ai.status.autoPlayDraw > 0 && this.ai.board.length < 3) {
+                this.ai.board.push(extra);
+                this.logMessage(`AI's drawn mana is auto-played to board!`);
+            } else {
+                this.ai.hand.push(extra);
+            }
+
+            // Check loseManaOnDraw: lose a hand card when drawing
+            if (this.ai.status.loseManaOnDraw > 0 && this.ai.hand.length > 0) {
+                const lostIdx = Math.floor(Math.random() * this.ai.hand.length);
+                const lost = this.ai.hand.splice(lostIdx, 1)[0];
+                this.sharedDiscard.push(lost);
+                this.logMessage(`AI lost a hand mana from drawing!`);
+            }
+
             this.updateAIHandDisplay();
+            this.updateAIBoardDisplay();
             this.updateAILifeDisplay();
         }
 
