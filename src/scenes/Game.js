@@ -1030,48 +1030,89 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         // Primed Spell Preview Panel next to buttons
-        const panelW = 240;
-        const panelH = 120;
+        const panelW = 264;
+        const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(w - 600, h - 208).setVisible(false);
+        this.primedSpellPanel = this.add.container(w - 700, h - 180).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
         
         this.primedSpellTitle = this.add.text(14, 12, '', {
             fontFamily: '"Outfit", sans-serif',
-            fontSize: '13.5px',
+            fontSize: '15px',
             fontWeight: '800',
             color: '#ffffff'
         });
         this.primedSpellPanel.add(this.primedSpellTitle);
         
-        this.primedSpellCombo = this.add.text(14, 32, '', {
+        this.primedSpellCombo = this.add.text(14, 34, '', {
             fontFamily: '"Inter", sans-serif',
-            fontSize: '10px',
+            fontSize: '11px',
             fontWeight: '700',
             color: '#a0a0b0',
             letterSpacing: 0.5
         });
         this.primedSpellPanel.add(this.primedSpellCombo);
         
-        this.primedSpellDesc = this.add.text(14, 49, '', {
+        this.primedSpellDesc = this.add.text(14, 53, '', {
             fontFamily: '"Inter", sans-serif',
-            fontSize: '11px',
+            fontSize: '12px',
             fontWeight: '500',
             color: '#cbd5e1',
             wordWrap: { width: panelW - 28 }
         });
         this.primedSpellPanel.add(this.primedSpellDesc);
 
-        this.primedSpellAdvantage = this.add.text(14, 88, '', {
+        this.primedSpellAdvantage = this.add.text(14, 96, '', {
             fontFamily: '"Outfit", sans-serif',
-            fontSize: '10.5px',
+            fontSize: '11.5px',
             fontWeight: '800',
             color: '#a67032',
             letterSpacing: 0.5
         });
         this.primedSpellPanel.add(this.primedSpellAdvantage);
+
+        // Incoming Spell Preview Panel
+        this.incomingSpellPanel = this.add.container(w - 700, 48).setVisible(false);
+        
+        this.incomingSpellBg = this.add.graphics();
+        this.incomingSpellPanel.add(this.incomingSpellBg);
+        
+        this.incomingSpellTitle = this.add.text(14, 12, '', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '15px',
+            fontWeight: '800',
+            color: '#ffffff'
+        });
+        this.incomingSpellPanel.add(this.incomingSpellTitle);
+        
+        this.incomingSpellCombo = this.add.text(14, 34, '', {
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '11px',
+            fontWeight: '700',
+            color: '#a0a0b0',
+            letterSpacing: 0.5
+        });
+        this.incomingSpellPanel.add(this.incomingSpellCombo);
+        
+        this.incomingSpellDesc = this.add.text(14, 53, '', {
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '12px',
+            fontWeight: '500',
+            color: '#cbd5e1',
+            wordWrap: { width: panelW - 28 }
+        });
+        this.incomingSpellPanel.add(this.incomingSpellDesc);
+
+        this.incomingSpellAdvantage = this.add.text(14, 96, '', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '11.5px',
+            fontWeight: '800',
+            color: '#a67032',
+            letterSpacing: 0.5
+        });
+        this.incomingSpellPanel.add(this.incomingSpellAdvantage);
 
         // Action Menu Container
         this.btnHowToPlay = this.createActionButton(w - 180, h - 250, 'HOW TO PLAY', () => this.handleHowToPlayOption());
@@ -1298,35 +1339,6 @@ export class Game extends Phaser.Scene {
             this.isDraggingHistory = false;
             this.isDraggingScrollbar = false;
         });
-
-        // Dynamic Interactive Tooltip for Spell Hovering
-        this.logTooltip = this.add.container(0, 0).setVisible(false).setDepth(10000);
-        this.logTooltipBg = this.add.graphics();
-        this.logTooltip.add(this.logTooltipBg);
-
-        this.logTooltipTitle = this.add.text(12, 10, '', {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '13px',
-            fontWeight: '700',
-            color: '#ffffff'
-        });
-        this.logTooltip.add(this.logTooltipTitle);
-
-        this.logTooltipCombo = this.add.text(12, 28, '', {
-            fontFamily: '"Inter", sans-serif',
-            fontSize: '10px',
-            fontWeight: '600',
-            color: '#a0a0b0'
-        });
-        this.logTooltip.add(this.logTooltipCombo);
-
-        this.logTooltipDesc = this.add.text(12, 43, '', {
-            fontFamily: '"Inter", sans-serif',
-            fontSize: '11px',
-            color: '#cbd5e1',
-            wordWrap: { width: 216 }
-        });
-        this.logTooltip.add(this.logTooltipDesc);
     }
 
     logMessage(msg) {
@@ -1371,15 +1383,13 @@ export class Game extends Phaser.Scene {
             const spell = this.findSpellInMessage(msg);
             if (spell) {
                 textLine.setColor('#ffffff');
-                this.showLogTooltip(spell, pointer.x, pointer.y);
+                const isAI = msg.toLowerCase().includes('ai') || msg.toLowerCase().includes('opponent');
+                this.showLogTooltip(spell, isAI);
             }
         });
         textLine.on('pointerout', () => {
             textLine.setColor(textLine.originalColor);
             this.hideLogTooltip();
-        });
-        textLine.on('pointermove', (pointer) => {
-            this.updateLogTooltipPosition(pointer.x, pointer.y);
         });
 
         this.logScrollContainer.add(textLine);
@@ -1749,6 +1759,67 @@ export class Game extends Phaser.Scene {
         });
     }
 
+    updatePanelVisuals(isAI, spell) {
+        const titleObj = isAI ? this.incomingSpellTitle : this.primedSpellTitle;
+        const comboObj = isAI ? this.incomingSpellCombo : this.primedSpellCombo;
+        const descObj = isAI ? this.incomingSpellDesc : this.primedSpellDesc;
+        const advObj = isAI ? this.incomingSpellAdvantage : this.primedSpellAdvantage;
+        const bgObj = isAI ? this.incomingSpellBg : this.primedSpellBg;
+        const panelObj = isAI ? this.incomingSpellPanel : this.primedSpellPanel;
+        
+        const cycle = this.cycleElements[this.cycleIndex];
+        let isEmp = false;
+        if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
+        else if (spell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[spell.element]) isEmp = true;
+        else if (spell.synergyType === 'prestructive' && spell.combo && !spell.combo.includes(cycle)) isEmp = true;
+        else if (spell.synergyType === 'force_cycle') isEmp = true;
+        
+        const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff, 'n/a': 0x4a4a4a };
+        const colorHex = colors[spell.element] || 0x4a4a4a;
+
+        const elementIcon = spell.element === 'fire' ? '🔥' :
+                            spell.element === 'earth' ? '🌿' :
+                            spell.element === 'water' ? '💧' :
+                            spell.element === 'air' ? '🌪️' : '⚖️';
+        
+        titleObj.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
+        titleObj.setColor(
+            spell.element === 'fire' ? '#df1b2d' :
+            spell.element === 'earth' ? '#a67032' :
+            spell.element === 'water' ? '#1084e9' :
+            spell.element === 'air' ? '#bf8cff' : '#a0a0b0'
+        );
+
+        let comboStr = '';
+        for (const key in this.spellsCatalog) {
+            if (this.spellsCatalog[key].name === spell.name) {
+                comboStr = key.split(',').map(el => el.toUpperCase()).join(' + ');
+                break;
+            }
+        }
+        comboObj.setText(`PRIMED COMBO: ${comboStr}`);
+
+        descObj.setText(spell.desc);
+
+        if (isEmp) {
+            advObj.setText('⚡ SYNERGY ACTIVE');
+            advObj.setColor('#a67032');
+            advObj.setVisible(true);
+        } else {
+            advObj.setText('⚪ NO SYNERGY');
+            advObj.setColor('#a0a0b0');
+            advObj.setVisible(true);
+        }
+
+        bgObj.clear();
+        bgObj.fillStyle(0x090518, 0.95);
+        bgObj.lineStyle(2, colorHex, 0.9);
+        bgObj.fillRoundedRect(0, 0, 264, 132, 10);
+        bgObj.strokeRoundedRect(0, 0, 264, 132, 10);
+        
+        panelObj.setVisible(true);
+    }
+
     updateComboPreview() {
         if (!this.primedSpellPanel) return;
 
@@ -1759,77 +1830,21 @@ export class Game extends Phaser.Scene {
 
         const elements = this.selectedBoardMana.map(idx => this.player.board[idx]);
         const spell = this.getSpellFromCombo(elements);
-        const panelW = 240;
-        const panelH = 120;
+        const panelW = 264;
+        const panelH = 132;
         
         this.primedSpellBg.clear();
         this.primedSpellPanel.setVisible(true);
 
         if (spell) {
-            // Check synergy using the new three-way system
-            const cycle = this.cycleElements[this.cycleIndex];
-            let isEmp = false;
-            if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
-            else if (spell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[spell.element]) isEmp = true;
-            else if (spell.synergyType === 'prestructive' && spell.combo && !spell.combo.includes(cycle)) isEmp = true;
-            else if (spell.synergyType === 'force_cycle') isEmp = true;
-            
-            const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff, 'n/a': 0x4a4a4a };
-            const colorHex = colors[spell.element] || 0x4a4a4a;
-
-            const elementIcon = spell.element === 'fire' ? '🔥' :
-                                spell.element === 'earth' ? '🌿' :
-                                spell.element === 'water' ? '💧' :
-                                spell.element === 'air' ? '🌪️' : '⚖️';
-            
-            // 1. Set Title
-            this.primedSpellTitle.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
-            this.primedSpellTitle.setColor(
-                spell.element === 'fire' ? '#df1b2d' :
-                spell.element === 'earth' ? '#a67032' :
-                spell.element === 'water' ? '#1084e9' :
-                spell.element === 'air' ? '#bf8cff' : '#a0a0b0'
-            );
-
-            // 2. Set Combo Recipe
-            let comboStr = '';
-            for (const key in this.spellsCatalog) {
-                if (this.spellsCatalog[key].name === spell.name) {
-                    comboStr = key.split(',').map(el => el.toUpperCase()).join(' + ');
-                    break;
-                }
-            }
-            this.primedSpellCombo.setText(`PRIMED COMBO: ${comboStr}`);
-
-            // 3. Set Description
-            this.primedSpellDesc.setText(spell.desc);
-
-            // 4. Set Cycle Synergy Banner
-            if (isEmp) {
-                this.primedSpellAdvantage.setText('⚡ SYNERGY ACTIVE');
-                this.primedSpellAdvantage.setColor('#a67032');
-                this.primedSpellAdvantage.setVisible(true);
-            } else {
-                this.primedSpellAdvantage.setText('⚪ NO SYNERGY');
-                this.primedSpellAdvantage.setColor('#a0a0b0');
-                this.primedSpellAdvantage.setVisible(true);
-            }
-
-            // Draw glowing background card
-            this.primedSpellBg.fillStyle(0x090518, 0.95);
-            this.primedSpellBg.lineStyle(2, colorHex, 0.9);
-            this.primedSpellBg.fillRoundedRect(0, 0, panelW, panelH, 10);
-            this.primedSpellBg.strokeRoundedRect(0, 0, panelW, panelH, 10);
-
+            this.updatePanelVisuals(false, spell);
         } else {
-            // Invalid combination
             this.primedSpellTitle.setText('INVALID COMBO');
             this.primedSpellTitle.setColor('#df1b2d');
             this.primedSpellCombo.setText('FORMULA UNKNOWN');
             this.primedSpellDesc.setText('Select valid elemental cards on your board to prime a spell.');
             this.primedSpellAdvantage.setVisible(false);
 
-            // Draw warning background
             this.primedSpellBg.fillStyle(0x090518, 0.95);
             this.primedSpellBg.lineStyle(2, 0xdf1b2d, 0.6);
             this.primedSpellBg.fillRoundedRect(0, 0, panelW, panelH, 10);
@@ -3251,56 +3266,14 @@ export class Game extends Phaser.Scene {
         return null;
     }
 
-    showLogTooltip(spell, x, y) {
-        if (!this.logTooltip) return;
-        const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff };
-        const colorHex = colors[spell.element] || 0x4a4a4a;
-
-        const elementIcon = spell.element === 'fire' ? '🔥' :
-                            spell.element === 'earth' ? '🌿' :
-                            spell.element === 'water' ? '💧' : '🌪️';
-        this.logTooltipTitle.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
-        this.logTooltipTitle.setColor(
-            spell.element === 'fire' ? '#df1b2d' :
-            spell.element === 'earth' ? '#a67032' :
-            spell.element === 'water' ? '#1084e9' : '#bf8cff'
-        );
-
-        let comboStr = '';
-        for (const key in this.spellsCatalog) {
-            if (this.spellsCatalog[key].name === spell.name) {
-                comboStr = key.split(',').map(el => el.toUpperCase()).join(' + ');
-                break;
-            }
-        }
-        this.logTooltipCombo.setText(`COMBO: ${comboStr}`);
-        this.logTooltipDesc.setText(spell.desc);
-
-        const width = 240;
-        const height = 48 + this.logTooltipDesc.height + 12;
-
-        this.logTooltipBg.clear();
-        this.logTooltipBg.fillStyle(0x090518, 0.95);
-        this.logTooltipBg.lineStyle(2, colorHex, 0.85);
-        this.logTooltipBg.fillRoundedRect(0, 0, width, height, 8);
-        this.logTooltipBg.strokeRoundedRect(0, 0, width, height, 8);
-
-        this.logTooltip.setPosition(x - width - 15, y - height / 2);
-        this.logTooltip.setVisible(true);
+    showLogTooltip(spell, isAI) {
+        this.updatePanelVisuals(isAI, spell);
     }
 
     hideLogTooltip() {
-        if (this.logTooltip) {
-            this.logTooltip.setVisible(false);
-        }
-    }
-
-    updateLogTooltipPosition(x, y) {
-        if (this.logTooltip && this.logTooltip.visible) {
-            const width = 240;
-            const height = 48 + this.logTooltipDesc.height + 12;
-            this.logTooltip.setPosition(x - width - 15, y - height / 2);
-        }
+        if (this.incomingSpellPanel) this.incomingSpellPanel.setVisible(false);
+        if (this.primedSpellPanel) this.primedSpellPanel.setVisible(false);
+        this.updateComboPreview();
     }
 
     getLogTotalHeight() {
