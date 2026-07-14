@@ -868,8 +868,8 @@ export class Game extends Phaser.Scene {
 
     drawMagicSigils() {
         const h = this.scale.height;
-        this.drawMagicSigil(240, h - 280, 0x1a1a1a); // Player board sigil
-        this.drawMagicSigil(240, 260, 0x1a1a1a); // AI board sigil
+        this.drawMagicSigil(960, h - 90, 0x1a1a1a); // Player board sigil
+        this.drawMagicSigil(960, 90, 0x1a1a1a); // AI board sigil
     }
 
     drawMagicSigil(x, y, colorHex) {
@@ -1048,7 +1048,7 @@ export class Game extends Phaser.Scene {
         const panelW = 264;
         const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(240, h - 260).setVisible(false);
+        this.primedSpellPanel = this.add.container(80, h - 300).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
@@ -1092,7 +1092,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // Incoming Spell Preview Panel
-        this.incomingSpellPanel = this.add.container(240, 180).setVisible(false);
+        this.incomingSpellPanel = this.add.container(80, 170).setVisible(false);
         
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
@@ -1523,7 +1523,7 @@ export class Game extends Phaser.Scene {
 
         this.playerBoardGroup = this.add.group();
         const h = this.scale.height;
-        const y = h - 280;
+        const y = h - 90;
 
         // Group player board elements dynamically
         const stacks = {};
@@ -1725,7 +1725,7 @@ export class Game extends Phaser.Scene {
         }
 
         this.aiBoardGroup = this.add.group();
-        const y = 200;
+        const y = 90;
 
         // Group AI board elements dynamically
         const stacks = {};
