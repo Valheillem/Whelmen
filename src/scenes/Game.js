@@ -1024,7 +1024,7 @@ export class Game extends Phaser.Scene {
             const cardH = 150 * 0.75;
             this.discardOutlineG.lineStyle(1.5, 0x1a1a1a, 0.6);
             this.discardOutlineG.strokeRoundedRect(
-                w / 2 + 270 - cardW / 2, 
+                w / 2 + 140 - cardW / 2, 
                 h / 2 - 40 - cardH / 2, 
                 cardW, 
                 cardH, 
