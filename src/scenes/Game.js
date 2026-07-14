@@ -1042,13 +1042,21 @@ export class Game extends Phaser.Scene {
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
         
-        this.primedSpellTitle = this.add.text(14, 12, '', {
+        this.primedSpellTitle = this.add.text(32, 12, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '15px',
             fontWeight: '800',
             color: '#ffffff'
         });
         this.primedSpellPanel.add(this.primedSpellTitle);
+
+        this.primedSpellIcon = this.add.image(20, 20, '').setDisplaySize(16, 16).setVisible(false);
+        this.primedSpellPanel.add(this.primedSpellIcon);
+        
+        this.primedSpellNeutralDot = this.add.graphics().setVisible(false);
+        this.primedSpellNeutralDot.fillStyle(0x64748b, 1);
+        this.primedSpellNeutralDot.fillCircle(20, 20, 5);
+        this.primedSpellPanel.add(this.primedSpellNeutralDot);
         
         this.primedSpellCombo = this.add.text(14, 34, '', {
             fontFamily: '"Inter", sans-serif',
@@ -1083,13 +1091,21 @@ export class Game extends Phaser.Scene {
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
         
-        this.incomingSpellTitle = this.add.text(14, 12, '', {
+        this.incomingSpellTitle = this.add.text(32, 12, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '15px',
             fontWeight: '800',
             color: '#ffffff'
         });
         this.incomingSpellPanel.add(this.incomingSpellTitle);
+
+        this.incomingSpellIcon = this.add.image(20, 20, '').setDisplaySize(16, 16).setVisible(false);
+        this.incomingSpellPanel.add(this.incomingSpellIcon);
+        
+        this.incomingSpellNeutralDot = this.add.graphics().setVisible(false);
+        this.incomingSpellNeutralDot.fillStyle(0x64748b, 1);
+        this.incomingSpellNeutralDot.fillCircle(20, 20, 5);
+        this.incomingSpellPanel.add(this.incomingSpellNeutralDot);
         
         this.incomingSpellCombo = this.add.text(14, 34, '', {
             fontFamily: '"Inter", sans-serif',
@@ -1781,12 +1797,19 @@ export class Game extends Phaser.Scene {
         const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff, 'n/a': 0x4a4a4a };
         const colorHex = colors[spell.element] || 0x4a4a4a;
 
-        const elementIcon = spell.element === 'fire' ? '🔥' :
-                            spell.element === 'earth' ? '🌿' :
-                            spell.element === 'water' ? '💧' :
-                            spell.element === 'air' ? '🌪️' : '⚖️';
+        const iconObj = isAI ? this.incomingSpellIcon : this.primedSpellIcon;
+        const dotObj = isAI ? this.incomingSpellNeutralDot : this.primedSpellNeutralDot;
+
+        if (spell.element === 'n/a' || !spell.element) {
+            iconObj.setVisible(false);
+            dotObj.setVisible(true);
+        } else {
+            iconObj.setVisible(true);
+            dotObj.setVisible(false);
+            iconObj.setTexture(`icon_${spell.element}`);
+        }
         
-        titleObj.setText(`${elementIcon} ${spell.name.toUpperCase()}`);
+        titleObj.setText(`${spell.name.toUpperCase()}`);
         titleObj.setColor(
             spell.element === 'fire' ? '#df1b2d' :
             spell.element === 'earth' ? '#a67032' :
@@ -1843,6 +1866,8 @@ export class Game extends Phaser.Scene {
         if (spell) {
             this.updatePanelVisuals(false, spell);
         } else {
+            this.primedSpellIcon.setVisible(false);
+            this.primedSpellNeutralDot.setVisible(false);
             this.primedSpellTitle.setText('INVALID COMBO');
             this.primedSpellTitle.setColor('#df1b2d');
             this.primedSpellCombo.setText('FORMULA UNKNOWN');
@@ -3458,11 +3483,11 @@ export class Game extends Phaser.Scene {
                 <div class="panel-section">
                     <div class="panel-section-title">Environmental Cycle</div>
                     <div class="cycle-btn-group">
-                        <button class="panel-btn active-weather" id="w-neutral" style="--color: var(--color-neutral); --glow: var(--glow-neutral-glow);"><span class="emoji">⚪</span>Neut</button>
-                        <button class="panel-btn" id="w-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);"><span class="emoji">🔥</span>Fire</button>
-                        <button class="panel-btn" id="w-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);"><span class="emoji">🌿</span>Earth</button>
-                        <button class="panel-btn" id="w-air" style="--color: var(--color-air); --glow: var(--color-air-glow);"><span class="emoji">🌪️</span>Air</button>
-                        <button class="panel-btn" id="w-water" style="--color: var(--color-water); --glow: var(--color-water-glow);"><span class="emoji">💧</span>Water</button>
+                        <button class="panel-btn active-weather" id="w-neutral" style="--color: var(--color-neutral); --glow: var(--glow-neutral-glow);"><span class="grey-dot"></span>Neut</button>
+                        <button class="panel-btn" id="w-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);"><img src="assets/icons/Fire.png" class="el-icon">Fire</button>
+                        <button class="panel-btn" id="w-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);"><img src="assets/icons/Earth.png" class="el-icon">Earth</button>
+                        <button class="panel-btn" id="w-air" style="--color: var(--color-air); --glow: var(--color-air-glow);"><img src="assets/icons/Air.png" class="el-icon">Air</button>
+                        <button class="panel-btn" id="w-water" style="--color: var(--color-water); --glow: var(--color-water-glow);"><img src="assets/icons/Water.png" class="el-icon">Water</button>
                     </div>
                 </div>
                 
@@ -3472,20 +3497,20 @@ export class Game extends Phaser.Scene {
                         <div class="spawner-column">
                             <div class="spawner-col-title">Spawn In Hand</div>
                             <div class="element-grid">
-                                <button class="panel-btn el-btn" id="spawn-h-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);">🔥 Fire</button>
-                                <button class="panel-btn el-btn" id="spawn-h-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);">🌿 Earth</button>
-                                <button class="panel-btn el-btn" id="spawn-h-air" style="--color: var(--color-air); --glow: var(--color-air-glow);">🌪️ Air</button>
-                                <button class="panel-btn el-btn" id="spawn-h-water" style="--color: var(--color-water); --glow: var(--color-water-glow);">💧 Water</button>
+                                <button class="panel-btn el-btn" id="spawn-h-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);"><img src="assets/icons/Fire.png" class="el-icon"> Fire</button>
+                                <button class="panel-btn el-btn" id="spawn-h-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);"><img src="assets/icons/Earth.png" class="el-icon"> Earth</button>
+                                <button class="panel-btn el-btn" id="spawn-h-air" style="--color: var(--color-air); --glow: var(--color-air-glow);"><img src="assets/icons/Air.png" class="el-icon"> Air</button>
+                                <button class="panel-btn el-btn" id="spawn-h-water" style="--color: var(--color-water); --glow: var(--color-water-glow);"><img src="assets/icons/Water.png" class="el-icon"> Water</button>
                                 <button class="panel-btn el-btn clear-btn" id="clear-hand">Clear Hand</button>
                             </div>
                         </div>
                         <div class="spawner-column">
                             <div class="spawner-col-title">Spawn On Board</div>
                             <div class="element-grid">
-                                <button class="panel-btn el-btn" id="spawn-b-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);">🔥 Fire</button>
-                                <button class="panel-btn el-btn" id="spawn-b-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);">🌿 Earth</button>
-                                <button class="panel-btn el-btn" id="spawn-b-air" style="--color: var(--color-air); --glow: var(--color-air-glow);">🌪️ Air</button>
-                                <button class="panel-btn el-btn" id="spawn-b-water" style="--color: var(--color-water); --glow: var(--color-water-glow);">💧 Water</button>
+                                <button class="panel-btn el-btn" id="spawn-b-fire" style="--color: var(--color-fire); --glow: var(--color-fire-glow);"><img src="assets/icons/Fire.png" class="el-icon"> Fire</button>
+                                <button class="panel-btn el-btn" id="spawn-b-earth" style="--color: var(--color-earth); --glow: var(--color-earth-glow);"><img src="assets/icons/Earth.png" class="el-icon"> Earth</button>
+                                <button class="panel-btn el-btn" id="spawn-b-air" style="--color: var(--color-air); --glow: var(--color-air-glow);"><img src="assets/icons/Air.png" class="el-icon"> Air</button>
+                                <button class="panel-btn el-btn" id="spawn-b-water" style="--color: var(--color-water); --glow: var(--color-water-glow);"><img src="assets/icons/Water.png" class="el-icon"> Water</button>
                                 <button class="panel-btn el-btn clear-btn" id="clear-board">Clear Board</button>
                             </div>
                         </div>
@@ -3655,9 +3680,10 @@ export class Game extends Phaser.Scene {
                     return;
                 }
                 
-                const elementIcon = spell.element === 'fire' ? '🔥' :
-                                    spell.element === 'earth' ? '🌿' :
-                                    spell.element === 'water' ? '💧' : '🌪️';
+                const elementIcon = spell.element === 'fire' ? '<img src="assets/icons/Fire.png" class="el-icon">' :
+                                    spell.element === 'earth' ? '<img src="assets/icons/Earth.png" class="el-icon">' :
+                                    spell.element === 'water' ? '<img src="assets/icons/Water.png" class="el-icon">' :
+                                    spell.element === 'air' ? '<img src="assets/icons/Air.png" class="el-icon">' : '<span class="grey-dot"></span>';
                 
                 const elSpanClass = `element-${spell.element}`;
                 

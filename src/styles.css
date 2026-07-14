@@ -560,8 +560,18 @@ html, body {
     gap: 4px;
 }
 
-.panel-btn span.emoji {
-    font-size: 1.1rem;
+.panel-btn img.el-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+}
+
+.grey-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #64748b;
+    border-radius: 50%;
+    display: inline-block;
 }
 
 .panel-btn:hover {
