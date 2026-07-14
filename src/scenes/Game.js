@@ -1794,7 +1794,7 @@ export class Game extends Phaser.Scene {
         const cycle = this.cycleElements[this.cycleIndex];
         let isEmp = false;
         if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
-        else if (spell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[spell.element]) isEmp = true;
+        else if (spell.synergyType === 'destructive' && cycle !== spell.element && spell.combo.includes(cycle)) isEmp = true;
         else if (spell.synergyType === 'prestructive' && spell.combo && !spell.combo.includes(cycle)) isEmp = true;
         else if (spell.synergyType === 'force_cycle') isEmp = true;
         
@@ -2177,7 +2177,7 @@ export class Game extends Phaser.Scene {
         // Synergy logic
         let isEmp = false;
         if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
-        else if (spell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[spell.element]) isEmp = true;
+        else if (spell.synergyType === 'destructive' && cycle !== spell.element && spell.combo.includes(cycle)) isEmp = true;
         else if (spell.synergyType === 'prestructive' && !spell.combo.includes(cycle)) isEmp = true;
 
         let finalDmg = spell.damage;
@@ -2364,7 +2364,7 @@ export class Game extends Phaser.Scene {
             const cycle = this.cycleElements[this.cycleIndex];
             let isEmp = false;
             if (reactionSpell.synergyType === 'constructive' && cycle === reactionSpell.element) isEmp = true;
-            else if (reactionSpell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[reactionSpell.element]) isEmp = true;
+            else if (reactionSpell.synergyType === 'destructive' && cycle !== reactionSpell.element && reactionSpell.combo.includes(cycle)) isEmp = true;
             else if (reactionSpell.synergyType === 'prestructive' && reactionSpell.combo && !reactionSpell.combo.includes(cycle)) isEmp = true;
 
             let rDmg = reactionSpell.damage;
@@ -2569,7 +2569,7 @@ export class Game extends Phaser.Scene {
         
         let isEmp = false;
         if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
-        else if (spell.synergyType === 'destructive' && cycle === {'fire':'water','water':'fire','earth':'air','air':'earth'}[spell.element]) isEmp = true;
+        else if (spell.synergyType === 'destructive' && cycle !== spell.element && spell.combo.includes(cycle)) isEmp = true;
         else if (spell.synergyType === 'prestructive' && !spell.combo.includes(cycle)) isEmp = true;
 
         if (isReaction) {
