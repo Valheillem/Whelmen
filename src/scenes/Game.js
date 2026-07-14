@@ -941,15 +941,15 @@ export class Game extends Phaser.Scene {
             char.shieldG.fillStyle(0xa67032, 0.15);
             char.shieldG.lineStyle(2, 0xa67032, 0.7);
             if (who === 'player') {
-                // Place above the player hand (relative to playerZone) to avoid overlap
-                char.shieldG.fillRoundedRect(590, -35, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(590, -35, 140, 24, 6);
-                char.shieldT.setPosition(600, -31);
+                // Place below the player hand (relative to playerZone) to avoid overlap
+                char.shieldG.fillRoundedRect(80, 140, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(80, 140, 140, 24, 6);
+                char.shieldT.setPosition(90, 144);
             } else {
                 // Place below the AI hand (relative to aiZone)
-                char.shieldG.fillRoundedRect(590, 165, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(590, 165, 140, 24, 6);
-                char.shieldT.setPosition(600, 169);
+                char.shieldG.fillRoundedRect(80, 150, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(80, 150, 140, 24, 6);
+                char.shieldT.setPosition(90, 154);
             }
             char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
         } else {
@@ -962,7 +962,7 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         // Create actual image representations for Deck and Discard
-        this.deckCardImg = this.add.image(w / 2 - 170, h / 2 - 40, 'card_back')
+        this.deckCardImg = this.add.image(w / 2 - 240, h / 2 - 40, 'card_back')
             .setScale(0.75)
             .setVisible(true);
 
@@ -974,7 +974,7 @@ export class Game extends Phaser.Scene {
         this.discardOutlineG = this.add.graphics();
 
         // Text labels positioned under the card images
-        this.deckT = this.add.text(w / 2 - 170, h / 2 + 35, '', {
+        this.deckT = this.add.text(w / 2 - 240, h / 2 + 35, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
@@ -1135,25 +1135,25 @@ export class Game extends Phaser.Scene {
         this.btnPassDraw = this.createActionButton(w - 180, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
 
         // Select Discard prompt overlay container
-        this.discardPromptText = this.add.text(w / 2, h / 2 + 100, '', {
+        this.discardPromptText = this.add.text(w / 2, h / 2 + 250, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '22px',
             fontWeight: '800',
             color: '#df1b2d',
             backgroundColor: '#040212',
-            padding: { x: 20, y: 10 },
+            padding: { x: 10, y: 5 },
             align: 'center'
-        }).setOrigin(0.5).setVisible(false);
+        }).setOrigin(0.5).setVisible(false).setDepth(200);
 
         // Defend Reaction Alert/Countdown timer
         this.reactionTimerBg = this.add.graphics();
-        this.reactionTimerText = this.add.text(w / 2, h / 2 - 130, '', {
+        this.reactionTimerText = this.add.text(w / 2, h / 2 - 240, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '28px',
             fontWeight: '800',
             color: '#bf8cff',
             align: 'center'
-        }).setOrigin(0.5).setVisible(false);
+        }).setOrigin(0.5).setVisible(false).setDepth(200);
     }
 
     createActionButton(x, y, label, onClick) {
@@ -1541,7 +1541,7 @@ export class Game extends Phaser.Scene {
 
         // Dynamic symmetric centering around player board
         const centerX = w / 2 + 50;
-        const spaceX = 100;
+        const spaceX = 75;
         const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
 
         uniqueElements.forEach((el, index) => {
@@ -1739,7 +1739,7 @@ export class Game extends Phaser.Scene {
 
         // Dynamic symmetric centering around AI board
         const centerX = w / 2 + 50;
-        const spaceX = 100;
+        const spaceX = 75;
         const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
 
         uniqueElements.forEach((el, index) => {
@@ -1904,7 +1904,7 @@ export class Game extends Phaser.Scene {
         const uniqueElements = [...new Set(this.player.board)];
         const elIndex = uniqueElements.indexOf(el);
         const centerX = w / 2 + 50;
-        const spaceX = 100;
+        const spaceX = 75;
         const targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
         const targetY = h / 2 - 40 + 160;
 
