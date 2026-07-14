@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./src/styles.css?v=1.2.25">
+    <link rel="stylesheet" href="./src/styles.css?v=1.2.26">
 </head>
 <body>
     <div id="rotate-overlay" class="overlay">
@@ -84,12 +84,15 @@
                 <p>Your total health is represented by the active cards remaining in your <strong>Hand</strong> and placed on your <strong>Board</strong>. If your cards run out, you are defeated!</p>
 
                 <h3>The Structure</h3>
-                <p>At the start of your turn, you draw 1 card from the shared deck. Then, you may perform <strong>ONE</strong> of the following actions:</p>
+                <p>At the start of your turn, you draw 1 card from the shared deck. Then, you may perform <strong>BOTH</strong> of the following actions in any order:</p>
                 <ul>
                     <li><strong>Play Mana:</strong> Move 1 card from your hand to the board as mana. You can only play 1 mana card per turn.</li>
                     <li><strong>Cast a Spell:</strong> Select up to 3 mana cards on your board and consume them to cast a spell. Casting a spell consumes your active cards, reducing your overall health!</li>
-                    <li><strong>Pass:</strong> Skip playing mana or casting a spell to draw 1 additional card.</li>
                 </ul>
+                <p>Alternatively, you may <strong>Pass & Draw</strong>: Skip your actions to draw 1 additional card.</p>
+                
+                <h3>Overwhelmed</h3>
+                <p>Your Maximum Hand Size is normally 8. If you exceed this limit, you must discard cards at the end of the turn. If you are forced to discard cards due to exceeding your hand size <strong>2 turns in a row</strong>, you become <strong>Overwhelmed</strong>! Your Maximum Hand Size will decrease by 1. A player can become Overwhelmed any number of times.</p>
 
                                                 <h3>The Cycle and Synergies</h3>
                 <p>A predictable, elemental weather cycle rotates every single turn in this order:</p>
@@ -121,12 +124,15 @@
                 <p>Your total health is represented by the active cards remaining in your <strong>Hand</strong> and placed on your <strong>Board</strong>. If your cards run out, you are defeated!</p>
 
                 <h3>The Structure</h3>
-                <p>At the start of your turn, you draw 1 card from the shared deck. Then, you may perform <strong>ONE</strong> of the following actions:</p>
+                <p>At the start of your turn, you draw 1 card from the shared deck. Then, you may perform <strong>BOTH</strong> of the following actions in any order:</p>
                 <ul>
                     <li><strong>Play Mana:</strong> Move 1 card from your hand to the board as mana. You can only play 1 mana card per turn.</li>
                     <li><strong>Cast a Spell:</strong> Select up to 3 mana cards on your board and consume them to cast a spell. Casting a spell consumes your active cards, reducing your overall health!</li>
-                    <li><strong>Pass:</strong> Skip playing mana or casting a spell to draw 1 additional card.</li>
                 </ul>
+                <p>Alternatively, you may <strong>Pass & Draw</strong>: Skip your actions to draw 1 additional card.</p>
+                
+                <h3>Overwhelmed</h3>
+                <p>Your Maximum Hand Size is normally 8. If you exceed this limit, you must discard cards at the end of the turn. If you are forced to discard cards due to exceeding your hand size <strong>2 turns in a row</strong>, you become <strong>Overwhelmed</strong>! Your Maximum Hand Size will decrease by 1. A player can become Overwhelmed any number of times.</p>
 
                                                 <h3>The Cycle and Synergies</h3>
                 <p>A predictable, elemental weather cycle rotates every single turn in this order:</p>
@@ -214,6 +220,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <script src="./phaser.js"></script>
-    <script type="module" src="./src/main.js?v=1.2.25"></script>
+    <script type="module" src="./src/main.js?v=1.2.26"></script>
 </body>
 </html>

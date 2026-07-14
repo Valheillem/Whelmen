@@ -239,7 +239,7 @@ export class Game extends Phaser.Scene {
         this.firstCycleIndex = Math.floor(Math.random() * 4) + 1; // 1 to 4
         this.turn = 'player'; // Player starts
         this.phase = 'action'; // Starting action phase
-        this.actionUsedThisTurn = false; // Player can do 1 action per turn
+        this.manaPlacedThisTurn = false; this.spellCastThisTurn = false; // Player can do 1 action per turn
 
         this.player = {
             hand: [],
@@ -247,6 +247,7 @@ export class Game extends Phaser.Scene {
             shield: 0,
             life: 8,
             maxHand: 8,
+            consecutiveDiscards: 0,
             shieldG: null,
             shieldT: null,
                         steamDebuff: false,
@@ -259,6 +260,7 @@ export class Game extends Phaser.Scene {
             shield: 0,
             life: 8,
             maxHand: 8,
+            consecutiveDiscards: 0,
             shieldG: null,
             shieldT: null,
                         steamDebuff: false,
@@ -340,7 +342,7 @@ export class Game extends Phaser.Scene {
     }
 
     dealStartingHands() {
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 4; i++) {
             this.player.hand.push(this.drawCard(true));
             this.ai.hand.push(this.drawCard(true));
         }
@@ -427,7 +429,7 @@ export class Game extends Phaser.Scene {
         }
         
         this.phase = 'action';
-        this.actionUsedThisTurn = false;
+        this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
         this.selectedBoardMana = [];
         this.updateComboPreview();
 
@@ -535,6 +537,13 @@ export class Game extends Phaser.Scene {
                 const discarded = char.hand.pop();
                 this.sharedDiscard.push(discarded);
             }
+            char.consecutiveDiscards++;
+            if (char.consecutiveDiscards >= 2) {
+                char.maxHand = Math.max(1, char.maxHand - 1);
+                char.consecutiveDiscards = 0;
+                this.logMessage(`OVERWHELMED! ${who.toUpperCase()}'s Max Hand Size decreases by 1!`);
+                this.playSound('damage');
+            }
             if (who === 'player') {
                 this.updatePlayerHandDisplay();
                 this.updatePlayerLifeDisplay();
@@ -543,6 +552,8 @@ export class Game extends Phaser.Scene {
                 this.updateAILifeDisplay();
             }
             this.updateDeckDiscardDisplay();
+        } else {
+            char.consecutiveDiscards = 0;
         }
     }
 
@@ -1050,12 +1061,12 @@ export class Game extends Phaser.Scene {
         });
         this.primedSpellPanel.add(this.primedSpellTitle);
 
-        this.primedSpellIcon = this.add.image(230, 26, '').setAlpha(0.5).setVisible(false);
+        this.primedSpellIcon = this.add.image(198, 66, '').setAlpha(0.5).setVisible(false);
         this.primedSpellPanel.add(this.primedSpellIcon);
         
         this.primedSpellNeutralDot = this.add.graphics().setVisible(false);
         this.primedSpellNeutralDot.fillStyle(0x64748b, 0.5);
-        this.primedSpellNeutralDot.fillCircle(230, 26, 12);
+        this.primedSpellNeutralDot.fillCircle(198, 66, 12);
         this.primedSpellPanel.add(this.primedSpellNeutralDot);
         
         this.primedSpellCombo = this.add.text(14, 34, '', {
@@ -1099,12 +1110,12 @@ export class Game extends Phaser.Scene {
         });
         this.incomingSpellPanel.add(this.incomingSpellTitle);
 
-        this.incomingSpellIcon = this.add.image(230, 26, '').setAlpha(0.5).setVisible(false);
+        this.incomingSpellIcon = this.add.image(198, 66, '').setAlpha(0.5).setVisible(false);
         this.incomingSpellPanel.add(this.incomingSpellIcon);
         
         this.incomingSpellNeutralDot = this.add.graphics().setVisible(false);
         this.incomingSpellNeutralDot.fillStyle(0x64748b, 0.5);
-        this.incomingSpellNeutralDot.fillCircle(230, 26, 12);
+        this.incomingSpellNeutralDot.fillCircle(198, 66, 12);
         this.incomingSpellPanel.add(this.incomingSpellNeutralDot);
         
         this.incomingSpellCombo = this.add.text(14, 34, '', {
@@ -1228,7 +1239,8 @@ export class Game extends Phaser.Scene {
                     drawState(0x1a1410, 0x05040a, '#555566');
                     zone.disableInteractive();
                 }
-            }
+            },
+            setText: (t) => text.setText(t)
         };
     }
 
@@ -1249,7 +1261,6 @@ export class Game extends Phaser.Scene {
             this.btnPassDraw.setEnabled(true); // Serve as "Pass Reaction" option!
             return;
         }
-
         if (!state) {
             this.btnHowToPlay.setEnabled(true);
             this.btnSpellBook.setEnabled(true);
@@ -1258,8 +1269,15 @@ export class Game extends Phaser.Scene {
         } else {
             this.btnHowToPlay.setEnabled(true);
             this.btnSpellBook.setEnabled(true);
-            this.btnPassDraw.setEnabled(!this.actionUsedThisTurn);
-            this.btnCastSpell.setEnabled(!this.actionUsedThisTurn && this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
+            
+            if (this.manaPlacedThisTurn || this.spellCastThisTurn) {
+                this.btnPassDraw.setText('END TURN');
+            } else {
+                this.btnPassDraw.setText('PASS & DRAW');
+            }
+            this.btnPassDraw.setEnabled(true);
+
+            this.btnCastSpell.setEnabled(!this.spellCastThisTurn && this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
         }
     }
 
@@ -1453,7 +1471,7 @@ export class Game extends Phaser.Scene {
             cardObj.on('pointerdown', () => {
                 if (this.phase === 'discard' || this.phase === 'discard_request_active') {
                     this.discardCardFromZone('hand', index, 'player');
-                } else if (this.phase === 'action' && !this.actionUsedThisTurn && this.turn === 'player') {
+                } else if (this.phase === 'action' && !this.manaPlacedThisTurn && this.turn === 'player') {
                     // Quick Action: Play as Board Mana directly on click!
                     this.playHandCardToBoard(index);
                 }
@@ -1883,10 +1901,10 @@ export class Game extends Phaser.Scene {
 
     // --- STRATEGIC PLAY ACTIONS ---
     playHandCardToBoard(index) {
-        if (this.actionUsedThisTurn) return;
+        if (this.manaPlacedThisTurn) return;
 
         const el = this.player.hand[index];
-        this.actionUsedThisTurn = true;
+        this.manaPlacedThisTurn = true;
         this.playSound('draw');
         this.logMessage(`Player plays [${el.toUpperCase()}] mana to board.`);
         this.enablePlayerControls(false);
@@ -1949,12 +1967,15 @@ export class Game extends Phaser.Scene {
                 this.time.delayedCall(450, () => {
                     if (this.player.status.bonusManaPlays > 0) {
                         this.player.status.bonusManaPlays = 0;
-                        this.actionUsedThisTurn = false;
+                        this.manaPlacedThisTurn = false;
                         this.logMessage(`Player can play a second mana!`);
                         this.phase = 'action';
                         this.enablePlayerControls(true);
-                    } else {
+                    } else if (this.manaPlacedThisTurn && this.spellCastThisTurn) {
                         this.endTurn();
+                    } else {
+                        this.phase = 'action';
+                        this.enablePlayerControls(true);
                     }
                 });
             }
@@ -2044,8 +2065,14 @@ export class Game extends Phaser.Scene {
             return;
         }
 
-        if (this.actionUsedThisTurn) return;
-        this.actionUsedThisTurn = true;
+        if (this.manaPlacedThisTurn || this.spellCastThisTurn) {
+            this.logMessage("Player ends turn.");
+            this.enablePlayerControls(false);
+            this.time.delayedCall(450, () => {
+                this.endTurn();
+            });
+            return;
+        }
 
         this.logMessage("Player chooses Pass to Draw.");
         const extraCard = this.drawCard();
@@ -2111,7 +2138,8 @@ export class Game extends Phaser.Scene {
         }
 
         // Normal turn attack spell casting
-        this.actionUsedThisTurn = true;
+        if (this.spellCastThisTurn) return;
+        this.spellCastThisTurn = true;
         this.enablePlayerControls(false);
 
         // Consume cards
@@ -2295,7 +2323,7 @@ export class Game extends Phaser.Scene {
                 this.time.delayedCall(800, () => {
                     if (this.pendingExtraAction) {
                         this.pendingExtraAction = false;
-                        this.actionUsedThisTurn = false;
+                        this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                         this.logMessage(`${this.turn.toUpperCase()} gets another action!`);
                         if (this.turn === 'player') {
                             this.phase = 'action';
@@ -2304,7 +2332,7 @@ export class Game extends Phaser.Scene {
                             this.runAITurn();
                         }
                     } else {
-                        this.endTurn();
+                        this.checkTurnContinuation();
                     }
                 });
             }
@@ -2445,7 +2473,7 @@ export class Game extends Phaser.Scene {
             this.time.delayedCall(800, () => {
                 if (this.pendingExtraAction) {
                     this.pendingExtraAction = false;
-                    this.actionUsedThisTurn = false;
+                    this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                     this.logMessage(`${this.turn.toUpperCase()} gets another action!`);
                     if (this.turn === 'player') {
                         this.phase = 'action';
@@ -2454,7 +2482,7 @@ export class Game extends Phaser.Scene {
                         this.runAITurn();
                     }
                 } else {
-                    this.endTurn();
+                    this.checkTurnContinuation();
                 }
             });
         }
@@ -2513,11 +2541,11 @@ export class Game extends Phaser.Scene {
                     this.time.delayedCall(600, () => {
                         if (this.pendingExtraAction) {
                             this.pendingExtraAction = false;
-                            this.actionUsedThisTurn = false;
+                            this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                             this.logMessage('Player gets another action!');
                             this.enablePlayerControls(true);
                         } else {
-                            this.endTurn();
+                            this.checkTurnContinuation();
                         }
                     });
                 }
@@ -2592,6 +2620,17 @@ export class Game extends Phaser.Scene {
         return score;
     }
 
+    checkTurnContinuation() {
+        if (this.turn === 'player' && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
+            this.phase = 'action';
+            this.enablePlayerControls(true);
+        } else if (this.turn === 'ai' && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
+            this.runAITurn();
+        } else {
+            this.endTurn();
+        }
+    }
+
     runAITurn() {
         if (this.phase === 'gameover') return;
 
@@ -2599,7 +2638,8 @@ export class Game extends Phaser.Scene {
 
         // Smart decision making logic:
         // 1. Play mana if board has less than 3 cards
-        if (this.ai.board.length < 3 && this.ai.hand.length > 0) {
+        if (!this.manaPlacedThisTurn && this.ai.board.length < 3 && this.ai.hand.length > 0) {
+            this.manaPlacedThisTurn = true;
             // Find a duplicate element or just play first
             const idxToPlay = 0; 
             const el = this.ai.hand.splice(idxToPlay, 1)[0];
@@ -2624,6 +2664,7 @@ export class Game extends Phaser.Scene {
                 // Check bonusManaPlays: AI gets a second mana play
                 if (this.ai.status.bonusManaPlays > 0 && this.ai.hand.length > 0 && this.ai.board.length < 3) {
                     this.ai.status.bonusManaPlays = 0;
+                    this.manaPlacedThisTurn = false;
                     this.logMessage(`AI plays a second mana!`);
                     const el2 = this.ai.hand.splice(0, 1)[0];
                     this.ai.board.push(el2);
@@ -2631,18 +2672,14 @@ export class Game extends Phaser.Scene {
                     this.updateAIHandDisplay();
                     this.updateAIBoardDisplay();
                     this.updateAILifeDisplay();
-                    this.time.delayedCall(1200, () => {
-                        this.endTurn();
-                    });
-                } else {
-                    this.endTurn();
                 }
+                this.runAITurn();
             });
             return;
         }
 
         // 2. Try to form a spell combo from board
-        if (this.ai.board.length >= 2) {
+        if (!this.spellCastThisTurn && this.ai.board.length >= 2) {
             const combos = this.getValidBoardCombos(this.ai.board);
             let bestSpell = null;
             let bestComboIndices = null;
@@ -2662,6 +2699,7 @@ export class Game extends Phaser.Scene {
             });
 
             if (bestSpell) {
+                this.spellCastThisTurn = true;
                 // Consume
                 bestComboIndices.sort((a,b) => b-a);
                 bestComboIndices.forEach(idx => {
@@ -2681,6 +2719,14 @@ export class Game extends Phaser.Scene {
                 });
                 return;
             }
+        }
+
+        if (this.manaPlacedThisTurn || this.spellCastThisTurn) {
+            this.logMessage("AI ends turn.");
+            this.time.delayedCall(1200, () => {
+                this.endTurn();
+            });
+            return;
         }
 
         // 3. Fallback: pass to draw
@@ -2790,7 +2836,7 @@ export class Game extends Phaser.Scene {
         this.time.delayedCall(1200, () => {
             if (this.pendingExtraAction) {
                 this.pendingExtraAction = false;
-                this.actionUsedThisTurn = false;
+                this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                 if (this.turn === 'player') {
                     this.logMessage('Player gets another action!');
                     this.enablePlayerControls(true);
@@ -2799,7 +2845,7 @@ export class Game extends Phaser.Scene {
                     this.runAITurn();
                 }
             } else {
-                this.endTurn();
+                this.checkTurnContinuation();
             }
         });
     }
@@ -3228,11 +3274,11 @@ export class Game extends Phaser.Scene {
             this.time.delayedCall(600, () => {
                 if (this.pendingExtraAction) {
                     this.pendingExtraAction = false;
-                    this.actionUsedThisTurn = false;
+                    this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                     this.logMessage('You get another action!');
                     this.enablePlayerControls(true);
                 } else {
-                    this.endTurn();
+                    this.checkTurnContinuation();
                 }
             });
             return;
@@ -3241,7 +3287,7 @@ export class Game extends Phaser.Scene {
         // Normal Turn Logic
         if (isMyTurn) {
             this.logMessage("--- YOUR TURN ---");
-            this.actionUsedThisTurn = false;
+            this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
             this.selectedBoardMana = [];
             this.updateComboPreview();
             this.enablePlayerControls(true);
@@ -3758,8 +3804,10 @@ export class Game extends Phaser.Scene {
         this.ai.steamDebuff = false;
         this.ai.maxHand = 8;
         
-        // Restore random 8 hand cards and 3 board cards
-        for (let i = 0; i < 8; i++) {
+        this.ai.consecutiveDiscards = 0;
+        
+        // Restore random 4 hand cards and 3 board cards
+        for (let i = 0; i < 4; i++) {
             this.ai.hand.push(this.drawCard() || 'fire');
         }
         for (let i = 0; i < 3; i++) {
@@ -3788,9 +3836,10 @@ export class Game extends Phaser.Scene {
         this.player.steamDebuff = false;
         this.player.maxHand = 8;
         this.selectedBoardMana = [];
+        this.player.consecutiveDiscards = 0;
         
-        // Restore random 8 hand cards and 3 board cards
-        for (let i = 0; i < 8; i++) {
+        // Restore random 4 hand cards and 3 board cards
+        for (let i = 0; i < 4; i++) {
             this.player.hand.push(this.drawCard() || 'fire');
         }
         for (let i = 0; i < 3; i++) {
@@ -3811,3 +3860,4 @@ export class Game extends Phaser.Scene {
         }
     }
 }
+
