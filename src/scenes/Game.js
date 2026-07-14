@@ -1042,7 +1042,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
         
-        this.primedSpellTitle = this.add.text(32, 12, '', {
+        this.primedSpellTitle = this.add.text(14, 12, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '15px',
             fontWeight: '800',
@@ -1050,12 +1050,12 @@ export class Game extends Phaser.Scene {
         });
         this.primedSpellPanel.add(this.primedSpellTitle);
 
-        this.primedSpellIcon = this.add.image(20, 20, '').setDisplaySize(16, 16).setVisible(false);
+        this.primedSpellIcon = this.add.image(230, 26, '').setAlpha(0.5).setVisible(false);
         this.primedSpellPanel.add(this.primedSpellIcon);
         
         this.primedSpellNeutralDot = this.add.graphics().setVisible(false);
-        this.primedSpellNeutralDot.fillStyle(0x64748b, 1);
-        this.primedSpellNeutralDot.fillCircle(20, 20, 5);
+        this.primedSpellNeutralDot.fillStyle(0x64748b, 0.5);
+        this.primedSpellNeutralDot.fillCircle(230, 26, 12);
         this.primedSpellPanel.add(this.primedSpellNeutralDot);
         
         this.primedSpellCombo = this.add.text(14, 34, '', {
@@ -1091,7 +1091,7 @@ export class Game extends Phaser.Scene {
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
         
-        this.incomingSpellTitle = this.add.text(32, 12, '', {
+        this.incomingSpellTitle = this.add.text(14, 12, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '15px',
             fontWeight: '800',
@@ -1099,12 +1099,12 @@ export class Game extends Phaser.Scene {
         });
         this.incomingSpellPanel.add(this.incomingSpellTitle);
 
-        this.incomingSpellIcon = this.add.image(20, 20, '').setDisplaySize(16, 16).setVisible(false);
+        this.incomingSpellIcon = this.add.image(230, 26, '').setAlpha(0.5).setVisible(false);
         this.incomingSpellPanel.add(this.incomingSpellIcon);
         
         this.incomingSpellNeutralDot = this.add.graphics().setVisible(false);
-        this.incomingSpellNeutralDot.fillStyle(0x64748b, 1);
-        this.incomingSpellNeutralDot.fillCircle(20, 20, 5);
+        this.incomingSpellNeutralDot.fillStyle(0x64748b, 0.5);
+        this.incomingSpellNeutralDot.fillCircle(230, 26, 12);
         this.incomingSpellPanel.add(this.incomingSpellNeutralDot);
         
         this.incomingSpellCombo = this.add.text(14, 34, '', {
@@ -1806,7 +1806,7 @@ export class Game extends Phaser.Scene {
         } else {
             iconObj.setVisible(true);
             dotObj.setVisible(false);
-            iconObj.setTexture(`icon_${spell.element}`).setDisplaySize(16, 16);
+            iconObj.setTexture(`icon_${spell.element}`);
         }
         
         titleObj.setText(`${spell.name.toUpperCase()}`);
