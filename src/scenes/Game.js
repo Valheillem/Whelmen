@@ -1806,7 +1806,7 @@ export class Game extends Phaser.Scene {
         } else {
             iconObj.setVisible(true);
             dotObj.setVisible(false);
-            iconObj.setTexture(`icon_${spell.element}`);
+            iconObj.setTexture(`icon_${spell.element}`).setDisplaySize(16, 16);
         }
         
         titleObj.setText(`${spell.name.toUpperCase()}`);
