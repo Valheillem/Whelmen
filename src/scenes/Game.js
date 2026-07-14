@@ -1045,6 +1045,9 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         // Primed Spell Preview Panel
+        const panelW = 264;
+        const panelH = 132;
+        
         this.primedSpellPanel = this.add.container(240, h - 260).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
