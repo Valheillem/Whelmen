@@ -682,7 +682,7 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         const h = this.scale.height;
 
-        this.cycleContainer = this.add.container(w / 2 + 50, h / 2 - 40);
+        this.cycleContainer = this.add.container(w / 2 - 20, h / 2 - 40);
         this.cycleLabels = [];
 
         // Core cycle dial drawing
@@ -869,7 +869,7 @@ export class Game extends Phaser.Scene {
     drawMagicSigils() {
         const w = this.scale.width;
         const h = this.scale.height;
-        this.drawMagicSigil(w / 2 + 50, h / 2 - 40, 0x1a1a1a); // Shared board sigil
+        this.drawMagicSigil(w / 2 - 20, h / 2 - 40, 0x1a1a1a); // Shared board sigil
     }
 
     drawMagicSigil(x, y, colorHex) {
@@ -942,14 +942,14 @@ export class Game extends Phaser.Scene {
             char.shieldG.lineStyle(2, 0xa67032, 0.7);
             if (who === 'player') {
                 // Place below the player hand (relative to playerZone) to avoid overlap
-                char.shieldG.fillRoundedRect(80, 140, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(80, 140, 140, 24, 6);
-                char.shieldT.setPosition(90, 144);
-            } else {
-                // Place below the AI hand (relative to aiZone)
                 char.shieldG.fillRoundedRect(80, 150, 140, 24, 6);
                 char.shieldG.strokeRoundedRect(80, 150, 140, 24, 6);
                 char.shieldT.setPosition(90, 154);
+            } else {
+                // Place below the AI hand (relative to aiZone)
+                char.shieldG.fillRoundedRect(80, 160, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(80, 160, 140, 24, 6);
+                char.shieldT.setPosition(90, 164);
             }
             char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
         } else {
@@ -962,11 +962,11 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         // Create actual image representations for Deck and Discard
-        this.deckCardImg = this.add.image(w / 2 - 240, h / 2 - 40, 'card_back')
+        this.deckCardImg = this.add.image(w / 2 - 180, h / 2 - 40, 'card_back')
             .setScale(0.75)
             .setVisible(true);
 
-        this.discardCardImg = this.add.image(w / 2 + 270, h / 2 - 40, 'card_back')
+        this.discardCardImg = this.add.image(w / 2 + 140, h / 2 - 40, 'card_back')
             .setScale(0.75)
             .setVisible(false);
 
@@ -974,7 +974,7 @@ export class Game extends Phaser.Scene {
         this.discardOutlineG = this.add.graphics();
 
         // Text labels positioned under the card images
-        this.deckT = this.add.text(w / 2 - 240, h / 2 + 35, '', {
+        this.deckT = this.add.text(w / 2 - 180, h / 2 + 35, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
@@ -982,7 +982,7 @@ export class Game extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5, 0);
 
-        this.discardT = this.add.text(w / 2 + 270, h / 2 + 35, '', {
+        this.discardT = this.add.text(w / 2 + 140, h / 2 + 35, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '14px',
             fontWeight: '700',
@@ -1084,8 +1084,8 @@ export class Game extends Phaser.Scene {
         });
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
-        // Incoming Spell Preview Panel
-        this.incomingSpellPanel = this.add.container(80, 140).setVisible(false);
+        // --- INCOMING SPELL PANEL ---
+        this.incomingSpellPanel = this.add.container(80, 200).setVisible(false);
         
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
@@ -1135,7 +1135,7 @@ export class Game extends Phaser.Scene {
         this.btnPassDraw = this.createActionButton(w - 180, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
 
         // Select Discard prompt overlay container
-        this.discardPromptText = this.add.text(w / 2, h / 2 + 250, '', {
+        this.discardPromptText = this.add.text(w / 2 - 20, h / 2 + 250, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '22px',
             fontWeight: '800',
@@ -1147,7 +1147,7 @@ export class Game extends Phaser.Scene {
 
         // Defend Reaction Alert/Countdown timer
         this.reactionTimerBg = this.add.graphics();
-        this.reactionTimerText = this.add.text(w / 2, h / 2 - 240, '', {
+        this.reactionTimerText = this.add.text(w / 2 - 20, h / 2 - 240, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '28px',
             fontWeight: '800',
@@ -1540,7 +1540,7 @@ export class Game extends Phaser.Scene {
         });
 
         // Dynamic symmetric centering around player board
-        const centerX = w / 2 + 50;
+        const centerX = w / 2 - 20;
         const spaceX = 75;
         const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
 
@@ -1738,7 +1738,7 @@ export class Game extends Phaser.Scene {
         });
 
         // Dynamic symmetric centering around AI board
-        const centerX = w / 2 + 50;
+        const centerX = w / 2 - 20;
         const spaceX = 75;
         const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
 
@@ -1903,7 +1903,7 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
         const uniqueElements = [...new Set(this.player.board)];
         const elIndex = uniqueElements.indexOf(el);
-        const centerX = w / 2 + 50;
+        const centerX = w / 2 - 20;
         const spaceX = 75;
         const targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
         const targetY = h / 2 - 40 + 160;
