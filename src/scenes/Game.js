@@ -1044,11 +1044,8 @@ export class Game extends Phaser.Scene {
         const w = this.scale.width;
         const h = this.scale.height;
 
-        // Primed Spell Preview Panel next to buttons
-        const panelW = 264;
-        const panelH = 132;
-        
-        this.primedSpellPanel = this.add.container(w - 700, h - 180).setVisible(false);
+        // Primed Spell Preview Panel
+        this.primedSpellPanel = this.add.container(240, h - 260).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
@@ -1063,11 +1060,6 @@ export class Game extends Phaser.Scene {
 
         this.primedSpellIcon = this.add.image(198, 66, '').setAlpha(0.5).setVisible(false);
         this.primedSpellPanel.add(this.primedSpellIcon);
-        
-        this.primedSpellNeutralDot = this.add.graphics().setVisible(false);
-        this.primedSpellNeutralDot.fillStyle(0x64748b, 0.5);
-        this.primedSpellNeutralDot.fillCircle(198, 66, 12);
-        this.primedSpellPanel.add(this.primedSpellNeutralDot);
         
         this.primedSpellCombo = this.add.text(14, 34, '', {
             fontFamily: '"Inter", sans-serif',
@@ -1087,7 +1079,7 @@ export class Game extends Phaser.Scene {
         });
         this.primedSpellPanel.add(this.primedSpellDesc);
 
-        this.primedSpellAdvantage = this.add.text(14, 96, '', {
+        this.primedSpellAdvantage = this.add.text(14, 110, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '11.5px',
             fontWeight: '800',
@@ -1097,7 +1089,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // Incoming Spell Preview Panel
-        this.incomingSpellPanel = this.add.container(w - 700, 48).setVisible(false);
+        this.incomingSpellPanel = this.add.container(240, 180).setVisible(false);
         
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
@@ -1112,11 +1104,6 @@ export class Game extends Phaser.Scene {
 
         this.incomingSpellIcon = this.add.image(198, 66, '').setAlpha(0.5).setVisible(false);
         this.incomingSpellPanel.add(this.incomingSpellIcon);
-        
-        this.incomingSpellNeutralDot = this.add.graphics().setVisible(false);
-        this.incomingSpellNeutralDot.fillStyle(0x64748b, 0.5);
-        this.incomingSpellNeutralDot.fillCircle(198, 66, 12);
-        this.incomingSpellPanel.add(this.incomingSpellNeutralDot);
         
         this.incomingSpellCombo = this.add.text(14, 34, '', {
             fontFamily: '"Inter", sans-serif',
@@ -1136,7 +1123,7 @@ export class Game extends Phaser.Scene {
         });
         this.incomingSpellPanel.add(this.incomingSpellDesc);
 
-        this.incomingSpellAdvantage = this.add.text(14, 96, '', {
+        this.incomingSpellAdvantage = this.add.text(14, 110, '', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '11.5px',
             fontWeight: '800',
@@ -1555,8 +1542,8 @@ export class Game extends Phaser.Scene {
             }
         });
 
-        // Dynamic symmetric centering around player board center x = 240
-        const centerX = 240;
+        // Dynamic symmetric centering around player board center x = 960
+        const centerX = 960;
         const spaceX = 100;
         const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
 
@@ -1735,7 +1722,7 @@ export class Game extends Phaser.Scene {
         }
 
         this.aiBoardGroup = this.add.group();
-        const y = 260;
+        const y = 200;
 
         // Group AI board elements dynamically
         const stacks = {};
@@ -1751,8 +1738,8 @@ export class Game extends Phaser.Scene {
             stacks[el].count++;
         });
 
-        // Dynamic symmetric centering around AI board center x = 240
-        const centerX = 240;
+        // Dynamic symmetric centering around AI board center x = 960
+        const centerX = 960;
         const spaceX = 100;
         const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
 
@@ -1816,14 +1803,11 @@ export class Game extends Phaser.Scene {
         const colorHex = colors[spell.element] || 0x4a4a4a;
 
         const iconObj = isAI ? this.incomingSpellIcon : this.primedSpellIcon;
-        const dotObj = isAI ? this.incomingSpellNeutralDot : this.primedSpellNeutralDot;
 
         if (spell.element === 'n/a' || !spell.element) {
             iconObj.setVisible(false);
-            dotObj.setVisible(true);
         } else {
             iconObj.setVisible(true);
-            dotObj.setVisible(false);
             iconObj.setTexture(`icon_${spell.element}`);
         }
         
@@ -1885,7 +1869,6 @@ export class Game extends Phaser.Scene {
             this.updatePanelVisuals(false, spell);
         } else {
             this.primedSpellIcon.setVisible(false);
-            this.primedSpellNeutralDot.setVisible(false);
             this.primedSpellTitle.setText('INVALID COMBO');
             this.primedSpellTitle.setColor('#df1b2d');
             this.primedSpellCombo.setText('FORMULA UNKNOWN');
