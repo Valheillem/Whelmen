@@ -867,9 +867,9 @@ export class Game extends Phaser.Scene {
     }
 
     drawMagicSigils() {
+        const w = this.scale.width;
         const h = this.scale.height;
-        this.drawMagicSigil(960, h - 90, 0x1a1a1a); // Player board sigil
-        this.drawMagicSigil(960, 90, 0x1a1a1a); // AI board sigil
+        this.drawMagicSigil(w / 2 + 50, h / 2 - 40, 0x1a1a1a); // Shared board sigil
     }
 
     drawMagicSigil(x, y, colorHex) {
@@ -877,48 +877,41 @@ export class Game extends Phaser.Scene {
         
         // Concentric outer rings
         sigil.lineStyle(1.5, colorHex, 0.25);
-        sigil.strokeCircle(x, y, 75);
+        sigil.strokeCircle(x, y, 220);
         
         sigil.lineStyle(1, colorHex, 0.15);
-        sigil.strokeCircle(x, y, 69);
+        sigil.strokeCircle(x, y, 205);
         
         // Concentric inner ring
         sigil.lineStyle(2, colorHex, 0.4);
-        sigil.strokeCircle(x, y, 45);
+        sigil.strokeCircle(x, y, 150);
         
         // Concentric innermost core circle
-        sigil.strokeCircle(x, y, 12);
+        sigil.lineStyle(1, colorHex, 0.6);
+        sigil.strokeCircle(x, y, 110);
         
-        // Heptagram or Heptagon details (8-pointed geometric star)
-        sigil.lineStyle(1.5, colorHex, 0.35);
-        const points = [];
-        const numPoints = 8;
-        for (let i = 0; i < numPoints; i++) {
-            const angle = (i * Math.PI * 2) / numPoints;
-            const radius = i % 2 === 0 ? 45 : 18;
-            points.push({
-                x: x + Math.cos(angle) * radius,
-                y: y + Math.sin(angle) * radius
-            });
-        }
-        
+        // Draw crosshairs
+        sigil.lineStyle(1.5, colorHex, 0.3);
         sigil.beginPath();
-        sigil.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-            sigil.lineTo(points[i].x, points[i].y);
-        }
+        sigil.moveTo(x - 230, y);
+        sigil.lineTo(x + 230, y);
+        sigil.moveTo(x, y - 230);
+        sigil.lineTo(x, y + 230);
+        sigil.strokePath();
+
+        // Optional star geometry
+        sigil.beginPath();
+        sigil.moveTo(x, y - 220);
+        sigil.lineTo(x + 50, y - 50);
+        sigil.lineTo(x + 220, y);
+        sigil.lineTo(x + 50, y + 50);
+        sigil.lineTo(x, y + 220);
+        sigil.lineTo(x - 50, y + 50);
+        sigil.lineTo(x - 220, y);
+        sigil.lineTo(x - 50, y - 50);
         sigil.closePath();
-        sigil.stroke();
-        
-        // Add tiny elemental cardinal spikes
-        sigil.lineStyle(1.5, colorHex, 0.5);
-        for (let i = 0; i < 4; i++) {
-            const angle = (i * Math.PI) / 2;
-            sigil.beginPath();
-            sigil.moveTo(x + Math.cos(angle) * 45, y + Math.sin(angle) * 45);
-            sigil.lineTo(x + Math.cos(angle) * 78, y + Math.sin(angle) * 78);
-            sigil.stroke();
-        }
+        sigil.lineStyle(1, colorHex, 0.2);
+        sigil.strokePath();
         
         // Subtle breathing animation for a premium element feel
         this.tweens.add({
@@ -1048,7 +1041,7 @@ export class Game extends Phaser.Scene {
         const panelW = 264;
         const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(80, h - 300).setVisible(false);
+        this.primedSpellPanel = this.add.container(80, h - 350).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
@@ -1092,7 +1085,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // Incoming Spell Preview Panel
-        this.incomingSpellPanel = this.add.container(80, 170).setVisible(false);
+        this.incomingSpellPanel = this.add.container(80, 140).setVisible(false);
         
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
@@ -1522,8 +1515,9 @@ export class Game extends Phaser.Scene {
         }
 
         this.playerBoardGroup = this.add.group();
+        const w = this.scale.width;
         const h = this.scale.height;
-        const y = h - 90;
+        const y = h / 2 - 40 + 160;
 
         // Group player board elements dynamically
         const stacks = {};
@@ -1545,8 +1539,8 @@ export class Game extends Phaser.Scene {
             }
         });
 
-        // Dynamic symmetric centering around player board center x = 960
-        const centerX = 960;
+        // Dynamic symmetric centering around player board
+        const centerX = w / 2 + 50;
         const spaceX = 100;
         const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
 
@@ -1725,7 +1719,9 @@ export class Game extends Phaser.Scene {
         }
 
         this.aiBoardGroup = this.add.group();
-        const y = 90;
+        const w = this.scale.width;
+        const h = this.scale.height;
+        const y = h / 2 - 40 - 160;
 
         // Group AI board elements dynamically
         const stacks = {};
@@ -1741,8 +1737,8 @@ export class Game extends Phaser.Scene {
             stacks[el].count++;
         });
 
-        // Dynamic symmetric centering around AI board center x = 960
-        const centerX = 960;
+        // Dynamic symmetric centering around AI board
+        const centerX = w / 2 + 50;
         const spaceX = 100;
         const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
 
@@ -1903,12 +1899,14 @@ export class Game extends Phaser.Scene {
         this.player.hand.splice(index, 1);
         this.player.board.push(el);
 
+        const w = this.scale.width;
+        const h = this.scale.height;
         const uniqueElements = [...new Set(this.player.board)];
         const elIndex = uniqueElements.indexOf(el);
-        const centerX = 240;
+        const centerX = w / 2 + 50;
         const spaceX = 100;
         const targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
-        const targetY = this.scale.height - 280;
+        const targetY = h / 2 - 40 + 160;
 
         // Create the phantom card sprite
         const phantom = this.add.image(startX, startY, `card_${el}`)
