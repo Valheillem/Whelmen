@@ -280,7 +280,6 @@ export class Game extends Phaser.Scene {
         this.drawCycleIndicator();
         this.drawPlayerStats();
         this.drawAIStats();
-        this.drawMagicSigils();
         this.drawDeckDiscardPiles();
         this.drawUIControls();
         this.createTopRightUI();
@@ -686,12 +685,27 @@ export class Game extends Phaser.Scene {
         this.cycleContainer = this.add.container(w / 2 - 20, h / 2 - 40);
         this.cycleLabels = [];
 
+        // Sigil overlay
+        this.bgSigil = this.add.image(0, 0, 'sigil').setScale(440 / 864);
+        this.bgSigil.setAlpha(0.35); // Transparent to blend into background
+        this.cycleContainer.add(this.bgSigil);
+        
+        // Subtle breathing animation for a premium element feel
+        this.tweens.add({
+            targets: this.bgSigil,
+            alpha: 0.15,
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
         // 4 Elements around the circle
         const ringPositions = [
-            { x: 0, y: -65, color: 0xdf1b2d, icon: 'icon_fire', label: 'FIRE' },
-            { x: 65, y: 0, color: 0xa67032, icon: 'icon_earth', label: 'EARTH' },
-            { x: 0, y: 65, color: 0xbf8cff, icon: 'icon_air', label: 'AIR' },
-            { x: -65, y: 0, color: 0x1084e9, icon: 'icon_water', label: 'WATER' }
+            { x: 0, y: -50, color: 0xdf1b2d, icon: 'icon_fire', label: 'FIRE' },
+            { x: 50, y: 0, color: 0xa67032, icon: 'icon_earth', label: 'EARTH' },
+            { x: 0, y: 50, color: 0xbf8cff, icon: 'icon_air', label: 'AIR' },
+            { x: -50, y: 0, color: 0x1084e9, icon: 'icon_water', label: 'WATER' }
         ];
 
         ringPositions.forEach((pos) => {
@@ -852,26 +866,7 @@ export class Game extends Phaser.Scene {
         this.aiZone.add(this.ai.shieldT);
     }
 
-    drawMagicSigils() {
-        const w = this.scale.width;
-        const h = this.scale.height;
-        this.drawMagicSigil(w / 2 - 20, h / 2 - 40, 0x1a1a1a); // Shared board sigil
-    }
 
-    drawMagicSigil(x, y, colorHex) {
-        const sigil = this.add.image(x, y, 'sigil').setScale(440 / 864);
-        sigil.setAlpha(0.35); // Transparent to blend into background
-        
-        // Subtle breathing animation for a premium element feel
-        this.tweens.add({
-            targets: sigil,
-            alpha: 0.15,
-            duration: 2000,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
-        });
-    }
 
     updatePlayerLifeDisplay() {
         const total = this.player.hand.length + this.player.board.length;
