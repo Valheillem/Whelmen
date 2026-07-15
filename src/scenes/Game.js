@@ -1,96 +1,14 @@
-// --- SYNTHESIZED WEB AUDIO HELPER ---
-class AudioSynthHelper {
-    constructor() {
-        this.ctx = null;
-    }
-
-    init() {
-        if (!this.ctx) {
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-    }
-
-    play(type) {
-        try {
-            this.init();
-            if (!this.ctx) return;
-            if (this.ctx.state === 'suspended') {
-                this.ctx.resume();
-            }
-
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            const now = this.ctx.currentTime;
-
-            if (type === 'click') {
-                osc.frequency.setValueAtTime(500, now);
-                osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
-                gain.gain.setValueAtTime(0.12, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-                osc.start(now);
-                osc.stop(now + 0.08);
-            } 
-            else if (type === 'draw') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(250, now);
-                osc.frequency.exponentialRampToValueAtTime(700, now + 0.22);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-                osc.start(now);
-                osc.stop(now + 0.22);
-            } 
-            else if (type === 'fire') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, now);
-                osc.frequency.exponentialRampToValueAtTime(35, now + 0.45);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-                osc.start(now);
-                osc.stop(now + 0.45);
-            } 
-            else if (type === 'shield') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(350, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
-            } 
-            else if (type === 'water') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, now);
-                osc.frequency.linearRampToValueAtTime(300, now + 0.2);
-                gain.gain.setValueAtTime(0.12, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                osc.start(now);
-                osc.stop(now + 0.25);
-            }
-            else if (type === 'air') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(450, now);
-                osc.frequency.linearRampToValueAtTime(750, now + 0.3);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-                osc.start(now);
-                osc.stop(now + 0.35);
-            }
-            else if (type === 'hit') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(80, now);
-                osc.frequency.exponentialRampToValueAtTime(10, now + 0.35);
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-                osc.start(now);
-                osc.stop(now + 0.35);
-            }
-        } catch (e) {
-            // Autoplay blocking safety
-        }
-    }
-}
+import { ELEMENT_COLORS, ELEMENT_HEX, isWeakenedByCycle } from '../data/ElementConstants.js';
+import { getSpellFromCombo, findSpellInMessage } from '../data/SpellCatalog.js';
+import { AudioSynthHelper } from '../audio/AudioSynthHelper.js';
+import { SpellEffectsPlayer } from '../effects/SpellEffectsPlayer.js';
+import { SynergySystem } from '../systems/SynergySystem.js';
+import { CombatSystem } from '../systems/CombatSystem.js';
+import { AIAgent } from '../systems/AIAgent.js';
+import { DuelHistory } from '../ui/DuelHistory.js';
+import { GameOverScreen } from '../ui/GameOverScreen.js';
+import { SandboxDashboard } from '../ui/SandboxDashboard.js';
+import { OnlineManager } from '../online/OnlineManager.js';
 
 export class Game extends Phaser.Scene {
     constructor() {
@@ -222,6 +140,14 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
 
         this.synth = new AudioSynthHelper();
+        this.spellEffects = new SpellEffectsPlayer(this);
+        this.synergy = new SynergySystem(this);
+        this.combat = new CombatSystem(this);
+        this.aiAgent = new AIAgent(this);
+        this.duelHistory = new DuelHistory(this);
+        this.gameOverScreen = new GameOverScreen(this);
+        this.sandboxDashboard = new SandboxDashboard(this);
+        this.onlineManager = new OnlineManager(this);
 
         // Background space
         this.add.rectangle(0, 0, w, h, 0x1a1410).setOrigin(0);
@@ -276,7 +202,7 @@ export class Game extends Phaser.Scene {
         this.setupParticles();
 
         // Drawing fields FIRST (UI must exist before game logic references it)
-        this.drawActionLog();
+        this.duelHistory.drawActionLog();
         this.drawCycleIndicator();
         this.drawPlayerStats();
         this.drawAIStats();
@@ -286,14 +212,14 @@ export class Game extends Phaser.Scene {
 
         // ONLINE MODE: show waiting indicator and set up differently
         if (this.mode === 'online') {
-            this.setupOnlineGame();
+            this.onlineManager.setupOnlineGame();
         } else {
             // AI MODE: initialize locally as before
             this.initSharedDeck();
             this.dealStartingHands();
             this.startTurn('player');
             if (this.mode === 'test') {
-                this.buildSandboxDashboard();
+                this.sandboxDashboard.buildSandboxDashboard();
             }
         }
     }
@@ -313,7 +239,7 @@ export class Game extends Phaser.Scene {
             }
         });
         this.shuffle(this.sharedDeck);
-        this.logMessage("Initialized 88-card shared deck.");
+        this.duelHistory.logMessage("Initialized 88-card shared deck.");
     }
 
     shuffle(array) {
@@ -326,10 +252,10 @@ export class Game extends Phaser.Scene {
     drawCard(silent = false) {
         if (this.sharedDeck.length === 0) {
             if (this.sharedDiscard.length === 0) {
-                this.logMessage("Deck and Discard are empty!");
+                this.duelHistory.logMessage("Deck and Discard are empty!");
                 return null;
             }
-            this.logMessage("Deck dry! Reshuffling Discard Pile...");
+            this.duelHistory.logMessage("Deck dry! Reshuffling Discard Pile...");
             this.sharedDeck = [...this.sharedDiscard];
             this.sharedDiscard = [];
             this.shuffle(this.sharedDeck);
@@ -364,7 +290,7 @@ export class Game extends Phaser.Scene {
                 let d = this.drawCard(); if(d) char.hand.push(d); 
                 let d2 = this.drawCard(); if(d2) opp.hand.push(d2); 
             }
-            this.logMessage("Everyone draws 3 mana!");
+            this.duelHistory.logMessage("Everyone draws 3 mana!");
             char.status.everyoneDraw3 = 0; opp.status.everyoneDraw3 = 0;
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
@@ -377,7 +303,7 @@ export class Game extends Phaser.Scene {
             for(let i=0;i<chCount;i++) { let d = this.drawCard(); if(d) char.hand.push(d); }
             for(let i=0;i<opCount;i++) { let d = this.drawCard(); if(d) opp.hand.push(d); }
             char.status.discardReplaceHand = 0; opp.status.discardReplaceHand = 0;
-            this.logMessage("Hands were discarded and replaced!");
+            this.duelHistory.logMessage("Hands were discarded and replaced!");
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
@@ -387,7 +313,7 @@ export class Game extends Phaser.Scene {
             char.hand = [...opp.hand];
             opp.hand = temp;
             char.status.rotateHands = 0; opp.status.rotateHands = 0;
-            this.logMessage("Hands were rotated!");
+            this.duelHistory.logMessage("Hands were rotated!");
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
@@ -395,14 +321,14 @@ export class Game extends Phaser.Scene {
         if (char.status.oppDraw4 > 0) {
             for(let i=0;i<4;i++) { let d = this.drawCard(); if(d) char.hand.push(d); }
             char.status.oppDraw4 = 0;
-            this.logMessage(`${who.toUpperCase()} is flooded with 4 extra mana!`);
+            this.duelHistory.logMessage(`${who.toUpperCase()} is flooded with 4 extra mana!`);
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
         
         if (char.status.extraDrawIfShield > 0 && char.shield > 0) {
             let d = this.drawCard(); if(d) char.hand.push(d);
-            this.logMessage(`${who.toUpperCase()} draws extra mana from Shield!`);
+            this.duelHistory.logMessage(`${who.toUpperCase()} draws extra mana from Shield!`);
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
@@ -418,7 +344,7 @@ export class Game extends Phaser.Scene {
                 let d = this.drawCard(); if(d) char.hand.push(d);
             }
             char.status.redrawMana = 0;
-            this.logMessage(`${who.toUpperCase()} redraws ${redrawCount} mana!`);
+            this.duelHistory.logMessage(`${who.toUpperCase()} redraws ${redrawCount} mana!`);
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
@@ -436,13 +362,13 @@ export class Game extends Phaser.Scene {
         const displayName = (this.mode === 'online' && who === 'player') ? 'YOUR' :
                             (this.mode === 'online' && who === 'ai') ? "OPPONENT'S" :
                             who.toUpperCase() + "'S";
-        this.logMessage(`--- ${displayName} TURN ---`);
+        this.duelHistory.logMessage(`--- ${displayName} TURN ---`);
 
         // Draw phase
         
         let card = null;
         if (char.status.noDrawDebuff > 0) {
-            this.logMessage(`${who.toUpperCase()} cannot draw this turn!`);
+            this.duelHistory.logMessage(`${who.toUpperCase()} cannot draw this turn!`);
         } else {
             card = this.drawCard();
         }
@@ -451,7 +377,7 @@ export class Game extends Phaser.Scene {
             // Check autoPlayDraw: drawn mana goes to board instead of hand
             if (char.status.autoPlayDraw > 0 && char.board.length < 3) {
                 char.board.push(card);
-                this.logMessage(`${who.toUpperCase()}'s drawn mana is auto-played to board!`);
+                this.duelHistory.logMessage(`${who.toUpperCase()}'s drawn mana is auto-played to board!`);
             } else {
                 char.hand.push(card);
             }
@@ -461,7 +387,7 @@ export class Game extends Phaser.Scene {
                 const lostIdx = Math.floor(Math.random() * char.hand.length);
                 const lost = char.hand.splice(lostIdx, 1)[0];
                 this.sharedDiscard.push(lost);
-                this.logMessage(`${who.toUpperCase()} lost a hand mana from drawing!`);
+                this.duelHistory.logMessage(`${who.toUpperCase()} lost a hand mana from drawing!`);
             }
 
             if (who === 'player') {
@@ -479,28 +405,28 @@ export class Game extends Phaser.Scene {
         if (who === 'player') {
             this.enablePlayerControls(true);
             if (this.mode === 'online') {
-                this.logMessage('It is your turn. Choose an action.');
+                this.duelHistory.logMessage('It is your turn. Choose an action.');
             }
         } else {
             this.enablePlayerControls(false);
             if (this.mode === 'ai') {
                 this.time.delayedCall(1200, () => {
-                    this.runAITurn();
+                    this.aiAgent.runAITurn();
                 });
             } else if (this.mode === 'test') {
                 if (this.dummyMode === 'passive') {
-                    this.logMessage("Dummy is passive. Passing turn back to Player.");
+                    this.duelHistory.logMessage("Dummy is passive. Passing turn back to Player.");
                     this.time.delayedCall(800, () => {
                         this.endTurn();
                     });
                 } else {
                     this.time.delayedCall(1200, () => {
-                        this.runAITurn();
+                        this.aiAgent.runAITurn();
                     });
                 }
             } else {
                 // ONLINE: wait for opponent — Firebase listener handles it
-                this.logMessage('Waiting for opponent...');
+                this.duelHistory.logMessage('Waiting for opponent...');
             }
         }
     }
@@ -524,7 +450,7 @@ export class Game extends Phaser.Scene {
         // ONLINE: sync state to Firebase AFTER transitioning to opponent's turn.
         // This ensures the opponent's newly drawn card and correct turn flag are synced.
         if (this.mode === 'online' && this.turn === 'ai') {
-            this.syncToFirebase('endTurn');
+            this.onlineManager.syncToFirebase('endTurn');
         }
     }
 
@@ -532,7 +458,7 @@ export class Game extends Phaser.Scene {
         const char = who === 'player' ? this.player : this.ai;
         if (char.hand.length > char.maxHand) {
             const discardCount = char.hand.length - char.maxHand;
-            this.logMessage(`${who.toUpperCase()} discards ${discardCount} card(s) to match Hand Limit.`);
+            this.duelHistory.logMessage(`${who.toUpperCase()} discards ${discardCount} card(s) to match Hand Limit.`);
             for (let i = 0; i < discardCount; i++) {
                 const discarded = char.hand.pop();
                 this.sharedDiscard.push(discarded);
@@ -541,7 +467,7 @@ export class Game extends Phaser.Scene {
             if (char.consecutiveDiscards >= 2) {
                 char.maxHand = Math.max(1, char.maxHand - 1);
                 char.consecutiveDiscards = 0;
-                this.logMessage(`OVERWHELMED! ${who.toUpperCase()}'s Max Hand Size decreases by 1!`);
+                this.duelHistory.logMessage(`OVERWHELMED! ${who.toUpperCase()}'s Max Hand Size decreases by 1!`);
                 this.playSound('damage');
             }
             if (who === 'player') {
@@ -566,7 +492,7 @@ export class Game extends Phaser.Scene {
         }
         
         const el = this.cycleElements[this.cycleIndex];
-        this.logMessage(`The Cycle rotates to: [${el.toUpperCase()}]`);
+        this.duelHistory.logMessage(`The Cycle rotates to: [${el.toUpperCase()}]`);
 
         // Rotate graphic dial
         this.tweens.add({
@@ -586,13 +512,13 @@ export class Game extends Phaser.Scene {
         if (totalCards === 0) {
             if (this.mode === 'test') {
                 if (who === 'ai') {
-                    this.showSandboxNotification("Dummy Defeated! Reviving...");
-                    this.logMessage("--- DUMMY DEFEATED! Reviving Dummy... ---");
-                    this.resetDummyState();
+                    this.sandboxDashboard.showSandboxNotification("Dummy Defeated! Reviving...");
+                    this.duelHistory.logMessage("--- DUMMY DEFEATED! Reviving Dummy... ---");
+                    this.sandboxDashboard.resetDummyState();
                 } else {
-                    this.showSandboxNotification("You Died! Reviving...");
-                    this.logMessage("--- PLAYER DEFEATED! Reviving Player... ---");
-                    this.resetPlayerState();
+                    this.sandboxDashboard.showSandboxNotification("You Died! Reviving...");
+                    this.duelHistory.logMessage("--- PLAYER DEFEATED! Reviving Player... ---");
+                    this.sandboxDashboard.resetPlayerState();
                 }
                 
                 // Clear any locked sandbox phases
@@ -612,11 +538,11 @@ export class Game extends Phaser.Scene {
 
             this.phase = 'gameover';
             this.enablePlayerControls(false);
-            this.showGameOver(who === 'player' ? 'DEFEAT' : 'VICTORY');
+            this.gameOverScreen.showGameOver(who === 'player' ? 'DEFEAT' : 'VICTORY');
 
             // ONLINE: sync game over state so opponent sees result
             if (this.mode === 'online') {
-                this.syncToFirebase('gameover');
+                this.onlineManager.syncToFirebase('gameover');
             }
             return true;
         }
@@ -625,26 +551,20 @@ export class Game extends Phaser.Scene {
 
     // --- RENDER VISUAL LAYOUT ---
     setupParticles() {
-        this.emitters = {};
-        const elements = ['fire', 'earth', 'water', 'air'];
-        const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff };
 
-        elements.forEach(el => {
-            this.emitters[el] = this.add.particles(0, 0, 'star', {
-                color: colors[el],
-                scale: { start: 0.8, end: 0 },
-                alpha: { start: 0.8, end: 0 },
-                speed: { min: 50, max: 200 },
-                lifespan: 800,
-                emitting: false
-            });
+        this.spellEffects.setupParticles();
+
+    });
         });
     }
 
-    triggerSpellVisual(element, startX, startY, endX, endY, onComplete) {
-        if (element === 'n/a' || !this.emitters[element]) {
-            element = 'air'; // Default to a valid element to prevent crash
-        }
+    triggerSpellVisual(spell, startX, startY, endX, endY, onComplete) {
+
+
+        this.spellEffects.playSpellCast(spell, startX, startY, endX, endY, onComplete);
+
+
+    }
         
         this.playSound(element === 'earth' ? 'shield' : element);
         
@@ -656,7 +576,7 @@ export class Game extends Phaser.Scene {
         visual.setStrokeStyle(4, 0xffffff);
 
         // Dynamic tail particle flow
-        const emitter = this.emitters[element];
+        const emitter = this.spellEffects.emitters[element];
         emitter.startFollow(visual);
         emitter.start();
 
@@ -751,16 +671,18 @@ export class Game extends Phaser.Scene {
 
     triggerCycleParticles(element) {
         if (element === 'neutral') return;
-        const emitter = this.emitters[element];
+        const emitter = this.spellEffects.emitters[element];
         emitter.explode(40, this.scale.width / 2, this.scale.height / 2 - 40);
         this.updateCycleDisplayColor(element);
     }
 
     playElementalBurst(x, y, element) {
-        // Play corresponding sound effect
-        if (element === 'fire') {
-            this.playSound('fire'); // Sizzle
-        } else if (element === 'water') {
+
+
+        this.spellEffects.playElementalBurst(x, y, element);
+
+
+    } else if (element === 'water') {
             this.playSound('water'); // Splash
         } else if (element === 'earth') {
             this.playSound('earth'); // Thud
@@ -1258,7 +1180,7 @@ export class Game extends Phaser.Scene {
             const relativeY = pointer.y - 50;
             // Check if pointer is inside the history box
             if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 380) {
-                this.scrollDuelHistory(deltaY);
+                this.duelHistory.scrollDuelHistory(deltaY);
             }
         });
 
@@ -1271,12 +1193,12 @@ export class Game extends Phaser.Scene {
             if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 380) {
                 // If it is inside the scrollbar area (X: 320 to 338, Y: 10 to 370)
                 if (relativeX >= 320 && relativeX <= 338 && relativeY >= 10 && relativeY <= 370) {
-                    const totalHeight = this.getLogTotalHeight();
+                    const totalHeight = this.duelHistory.getLogTotalHeight();
                     const viewportHeight = 360;
                     if (totalHeight > viewportHeight) {
                         this.isDraggingScrollbar = true;
                         const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
-                        this.scrollHistoryByScrollbarY(relativeY, handleHeight);
+                        this.duelHistory.scrollHistoryByScrollbarY(relativeY, handleHeight);
                     }
                 } else {
                     // Otherwise, it is a drag-scroll on the text area
@@ -1290,13 +1212,13 @@ export class Game extends Phaser.Scene {
         this.input.on('pointermove', (pointer) => {
             if (this.isDraggingScrollbar) {
                 const relativeY = pointer.y - 50;
-                const totalHeight = this.getLogTotalHeight();
+                const totalHeight = this.duelHistory.getLogTotalHeight();
                 const viewportHeight = 360;
                 const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
-                this.scrollHistoryByScrollbarY(relativeY, handleHeight);
+                this.duelHistory.scrollHistoryByScrollbarY(relativeY, handleHeight);
             } else if (this.isDraggingHistory) {
                 const deltaY = pointer.y - this.dragStartY;
-                this.scrollDuelHistoryTo(this.dragStartScrollY + deltaY);
+                this.duelHistory.scrollDuelHistoryTo(this.dragStartScrollY + deltaY);
             }
         });
 
@@ -1349,26 +1271,26 @@ export class Game extends Phaser.Scene {
             if (spell) {
                 textLine.setColor('#ffffff');
                 const isAI = msg.toLowerCase().includes('ai') || msg.toLowerCase().includes('opponent');
-                this.showLogTooltip(spell, isAI);
+                this.duelHistory.showLogTooltip(spell, isAI);
             }
         });
         textLine.on('pointerout', () => {
             textLine.setColor(textLine.originalColor);
-            this.hideLogTooltip();
+            this.duelHistory.hideLogTooltip();
         });
 
         this.logScrollContainer.add(textLine);
         this.allLogTextLines.push(textLine);
 
         // Auto-scroll to the bottom when a new message is added
-        const totalHeight = this.getLogTotalHeight();
+        const totalHeight = this.duelHistory.getLogTotalHeight();
         const viewportHeight = 360;
         if (totalHeight > viewportHeight) {
             this.logScrollContainer.y = viewportHeight - totalHeight;
         } else {
             this.logScrollContainer.y = 0;
         }
-        this.updateScrollbar();
+        this.duelHistory.updateScrollbar();
     }
 
     // --- CARD HAND RENDERING ---
@@ -1736,13 +1658,9 @@ export class Game extends Phaser.Scene {
         const panelObj = isAI ? this.incomingSpellPanel : this.primedSpellPanel;
         
         const cycle = this.cycleElements[this.cycleIndex];
-        let isEmp = false;
-        if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
-        else if (spell.synergyType === 'destructive' && cycle !== spell.element && spell.combo.includes(cycle)) isEmp = true;
-        else if (spell.synergyType === 'prestructive' && spell.combo && !spell.combo.includes(cycle)) isEmp = true;
-        else if (spell.synergyType === 'force_cycle') isEmp = true;
+        let isEmp = this.synergy.calculateSynergy(spell, cycle);
         
-        const colors = { fire: 0xdf1b2d, earth: 0xa67032, water: 0x1084e9, air: 0xbf8cff, 'n/a': 0x4a4a4a };
+        const colors = ELEMENT_COLORS;
         const colorHex = colors[spell.element] || 0x4a4a4a;
 
         const iconObj = isAI ? this.incomingSpellIcon : this.primedSpellIcon;
@@ -1832,7 +1750,7 @@ export class Game extends Phaser.Scene {
         const el = this.player.hand[index];
         this.manaPlacedThisTurn = true;
         this.playSound('draw');
-        this.logMessage(`Player plays [${el.toUpperCase()}] mana to board.`);
+        this.duelHistory.logMessage(`Player plays [${el.toUpperCase()}] mana to board.`);
         this.enablePlayerControls(false);
 
         // Calculate Start Position (from hand)
@@ -1884,11 +1802,11 @@ export class Game extends Phaser.Scene {
                 // Status hooks for mana play
                 if (this.player.status.manaPlayDamage > 0) {
                     this.forceDiscardRandom('ai', 1);
-                    this.logMessage(`Player's mana play deals 1 damage to AI!`);
+                    this.duelHistory.logMessage(`Player's mana play deals 1 damage to AI!`);
                 }
                 if (this.ai.status.oppManaPlayDamage > 0) {
                     this.forceDiscardRandom('player', 1);
-                    this.logMessage(`Player takes 1 damage from playing mana due to AI Surge!`);
+                    this.duelHistory.logMessage(`Player takes 1 damage from playing mana due to AI Surge!`);
                 }
 
                 // Check bonusManaPlays: allow a second mana play
@@ -1896,7 +1814,7 @@ export class Game extends Phaser.Scene {
                     if (this.player.status.bonusManaPlays > 0) {
                         this.player.status.bonusManaPlays = 0;
                         this.manaPlacedThisTurn = false;
-                        this.logMessage(`Player can play a second mana!`);
+                        this.duelHistory.logMessage(`Player can play a second mana!`);
                         this.phase = 'action';
                         this.enablePlayerControls(true);
                     } else if (this.manaPlacedThisTurn && this.spellCastThisTurn) {
@@ -1961,7 +1879,7 @@ export class Game extends Phaser.Scene {
     forceDiscardRandom(who, count) {
         const char = who === 'player' ? this.player : this.ai;
         const actualCount = Math.min(count, char.hand.length);
-        this.logMessage(`${who.toUpperCase()} is forced to discard ${actualCount} card(s)!`);
+        this.duelHistory.logMessage(`${who.toUpperCase()} is forced to discard ${actualCount} card(s)!`);
         for (let i = 0; i < actualCount; i++) {
             const randIdx = Math.floor(Math.random() * char.hand.length);
             const discarded = char.hand.splice(randIdx, 1)[0];
@@ -1980,21 +1898,21 @@ export class Game extends Phaser.Scene {
     handlePassDrawOption() {
         if (this.phase === 'reaction' || this.phase === 'reaction_request_active') {
             // Serve as "Pass Reaction" option!
-            this.logMessage("Player passes Reaction Window.");
+            this.duelHistory.logMessage("Player passes Reaction Window.");
             if (this.phase === 'reaction_request_active') {
                 this.phase = 'reaction_response';
                 this.reactionResponseSpell = null;
-                this.syncToFirebase('reaction_response');
+                this.onlineManager.syncToFirebase('reaction_response');
                 this.enablePlayerControls(false);
-                this.logMessage('Reaction sent. Waiting for resolution...');
+                this.duelHistory.logMessage('Reaction sent. Waiting for resolution...');
             } else {
-                this.resolveDefendingReaction(null);
+                this.combat.resolveDefendingReaction(null);
             }
             return;
         }
 
         if (this.manaPlacedThisTurn || this.spellCastThisTurn) {
-            this.logMessage("Player ends turn.");
+            this.duelHistory.logMessage("Player ends turn.");
             this.enablePlayerControls(false);
             this.time.delayedCall(450, () => {
                 this.endTurn();
@@ -2002,13 +1920,13 @@ export class Game extends Phaser.Scene {
             return;
         }
 
-        this.logMessage("Player chooses Pass to Draw.");
+        this.duelHistory.logMessage("Player chooses Pass to Draw.");
         const extraCard = this.drawCard();
         if (extraCard) {
             // Check autoPlayDraw: drawn mana goes to board instead of hand
             if (this.player.status.autoPlayDraw > 0 && this.player.board.length < 3) {
                 this.player.board.push(extraCard);
-                this.logMessage(`Player's drawn mana is auto-played to board!`);
+                this.duelHistory.logMessage(`Player's drawn mana is auto-played to board!`);
             } else {
                 this.player.hand.push(extraCard);
             }
@@ -2018,7 +1936,7 @@ export class Game extends Phaser.Scene {
                 const lostIdx = Math.floor(Math.random() * this.player.hand.length);
                 const lost = this.player.hand.splice(lostIdx, 1)[0];
                 this.sharedDiscard.push(lost);
-                this.logMessage(`Player lost a hand mana from drawing!`);
+                this.duelHistory.logMessage(`Player lost a hand mana from drawing!`);
             }
 
             this.updatePlayerHandDisplay();
@@ -2038,7 +1956,7 @@ export class Game extends Phaser.Scene {
         const spell = this.getSpellFromCombo(elements);
 
         if (!spell) {
-            this.logMessage("Cannot cast: invalid combo selected.");
+            this.duelHistory.logMessage("Cannot cast: invalid combo selected.");
             return;
         }
 
@@ -2056,11 +1974,11 @@ export class Game extends Phaser.Scene {
             if (this.phase === 'reaction_request_active') {
                 this.phase = 'reaction_response';
                 this.reactionResponseSpell = spell;
-                this.syncToFirebase('reaction_response');
+                this.onlineManager.syncToFirebase('reaction_response');
                 this.enablePlayerControls(false);
-                this.logMessage('Reaction sent. Waiting for resolution...');
+                this.duelHistory.logMessage('Reaction sent. Waiting for resolution...');
             } else {
-                this.resolveDefendingReaction(spell);
+                this.combat.resolveDefendingReaction(spell);
             }
             return;
         }
@@ -2085,12 +2003,12 @@ export class Game extends Phaser.Scene {
         this.selectedBoardMana = [];
         this.updateComboPreview();
 
-        this.logMessage(`Player casts: ${spell.name}!`);
+        this.duelHistory.logMessage(`Player casts: ${spell.name}!`);
 
         // Visual spell fire from player center to AI center
         const w = this.scale.width;
-        this.triggerSpellVisual(spell.element, w / 2 - 100, 500, w / 2 - 100, 100, () => {
-            this.initiateAttack('player', 'ai', spell);
+        this.triggerSpellVisual(spell, w / 2 - 100, 500, w / 2 - 100, 100, () => {
+            this.combat.initiateAttack('player', 'ai', spell);
         });
     }
 
@@ -2105,24 +2023,21 @@ export class Game extends Phaser.Scene {
             if (Math.random() < 0.5) {
                 defender = attacker;
                 defChar = attChar;
-                this.logMessage(`Chaos! ${attacker.toUpperCase()}'s spell targets themselves!`);
+                this.duelHistory.logMessage(`Chaos! ${attacker.toUpperCase()}'s spell targets themselves!`);
             }
         }
         
         // Status: Spell Fail Chance
         if (attChar.status.spellFailChance > 0) {
             if (Math.random() < 0.5) {
-                this.logMessage(`${attacker.toUpperCase()}'s spell fizzled out!`);
+                this.duelHistory.logMessage(`${attacker.toUpperCase()}'s spell fizzled out!`);
                 this.time.delayedCall(800, () => this.endTurn());
                 return;
             }
         }
 
         // Synergy logic
-        let isEmp = false;
-        if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
-        else if (spell.synergyType === 'destructive' && cycle !== spell.element && spell.combo.includes(cycle)) isEmp = true;
-        else if (spell.synergyType === 'prestructive' && !spell.combo.includes(cycle)) isEmp = true;
+        let isEmp = this.synergy.calculateSynergy(spell, cycle);
 
         let finalDmg = spell.damage;
         let finalShield = spell.shield;
@@ -2133,14 +2048,14 @@ export class Game extends Phaser.Scene {
         if (attChar.status.missChance > 0 && finalDmg > 0) {
             if (Math.random() < 0.5) {
                 finalDmg = 0;
-                this.logMessage(`${attacker.toUpperCase()}'s attack missed!`);
+                this.duelHistory.logMessage(`${attacker.toUpperCase()}'s attack missed!`);
             }
         }
 
         // Damage Immunity Status
         if (defChar.status.damageImmunity > 0) {
             finalDmg = 0;
-            this.logMessage(`${defender.toUpperCase()} is immune to damage this round!`);
+            this.duelHistory.logMessage(`${defender.toUpperCase()} is immune to damage this round!`);
         }
 
         if (isEmp) {
@@ -2156,9 +2071,9 @@ export class Game extends Phaser.Scene {
             
             // Immediate synergy effects (not deferred status)
             if (spell.name === 'Wildfire') this.pendingExtraAction = true;
-            if (spell.name === 'Billow') { this.logMessage('Top 3 cards cycled!'); for(let i=0;i<3;i++) { let d = this.sharedDeck.shift(); if(d) this.sharedDeck.push(d); } }
-            if (spell.name === 'Vaporize') { this.logMessage('Top 3 cards destroyed!'); for(let i=0;i<3;i++) { let d = this.sharedDeck.shift(); if(d) this.sharedDiscard.push(d); } this.updateDeckDiscardDisplay(); }
-            if (spell.name === 'Scour') { defChar.shield = 0; this.updateShieldDisplay(defender); this.logMessage(`${defender.toUpperCase()}'s shield scoured!`); }
+            if (spell.name === 'Billow') { this.duelHistory.logMessage('Top 3 cards cycled!'); for(let i=0;i<3;i++) { let d = this.sharedDeck.shift(); if(d) this.sharedDeck.push(d); } }
+            if (spell.name === 'Vaporize') { this.duelHistory.logMessage('Top 3 cards destroyed!'); for(let i=0;i<3;i++) { let d = this.sharedDeck.shift(); if(d) this.sharedDiscard.push(d); } this.updateDeckDiscardDisplay(); }
+            if (spell.name === 'Scour') { defChar.shield = 0; this.updateShieldDisplay(defender); this.duelHistory.logMessage(`${defender.toUpperCase()}'s shield scoured!`); }
         }
 
         // Force Cycle always triggers (not gated by isEmp)
@@ -2167,7 +2082,7 @@ export class Game extends Phaser.Scene {
             const fcEl = fcMap[spell.name];
             if (fcEl) {
                 this.cycleIndex = this.cycleElements.indexOf(fcEl);
-                this.logMessage(`The Cycle is forced to ${fcEl.toUpperCase()}!`);
+                this.duelHistory.logMessage(`The Cycle is forced to ${fcEl.toUpperCase()}!`);
                 this.cycleCenterText.setText(fcEl.toUpperCase());
                 this.triggerCycleParticles(fcEl);
             }
@@ -2177,11 +2092,11 @@ export class Game extends Phaser.Scene {
         if (finalShield > 0) {
             if (attChar.status.shieldDamageDebuff > 0) {
                 this.forceDiscardRandom(attacker, 1);
-                this.logMessage(`${attacker.toUpperCase()} takes 1 damage from unstable shield!`);
+                this.duelHistory.logMessage(`${attacker.toUpperCase()} takes 1 damage from unstable shield!`);
             }
             attChar.shield += finalShield;
             this.updateShieldDisplay(attacker);
-            this.logMessage(`${attacker.toUpperCase()} gains ${finalShield} Shield.`);
+            this.duelHistory.logMessage(`${attacker.toUpperCase()} gains ${finalShield} Shield.`);
         }
 
         // Draw logic
@@ -2191,13 +2106,13 @@ export class Game extends Phaser.Scene {
                 if (drawn) {
                     if (attChar.status.autoPlayDraw > 0 && attChar.board.length < 3) {
                         attChar.board.push(drawn);
-                        this.logMessage(`Auto-played drawn mana!`);
+                        this.duelHistory.logMessage(`Auto-played drawn mana!`);
                     } else {
                         attChar.hand.push(drawn);
                     }
                     if (attChar.status.loseManaOnDraw > 0 && attChar.board.length > 0) {
                         this.sharedDiscard.push(attChar.board.pop());
-                        this.logMessage(`${attacker.toUpperCase()} lost a board mana from drawing!`);
+                        this.duelHistory.logMessage(`${attacker.toUpperCase()} lost a board mana from drawing!`);
                     }
                 }
             }
@@ -2237,27 +2152,27 @@ export class Game extends Phaser.Scene {
         
         // Trigger reaction window if there's incoming damage and defender has active mana
         if (finalDmg > 0 && defChar.board.length > 0) {
-            this.startReactionPhase(attacker, defender, { ...spell, damage: finalDmg, bypassShield: false });
+            this.combat.startReactionPhase(attacker, defender, { ...spell, damage: finalDmg, bypassShield: false });
         } else {
             // Direct hit
             if (finalDmg > 0) {
                 if (defChar.status.retaliationDamage > 0) {
                     this.forceDiscardRandom(attacker, 1);
-                    this.logMessage(`${defender.toUpperCase()} retaliates for 1 damage!`);
+                    this.duelHistory.logMessage(`${defender.toUpperCase()} retaliates for 1 damage!`);
                 }
-                this.applyDamage(defender, finalDmg, false);
+                this.combat.applyDamage(defender, finalDmg, false);
             } else {
                 // Done with spelling, auto-end turn after a slight delay
                 this.time.delayedCall(800, () => {
                     if (this.pendingExtraAction) {
                         this.pendingExtraAction = false;
                         this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
-                        this.logMessage(`${this.turn.toUpperCase()} gets another action!`);
+                        this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
                         if (this.turn === 'player') {
                             this.phase = 'action';
                             this.enablePlayerControls(true);
                         } else {
-                            this.runAITurn();
+                            this.aiAgent.runAITurn();
                         }
                     } else {
                         this.checkTurnContinuation();
@@ -2273,7 +2188,7 @@ export class Game extends Phaser.Scene {
         this.reactionSource = attacker;
         this.reactionCaster = defender;
 
-        this.logMessage(`Reaction window triggers for ${defender.toUpperCase()}!`);
+        this.duelHistory.logMessage(`Reaction window triggers for ${defender.toUpperCase()}!`);
 
         if (defender === 'player') {
             this.selectedBoardMana = [];
@@ -2281,14 +2196,14 @@ export class Game extends Phaser.Scene {
             this.enablePlayerControls(true);
         } else {
             if (this.mode === 'online') {
-                this.logMessage('Waiting for opponent to react...');
+                this.duelHistory.logMessage('Waiting for opponent to react...');
                 this.phase = 'reaction_request';
-                this.syncToFirebase('reaction_request');
+                this.onlineManager.syncToFirebase('reaction_request');
             } else {
                 // AI Reaction automation
                 this.time.delayedCall(1000, () => {
-                    const reactionSpell = this.calculateAIReaction(incomingSpell.damage);
-                    this.resolveDefendingReaction(reactionSpell);
+                    const reactionSpell = this.aiAgent.calculateAIReaction(incomingSpell.damage);
+                    this.combat.resolveDefendingReaction(reactionSpell);
                 });
             }
         }
@@ -2302,7 +2217,7 @@ export class Game extends Phaser.Scene {
         const attChar = attacker === 'player' ? this.player : this.ai;
 
         if (reactionSpell) {
-            this.logMessage(`${defender.toUpperCase()} casts reaction: ${reactionSpell.name}!`);
+            this.duelHistory.logMessage(`${defender.toUpperCase()} casts reaction: ${reactionSpell.name}!`);
 
             // Apply synergy using the new three-way system
             const cycle = this.cycleElements[this.cycleIndex];
@@ -2320,34 +2235,34 @@ export class Game extends Phaser.Scene {
                 if (reactionSpell.name === 'Spark') rDmg = 3;
                 if (reactionSpell.name === 'Carapace') rShield = 8;
                 if (reactionSpell.name === 'Blast') rDmg = 5;
-                this.logMessage(`${reactionSpell.name} is empowered by synergy!`);
+                this.duelHistory.logMessage(`${reactionSpell.name} is empowered by synergy!`);
             }
 
             // Apply reaction shield
             if (rShield > 0) {
                 defChar.shield += rShield;
                 this.updateShieldDisplay(defender);
-                this.logMessage(`${defender.toUpperCase()} gains ${rShield} Reaction Shield.`);
+                this.duelHistory.logMessage(`${defender.toUpperCase()} gains ${rShield} Reaction Shield.`);
             }
 
             // Counter damage check
             if (rDmg > 0) {
-                this.logMessage(`Reaction deals ${rDmg} counter damage back!`);
-                this.applyDamage(attacker, rDmg);
+                this.duelHistory.logMessage(`Reaction deals ${rDmg} counter damage back!`);
+                this.combat.applyDamage(attacker, rDmg);
             }
         } else {
-            this.logMessage(`${defender.toUpperCase()} takes the direct hit.`);
+            this.duelHistory.logMessage(`${defender.toUpperCase()} takes the direct hit.`);
         }
 
         // Retaliaton damage: fires when defender has retaliationDamage status
         if (defChar.status.retaliationDamage > 0) {
             this.forceDiscardRandom(attacker, 1);
-            this.logMessage(`${defender.toUpperCase()} retaliates for 1 damage!`);
+            this.duelHistory.logMessage(`${defender.toUpperCase()} retaliates for 1 damage!`);
         }
 
         // Apply incoming damage minus final shield
         const finalDmg = this.reactionTargetSpell.damage;
-        this.applyDamage(defender, finalDmg, this.reactionTargetSpell.bypassShield || false);
+        this.combat.applyDamage(defender, finalDmg, this.reactionTargetSpell.bypassShield || false);
     }
 
     applyDamage(who, amount, bypassShield = false) {
@@ -2355,15 +2270,15 @@ export class Game extends Phaser.Scene {
         
         // Shield absorption (Lava Surge bypasses shields entirely)
         if (bypassShield) {
-            this.logMessage(`Lava Surge bypasses ${who.toUpperCase()}'s shield!`);
+            this.duelHistory.logMessage(`Lava Surge bypasses ${who.toUpperCase()}'s shield!`);
         } else if (char.shield > 0) {
             if (char.shield >= amount) {
                 char.shield -= amount;
-                this.logMessage(`${who.toUpperCase()}'s shield absorbed all ${amount} DMG!`);
+                this.duelHistory.logMessage(`${who.toUpperCase()}'s shield absorbed all ${amount} DMG!`);
                 amount = 0;
             } else {
                 amount -= char.shield;
-                this.logMessage(`${who.toUpperCase()}'s shield absorbed ${char.shield} DMG. ${amount} DMG passes through!`);
+                this.duelHistory.logMessage(`${who.toUpperCase()}'s shield absorbed ${char.shield} DMG. ${amount} DMG passes through!`);
                 char.shield = 0;
             }
             this.updateShieldDisplay(who);
@@ -2375,7 +2290,7 @@ export class Game extends Phaser.Scene {
         this.updateShieldDisplay(who);
 
         if (amount > 0) {
-            this.logMessage(`${who.toUpperCase()} is hit for ${amount} DMG!`);
+            this.duelHistory.logMessage(`${who.toUpperCase()} is hit for ${amount} DMG!`);
             this.playSound('hit');
 
             // Set state to discard
@@ -2389,11 +2304,11 @@ export class Game extends Phaser.Scene {
                 if (this.mode === 'online') {
                     this.phase = 'discard_request';
                     this.discardTargetCount = amount;
-                    this.syncToFirebase('discard_request');
-                    this.logMessage('Waiting for opponent to discard...');
+                    this.onlineManager.syncToFirebase('discard_request');
+                    this.duelHistory.logMessage('Waiting for opponent to discard...');
                 } else {
                     // AI automatically discards
-                    this.runAIDiscardAutomation(amount);
+                    this.aiAgent.runAIDiscardAutomation(amount);
                 }
             }
         } else {
@@ -2402,12 +2317,12 @@ export class Game extends Phaser.Scene {
                 if (this.pendingExtraAction) {
                     this.pendingExtraAction = false;
                     this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
-                    this.logMessage(`${this.turn.toUpperCase()} gets another action!`);
+                    this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
                     if (this.turn === 'player') {
                         this.phase = 'action';
                         this.enablePlayerControls(true);
                     } else {
-                        this.runAITurn();
+                        this.aiAgent.runAITurn();
                     }
                 } else {
                     this.checkTurnContinuation();
@@ -2421,7 +2336,7 @@ export class Game extends Phaser.Scene {
         // Double check if player has enough cards left to discard
         const total = this.player.hand.length + this.player.board.length;
         if (total === 0 || total <= this.cardsToDiscardCount) {
-            this.logMessage("Player is out of cards!");
+            this.duelHistory.logMessage("Player is out of cards!");
             this.player.hand = [];
             this.player.board = [];
             this.updatePlayerHandDisplay();
@@ -2456,13 +2371,13 @@ export class Game extends Phaser.Scene {
 
             if (this.cardsToDiscardCount <= 0) {
                 this.discardPromptText.setVisible(false);
-                this.logMessage("Player finished discarding cards.");
+                this.duelHistory.logMessage("Player finished discarding cards.");
                 
                 if (this.phase === 'discard_request_active') {
                     this.phase = 'discard_response';
-                    this.syncToFirebase('discard_response');
+                    this.onlineManager.syncToFirebase('discard_response');
                     this.enablePlayerControls(false);
-                    this.logMessage('Waiting for turn resolution...');
+                    this.duelHistory.logMessage('Waiting for turn resolution...');
                 } else {
                     this.phase = 'action';
                     // End turn and rotate (or grant extra action)
@@ -2470,7 +2385,7 @@ export class Game extends Phaser.Scene {
                         if (this.pendingExtraAction) {
                             this.pendingExtraAction = false;
                             this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
-                            this.logMessage('Player gets another action!');
+                            this.duelHistory.logMessage('Player gets another action!');
                             this.enablePlayerControls(true);
                         } else {
                             this.checkTurnContinuation();
@@ -2511,10 +2426,7 @@ export class Game extends Phaser.Scene {
         let score = 0;
         const cycle = this.cycleElements[this.cycleIndex];
         
-        let isEmp = false;
-        if (spell.synergyType === 'constructive' && cycle === spell.element) isEmp = true;
-        else if (spell.synergyType === 'destructive' && cycle !== spell.element && spell.combo.includes(cycle)) isEmp = true;
-        else if (spell.synergyType === 'prestructive' && !spell.combo.includes(cycle)) isEmp = true;
+        let isEmp = this.synergy.calculateSynergy(spell, cycle);
 
         if (isReaction) {
             if (spell.shield > 0) {
@@ -2553,7 +2465,7 @@ export class Game extends Phaser.Scene {
             this.phase = 'action';
             this.enablePlayerControls(true);
         } else if (this.turn === 'ai' && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
-            this.runAITurn();
+            this.aiAgent.runAITurn();
         } else {
             this.endTurn();
         }
@@ -2562,7 +2474,7 @@ export class Game extends Phaser.Scene {
     runAITurn() {
         if (this.phase === 'gameover') return;
 
-        this.logMessage("AI is evaluating options...");
+        this.duelHistory.logMessage("AI is evaluating options...");
 
         // Smart decision making logic:
         // 1. Play mana if board has less than 3 cards
@@ -2574,14 +2486,14 @@ export class Game extends Phaser.Scene {
             this.ai.board.push(el);
 
             this.playSound('draw');
-            this.logMessage(`AI plays [${el.toUpperCase()}] mana to board.`);
+            this.duelHistory.logMessage(`AI plays [${el.toUpperCase()}] mana to board.`);
             if (this.ai.status.manaPlayDamage > 0) {
                 this.forceDiscardRandom('player', 1);
-                this.logMessage(`AI's mana play deals 1 damage to Player!`);
+                this.duelHistory.logMessage(`AI's mana play deals 1 damage to Player!`);
             }
             if (this.player.status.oppManaPlayDamage > 0) {
                 this.forceDiscardRandom('ai', 1);
-                this.logMessage(`AI takes 1 damage from playing mana due to Player Surge!`);
+                this.duelHistory.logMessage(`AI takes 1 damage from playing mana due to Player Surge!`);
             }
             
             this.updateAIHandDisplay();
@@ -2593,22 +2505,22 @@ export class Game extends Phaser.Scene {
                 if (this.ai.status.bonusManaPlays > 0 && this.ai.hand.length > 0 && this.ai.board.length < 3) {
                     this.ai.status.bonusManaPlays = 0;
                     this.manaPlacedThisTurn = false;
-                    this.logMessage(`AI plays a second mana!`);
+                    this.duelHistory.logMessage(`AI plays a second mana!`);
                     const el2 = this.ai.hand.splice(0, 1)[0];
                     this.ai.board.push(el2);
-                    this.logMessage(`AI plays [${el2.toUpperCase()}] mana to board.`);
+                    this.duelHistory.logMessage(`AI plays [${el2.toUpperCase()}] mana to board.`);
                     this.updateAIHandDisplay();
                     this.updateAIBoardDisplay();
                     this.updateAILifeDisplay();
                 }
-                this.runAITurn();
+                this.aiAgent.runAITurn();
             });
             return;
         }
 
         // 2. Try to form a spell combo from board
         if (!this.spellCastThisTurn && this.ai.board.length >= 2) {
-            const combos = this.getValidBoardCombos(this.ai.board);
+            const combos = this.aiAgent.getValidBoardCombos(this.ai.board);
             let bestSpell = null;
             let bestComboIndices = null;
             let bestScore = -1;
@@ -2617,7 +2529,7 @@ export class Game extends Phaser.Scene {
                 const elements = indices.map(idx => this.ai.board[idx]);
                 const spell = this.getSpellFromCombo(elements);
                 if (spell) {
-                    const score = this.scoreAISpell(spell, false, 0);
+                    const score = this.aiAgent.scoreAISpell(spell, false, 0);
                     if (score > bestScore) {
                         bestScore = score;
                         bestSpell = spell;
@@ -2639,18 +2551,18 @@ export class Game extends Phaser.Scene {
                 this.updateAILifeDisplay();
                 this.updateDeckDiscardDisplay();
 
-                this.logMessage(`AI casts: ${bestSpell.name}!`);
+                this.duelHistory.logMessage(`AI casts: ${bestSpell.name}!`);
 
                 const w = this.scale.width;
-                this.triggerSpellVisual(bestSpell.element, w / 2 + 100, 200, w / 2 + 100, 500, () => {
-                    this.initiateAttack('ai', 'player', bestSpell);
+                this.triggerSpellVisual(bestSpell, w / 2 + 100, 200, w / 2 + 100, 500, () => {
+                    this.combat.initiateAttack('ai', 'player', bestSpell);
                 });
                 return;
             }
         }
 
         if (this.manaPlacedThisTurn || this.spellCastThisTurn) {
-            this.logMessage("AI ends turn.");
+            this.duelHistory.logMessage("AI ends turn.");
             this.time.delayedCall(1200, () => {
                 this.endTurn();
             });
@@ -2658,13 +2570,13 @@ export class Game extends Phaser.Scene {
         }
 
         // 3. Fallback: pass to draw
-        this.logMessage("AI chooses Pass to Draw.");
+        this.duelHistory.logMessage("AI chooses Pass to Draw.");
         const extra = this.drawCard();
         if (extra) {
             // Check autoPlayDraw: drawn mana goes to board instead of hand
             if (this.ai.status.autoPlayDraw > 0 && this.ai.board.length < 3) {
                 this.ai.board.push(extra);
-                this.logMessage(`AI's drawn mana is auto-played to board!`);
+                this.duelHistory.logMessage(`AI's drawn mana is auto-played to board!`);
             } else {
                 this.ai.hand.push(extra);
             }
@@ -2674,7 +2586,7 @@ export class Game extends Phaser.Scene {
                 const lostIdx = Math.floor(Math.random() * this.ai.hand.length);
                 const lost = this.ai.hand.splice(lostIdx, 1)[0];
                 this.sharedDiscard.push(lost);
-                this.logMessage(`AI lost a hand mana from drawing!`);
+                this.duelHistory.logMessage(`AI lost a hand mana from drawing!`);
             }
 
             this.updateAIHandDisplay();
@@ -2691,7 +2603,7 @@ export class Game extends Phaser.Scene {
         if (this.ai.board.length === 0) return null;
         if (this.mode === 'test' && this.dummyMode === 'passive') return null;
 
-        const combos = this.getValidBoardCombos(this.ai.board);
+        const combos = this.aiAgent.getValidBoardCombos(this.ai.board);
         let bestSpell = null;
         let bestComboIndices = null;
         let bestScore = -1;
@@ -2700,7 +2612,7 @@ export class Game extends Phaser.Scene {
             const elements = indices.map(idx => this.ai.board[idx]);
             const spell = this.getSpellFromCombo(elements);
             if (spell) {
-                const score = this.scoreAISpell(spell, true, incomingDamage);
+                const score = this.aiAgent.scoreAISpell(spell, true, incomingDamage);
                 if (score > bestScore) {
                     bestScore = score;
                     bestSpell = spell;
@@ -2729,7 +2641,7 @@ export class Game extends Phaser.Scene {
     runAIDiscardAutomation(amount) {
         const total = this.ai.hand.length + this.ai.board.length;
         if (total === 0 || total <= amount) {
-            this.logMessage("AI is out of cards!");
+            this.duelHistory.logMessage("AI is out of cards!");
             this.ai.hand = [];
             this.ai.board = [];
             this.updateAIHandDisplay();
@@ -2739,7 +2651,7 @@ export class Game extends Phaser.Scene {
             return;
         }
 
-        this.logMessage(`AI is selecting ${amount} card(s) to discard...`);
+        this.duelHistory.logMessage(`AI is selecting ${amount} card(s) to discard...`);
 
         for (let i = 0; i < amount; i++) {
             // Prefer discarding from board mana first if excess, then hand
@@ -2766,11 +2678,11 @@ export class Game extends Phaser.Scene {
                 this.pendingExtraAction = false;
                 this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                 if (this.turn === 'player') {
-                    this.logMessage('Player gets another action!');
+                    this.duelHistory.logMessage('Player gets another action!');
                     this.enablePlayerControls(true);
                 } else {
-                    this.logMessage('AI gets another action!');
-                    this.runAITurn();
+                    this.duelHistory.logMessage('AI gets another action!');
+                    this.aiAgent.runAITurn();
                 }
             } else {
                 this.checkTurnContinuation();
@@ -2780,63 +2692,17 @@ export class Game extends Phaser.Scene {
 
     // --- ALPHABETICAL SPELL COMBO PARSER ---
     getSpellFromCombo(combo) {
-        if (!this.spellsCatalog) {
-            this.spellsCatalog = {
-                'air': { name: 'Breeze', element: 'air', combo: ['air'], damage: 0, shield: 0, draw: 0, drain: 1, synergyType: 'constructive', synergyText: 'Constructive: 2 drain', desc: 'Drain 1. Constructive: 2 drain' },
-                'water': { name: 'Stream', element: 'water', combo: ['water'], damage: 0, shield: 0, draw: 1, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 2 draw', desc: 'Draw 1. Constructive: 2 draw' },
-                'fire': { name: 'Spark', element: 'fire', combo: ['fire'], damage: 1, shield: 0, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 3 damage', desc: '1 DMG. Constructive: 3 damage' },
-                'earth': { name: 'Shell', element: 'earth', combo: ['earth'], damage: 0, shield: 3, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 5 shield', desc: '+3 Shield. Constructive: 5 shield' },
-                'air,air': { name: 'Gust', element: 'air', combo: ['air', 'air'], damage: 0, shield: 0, draw: 0, drain: 2, synergyType: 'constructive', synergyText: 'Constructive: 3 drain', desc: 'Drain 2. Constructive: 3 drain' },
-                'water,water': { name: 'Rain', element: 'water', combo: ['water', 'water'], damage: 0, shield: 0, draw: 2, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 3 draw', desc: 'Draw 2. Constructive: 3 draw' },
-                'fire,fire': { name: 'Blast', element: 'fire', combo: ['fire', 'fire'], damage: 3, shield: 0, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 5 damage', desc: '3 DMG. Constructive: 5 damage' },
-                'earth,earth': { name: 'Carapace', element: 'earth', combo: ['earth', 'earth'], damage: 0, shield: 5, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 8 shield', desc: '+5 Shield. Constructive: 8 shield' },
-                'air,fire': { name: 'Ignition', element: 'n/a', combo: ['air', 'fire'], damage: 1, shield: 0, draw: 0, drain: 1, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, 2 mana can be played', desc: '1 DMG, Drain 1. Prestructive: Next round, 2 mana can be played' },
-                'fire,water': { name: 'Haze', element: 'n/a', combo: ['fire', 'water'], damage: 1, shield: 0, draw: 1, drain: 0, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, all players lose hand mana as they draw mana', desc: '1 DMG, Draw 1. Prestructive: Next round, all players lose hand mana as they draw mana' },
-                'earth,fire': { name: 'Quake', element: 'n/a', combo: ['earth', 'fire'], damage: 1, shield: 3, draw: 0, drain: 0, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, applying Shield deals 1 damage', desc: '1 DMG, +3 Shield. Prestructive: Next round, applying Shield deals 1 damage' },
-                'air,earth': { name: 'Dust', element: 'n/a', combo: ['air', 'earth'], damage: 0, shield: 3, draw: 0, drain: 1, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, damage has a 50% chance of missing', desc: '+3 Shield, Drain 1. Prestructive: Next round, damage has a 50% chance of missing' },
-                'air,water': { name: 'Typhoon', element: 'n/a', combo: ['air', 'water'], damage: 0, shield: 0, draw: 1, drain: 1, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, drawn mana is immediately played', desc: 'Draw 1, Drain 1. Prestructive: Next round, drawn mana is immediately played' },
-                'earth,water': { name: 'Enrich', element: 'n/a', combo: ['earth', 'water'], damage: 0, shield: 3, draw: 1, drain: 0, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, everyone draws 3 mana', desc: '+3 Shield, Draw 1. Prestructive: Next round, everyone draws 3 mana' },
-                'air,air,fire': { name: 'Firestorm', element: 'air', combo: ['air', 'air', 'fire'], damage: 1, shield: 0, draw: 0, drain: 2, synergyType: 'constructive', synergyText: 'Constructive: Next played mana deals 1 damage to opponent', desc: '1 DMG, Drain 2. Constructive: Next played mana deals 1 damage to opponent' },
-                'earth,earth,water': { name: 'Fortress', element: 'earth', combo: ['earth', 'earth', 'water'], damage: 0, shield: 5, draw: 1, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: Next turn, draw an extra mana if you still have shield', desc: '+5 Shield, Draw 1. Constructive: Next turn, draw an extra mana if you still have shield' },
-                'air,fire,fire': { name: 'Wildfire', element: 'fire', combo: ['air', 'fire', 'fire'], damage: 3, shield: 0, draw: 0, drain: 1, synergyType: 'constructive', synergyText: 'Constructive: Next turn, play 2 spells instead of 1', desc: '3 DMG, Drain 1. Constructive: Next turn, play 2 spells instead of 1' },
-                'earth,water,water': { name: 'Quagmire', element: 'water', combo: ['earth', 'water', 'water'], damage: 0, shield: 3, draw: 2, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: Next turn, you can redraw up to 2 mana', desc: '+3 Shield, Draw 2. Constructive: Next turn, you can redraw up to 2 mana' },
-                'fire,water,water': { name: 'Billow', element: 'water', combo: ['fire', 'water', 'water'], damage: 1, shield: 0, draw: 2, drain: 0, synergyType: 'destructive', synergyText: 'Destructive: Cycle the top 3 deck cards', desc: '1 DMG, Draw 2. Destructive: Cycle the top 3 deck cards' },
-                'fire,fire,water': { name: 'Vaporize', element: 'fire', combo: ['fire', 'fire', 'water'], damage: 3, shield: 0, draw: 1, drain: 0, synergyType: 'destructive', synergyText: 'Destructive: Destroy the top 3 deck cards', desc: '3 DMG, Draw 1. Destructive: Destroy the top 3 deck cards' },
-                'earth,fire,fire': { name: 'Surge', element: 'fire', combo: ['earth', 'fire', 'fire'], damage: 3, shield: 3, draw: 0, drain: 0, synergyType: 'destructive', synergyText: 'Destructive: Next mana played by opponent deals 1 damage to them', desc: '3 DMG, +3 Shield. Destructive: Next mana played by opponent deals 1 damage to them' },
-                'earth,earth,fire': { name: 'Crucible', element: 'earth', combo: ['earth', 'earth', 'fire'], damage: 1, shield: 5, draw: 0, drain: 0, synergyType: 'destructive', synergyText: 'Destructive: Next round, deal 1 retaliation damage to attacking opponents', desc: '1 DMG, +5 Shield. Destructive: Next round, deal 1 retaliation damage to attacking opponents' },
-                'air,air,water': { name: 'Hurricane', element: 'air', combo: ['air', 'air', 'water'], damage: 0, shield: 0, draw: 1, drain: 2, synergyType: 'destructive', synergyText: 'Destructive: Next round, opponent can\'t draw mana', desc: 'Draw 1, Drain 2. Destructive: Next round, opponent can\'t draw mana' },
-                'air,water,water': { name: 'Flood', element: 'water', combo: ['air', 'water', 'water'], damage: 0, shield: 0, draw: 2, drain: 1, synergyType: 'destructive', synergyText: 'Destructive: Next round, opponent draws 4 mana', desc: 'Draw 2, Drain 1. Destructive: Next round, opponent draws 4 mana' },
-                'air,earth,earth': { name: 'Tower', element: 'earth', combo: ['air', 'earth', 'earth'], damage: 0, shield: 5, draw: 0, drain: 1, synergyType: 'destructive', synergyText: 'Destructive: Next round, opponent\'s spells have 50% chance of failing', desc: '+5 Shield, Drain 1. Destructive: Next round, opponent\'s spells have 50% chance of failing' },
-                'air,air,earth': { name: 'Scour', element: 'air', combo: ['air', 'air', 'earth'], damage: 0, shield: 3, draw: 0, drain: 2, synergyType: 'destructive', synergyText: 'Destructive: Remove opponent\'s Shield', desc: '+3 Shield, Drain 2. Destructive: Remove opponent\'s Shield' },
-                'air,air,air': { name: 'Tempest', element: 'air', combo: ['air', 'air', 'air'], damage: 0, shield: 0, draw: 0, drain: 3, synergyType: 'force_cycle', synergyText: 'Force Cycle to Air', desc: 'Drain 3. Force Cycle to Air' },
-                'earth,earth,earth': { name: 'Pillar', element: 'earth', combo: ['earth', 'earth', 'earth'], damage: 0, shield: 8, draw: 0, drain: 0, synergyType: 'force_cycle', synergyText: 'Force Cycle to Earth', desc: '+8 Shield. Force Cycle to Earth' },
-                'fire,fire,fire': { name: 'Blaze', element: 'fire', combo: ['fire', 'fire', 'fire'], damage: 5, shield: 0, draw: 0, drain: 0, synergyType: 'force_cycle', synergyText: 'Force Cycle to Fire', desc: '5 DMG. Force Cycle to Fire' },
-                'water,water,water': { name: 'Deluge', element: 'water', combo: ['water', 'water', 'water'], damage: 0, shield: 0, draw: 3, drain: 0, synergyType: 'force_cycle', synergyText: 'Force Cycle to Water', desc: 'Draw 3. Force Cycle to Water' },
-                'air,earth,water': { name: 'Mudslide', element: 'n/a', combo: ['air', 'earth', 'water'], damage: 0, shield: 3, draw: 1, drain: 1, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, everyone discards and replaces their hand', desc: '+3 Shield, Draw 1, Drain 1. Prestructive: Next round, everyone discards and replaces their hand' },
-                'air,fire,water': { name: 'Tide', element: 'n/a', combo: ['air', 'fire', 'water'], damage: 1, shield: 0, draw: 1, drain: 1, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, everyone rotates hands clockwise', desc: '1 DMG, Draw 1, Drain 1. Prestructive: Next round, everyone rotates hands clockwise' },
-                'earth,fire,water': { name: 'Aegis', element: 'n/a', combo: ['earth', 'fire', 'water'], damage: 1, shield: 3, draw: 1, drain: 0, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, no damage can be dealt', desc: '1 DMG, +3 Shield, Draw 1. Prestructive: Next round, no damage can be dealt' },
-                'air,earth,fire': { name: 'Cataclysm', element: 'n/a', combo: ['air', 'earth', 'fire'], damage: 1, shield: 3, draw: 0, drain: 1, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, spells are randomly targeted (including self)', desc: '1 DMG, +3 Shield, Drain 1. Prestructive: Next round, spells are randomly targeted (including self)' }
-            };
-        }
 
-        if (combo.length === 0 || combo.length > 3) return null;
-        
-        // Sort alphabetically to maintain order independence!
-        const sorted = [...combo].sort();
-        const key = sorted.join(',');
+        return getSpellFromCombo(combo);
 
-        return this.spellsCatalog[key] || null;
     }
 
     isWeakenedByCycle(spellEl, cycleEl) {
-        // Water beats Fire beats Earth beats Air beats Water
-        const weakness = {
-            'fire': 'water',
-            'earth': 'fire',
-            'air': 'earth',
-            'water': 'air'
-        };
-        return weakness[spellEl] === cycleEl;
+
+
+        return isWeakenedByCycle(spellEl, cycleEl);
+
+
     }
 
     // --- GAME OVER DISPLAY ---
@@ -2915,7 +2781,7 @@ export class Game extends Phaser.Scene {
                 rText.setColor('#ffffff');
             });
             z.on('pointerdown', () => {
-                this.cleanupOnline();
+                this.onlineManager.cleanupOnline();
                 this.scene.start('Start');
             });
         } else {
@@ -3015,8 +2881,8 @@ export class Game extends Phaser.Scene {
      * Guest waits for the initial state from Firebase.
      */
     setupOnlineGame() {
-        this.logMessage(`Online mode: you are the ${this.myRole.toUpperCase()}.`);
-        this.logMessage(`Lobby: ${this.lobbyCode}`);
+        this.duelHistory.logMessage(`Online mode: you are the ${this.myRole.toUpperCase()}.`);
+        this.duelHistory.logMessage(`Lobby: ${this.lobbyCode}`);
 
         if (this.myRole === 'host') {
             // Host initializes the game state
@@ -3024,14 +2890,14 @@ export class Game extends Phaser.Scene {
             this.dealStartingHands();
 
             // Write initial state to Firebase so guest can load it
-            this.syncToFirebase('init');
+            this.onlineManager.syncToFirebase('init');
 
             // Host goes first
             this.startTurn('player');
         }
 
         // Both host and guest listen for state changes
-        this.startFirebaseListener();
+        this.onlineManager.startFirebaseListener();
     }
 
     /**
@@ -3075,7 +2941,7 @@ export class Game extends Phaser.Scene {
         if (this.mode !== 'online' || !this.lobbyCode) return;
 
         try {
-            const state = this.serializeState();
+            const state = this.onlineManager.serializeState();
             const ref = firebase.database().ref(`lobbies/${this.lobbyCode}`);
             await ref.update({
                 gameState: state,
@@ -3084,7 +2950,7 @@ export class Game extends Phaser.Scene {
             });
         } catch (err) {
             console.error('[Whelmen Online] Sync error:', err);
-            this.logMessage('⚠ Network sync error. Retrying...');
+            this.duelHistory.logMessage('⚠ Network sync error. Retrying...');
         }
     }
 
@@ -3106,13 +2972,13 @@ export class Game extends Phaser.Scene {
 
             // Handle disconnection
             if (data.status === 'abandoned' || data.status === 'disconnected') {
-                this.logMessage('⚠ Opponent disconnected!');
-                this.showDisconnectOverlay();
+                this.duelHistory.logMessage('⚠ Opponent disconnected!');
+                this.gameOverScreen.showDisconnectOverlay();
                 return;
             }
 
             // Load the remote state
-            this.loadFromFirebase(state);
+            this.onlineManager.loadFromFirebase(state);
         };
 
         ref.on('value', handler);
@@ -3158,7 +3024,7 @@ export class Game extends Phaser.Scene {
         this.turn = isMyTurn ? 'player' : 'ai';
 
         // Refresh all UI
-        this.refreshAllUI();
+        this.onlineManager.refreshAllUI();
 
         // Handle game over
         if (state.phase === 'gameover') {
@@ -3174,7 +3040,7 @@ export class Game extends Phaser.Scene {
             this.reactionCaster = state.reactionCaster;
             
             this.phase = 'reaction_request_active';
-            this.logMessage(`Reaction window triggers for you!`);
+            this.duelHistory.logMessage(`Reaction window triggers for you!`);
             this.selectedBoardMana = [];
             this.updateComboPreview();
             this.enablePlayerControls(true);
@@ -3185,7 +3051,7 @@ export class Game extends Phaser.Scene {
             // We are the host and the guest responded
             this.phase = 'action'; // Reset phase internally
             const responseSpell = state.reactionResponseSpell || null;
-            this.resolveDefendingReaction(responseSpell);
+            this.combat.resolveDefendingReaction(responseSpell);
             return;
         }
 
@@ -3203,7 +3069,7 @@ export class Game extends Phaser.Scene {
                 if (this.pendingExtraAction) {
                     this.pendingExtraAction = false;
                     this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
-                    this.logMessage('You get another action!');
+                    this.duelHistory.logMessage('You get another action!');
                     this.enablePlayerControls(true);
                 } else {
                     this.checkTurnContinuation();
@@ -3214,15 +3080,15 @@ export class Game extends Phaser.Scene {
 
         // Normal Turn Logic
         if (isMyTurn) {
-            this.logMessage("--- YOUR TURN ---");
+            this.duelHistory.logMessage("--- YOUR TURN ---");
             this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
             this.selectedBoardMana = [];
             this.updateComboPreview();
             this.enablePlayerControls(true);
-            this.logMessage('It is your turn. Choose an action.');
+            this.duelHistory.logMessage('It is your turn. Choose an action.');
         } else {
             this.enablePlayerControls(false);
-            this.logMessage('Waiting for opponent...');
+            this.duelHistory.logMessage('Waiting for opponent...');
         }
     }
 
@@ -3283,7 +3149,7 @@ export class Game extends Phaser.Scene {
         btnText.on('pointerover', () => btnText.setColor('#bf8cff'));
         btnText.on('pointerout', () => btnText.setColor('#ffffff'));
         btnText.on('pointerdown', () => {
-            this.cleanupOnline();
+            this.onlineManager.cleanupOnline();
             this.scene.start('Start');
         });
     }
@@ -3316,18 +3182,11 @@ export class Game extends Phaser.Scene {
     }
 
     findSpellInMessage(msg) {
-        if (!this.spellsCatalog) {
-            this.getSpellFromCombo([]);
-        }
-        if (!this.spellsCatalog) return null;
-        const lowerMsg = msg.toLowerCase();
-        const sortedSpells = Object.values(this.spellsCatalog).sort((a, b) => b.name.length - a.name.length);
-        for (const spell of sortedSpells) {
-            if (lowerMsg.includes(spell.name.toLowerCase())) {
-                return spell;
-            }
-        }
-        return null;
+
+
+        return findSpellInMessage(msg);
+
+
     }
 
     showLogTooltip(spell, isAI) {
@@ -3348,7 +3207,7 @@ export class Game extends Phaser.Scene {
 
     scrollHistoryByScrollbarY(relativeY, handleHeight) {
         const viewportHeight = 360;
-        const totalHeight = this.getLogTotalHeight();
+        const totalHeight = this.duelHistory.getLogTotalHeight();
         
         // Calculate clicked center and map it
         // The handle travel range is from 10 to 10 + 360 - handleHeight
@@ -3365,18 +3224,18 @@ export class Game extends Phaser.Scene {
         const maxScroll = viewportHeight - totalHeight; // negative number
         
         this.logScrollContainer.y = scrollRatio * maxScroll;
-        this.updateScrollbar();
+        this.duelHistory.updateScrollbar();
     }
 
     scrollDuelHistoryTo(targetY) {
         if (!this.logScrollContainer || !this.allLogTextLines || this.allLogTextLines.length === 0) return;
         
         const viewportHeight = 360;
-        const totalHeight = this.getLogTotalHeight();
+        const totalHeight = this.duelHistory.getLogTotalHeight();
         
         if (totalHeight <= viewportHeight) {
             this.logScrollContainer.y = 0;
-            this.updateScrollbar();
+            this.duelHistory.updateScrollbar();
             return;
         }
         
@@ -3387,7 +3246,7 @@ export class Game extends Phaser.Scene {
         if (targetY > maxY) targetY = maxY;
         
         this.logScrollContainer.y = targetY;
-        this.updateScrollbar();
+        this.duelHistory.updateScrollbar();
     }
 
     scrollDuelHistory(deltaY) {
@@ -3395,7 +3254,7 @@ export class Game extends Phaser.Scene {
         
         // Scroll by 1 line height (26px) per tick
         const scrollAmount = -Math.sign(deltaY) * 26;
-        this.scrollDuelHistoryTo(this.logScrollContainer.y + scrollAmount);
+        this.duelHistory.scrollDuelHistoryTo(this.logScrollContainer.y + scrollAmount);
     }
 
     updateScrollbar() {
@@ -3404,7 +3263,7 @@ export class Game extends Phaser.Scene {
         this.logScrollbarGraphics.clear();
         
         const viewportHeight = 360;
-        const totalHeight = this.getLogTotalHeight();
+        const totalHeight = this.duelHistory.getLogTotalHeight();
         
         if (totalHeight <= viewportHeight) return;
         
@@ -3538,7 +3397,7 @@ export class Game extends Phaser.Scene {
                 // Force game cycle logic
                 this.cycleIndex = idx;
                 const el = elementsList[idx];
-                this.logMessage(`[Sandbox] Forced Cycle to: [${el.toUpperCase()}]`);
+                this.duelHistory.logMessage(`[Sandbox] Forced Cycle to: [${el.toUpperCase()}]`);
 
                 // Rotate visual dial
                 this.tweens.add({
@@ -3563,7 +3422,7 @@ export class Game extends Phaser.Scene {
                     this.player.board.push(el);
                     this.updatePlayerBoardDisplay();
                 } else {
-                    this.showSandboxNotification("Board is full!");
+                    this.sandboxDashboard.showSandboxNotification("Board is full!");
                 }
             }
             this.updatePlayerLifeDisplay();
@@ -3581,7 +3440,7 @@ export class Game extends Phaser.Scene {
             this.updatePlayerHandDisplay();
             this.updatePlayerLifeDisplay();
             this.updateComboPreview();
-            this.logMessage("[Sandbox] Cleared Player hand.");
+            this.duelHistory.logMessage("[Sandbox] Cleared Player hand.");
         });
 
         document.getElementById('clear-board').addEventListener('click', () => {
@@ -3591,7 +3450,7 @@ export class Game extends Phaser.Scene {
             this.updatePlayerBoardDisplay();
             this.updatePlayerLifeDisplay();
             this.updateComboPreview();
-            this.logMessage("[Sandbox] Cleared Player board mana.");
+            this.duelHistory.logMessage("[Sandbox] Cleared Player board mana.");
         });
 
         // 3. Dummy Behavior Handlers
@@ -3603,7 +3462,7 @@ export class Game extends Phaser.Scene {
             this.dummyMode = 'passive';
             btnDummyPassive.classList.add('btn-passive-ai');
             btnDummyActive.classList.remove('btn-active-ai');
-            this.logMessage("[Sandbox] Dummy set to PASSIVE Mode.");
+            this.duelHistory.logMessage("[Sandbox] Dummy set to PASSIVE Mode.");
         });
 
         btnDummyActive.addEventListener('click', () => {
@@ -3611,28 +3470,28 @@ export class Game extends Phaser.Scene {
             this.dummyMode = 'active';
             btnDummyActive.classList.add('btn-active-ai');
             btnDummyPassive.classList.remove('btn-passive-ai');
-            this.logMessage("[Sandbox] Dummy set to ACTIVE AI Mode.");
+            this.duelHistory.logMessage("[Sandbox] Dummy set to ACTIVE AI Mode.");
         });
 
         document.getElementById('btn-dummy-shield5').addEventListener('click', () => {
             this.playSound('shield');
             this.ai.shield += 5;
             this.updateShieldDisplay('ai');
-            this.logMessage(`[Sandbox] Granted Dummy +5 Shield. Total: ${this.ai.shield}`);
+            this.duelHistory.logMessage(`[Sandbox] Granted Dummy +5 Shield. Total: ${this.ai.shield}`);
         });
 
         document.getElementById('btn-dummy-shield10').addEventListener('click', () => {
             this.playSound('shield');
             this.ai.shield += 10;
             this.updateShieldDisplay('ai');
-            this.logMessage(`[Sandbox] Granted Dummy +10 Shield. Total: ${this.ai.shield}`);
+            this.duelHistory.logMessage(`[Sandbox] Granted Dummy +10 Shield. Total: ${this.ai.shield}`);
         });
 
         document.getElementById('btn-dummy-reset').addEventListener('click', () => {
             this.playSound('shield');
-            this.resetDummyState();
-            this.showSandboxNotification("Dummy Health Reset!");
-            this.logMessage("[Sandbox] Reset Dummy Health.");
+            this.sandboxDashboard.resetDummyState();
+            this.sandboxDashboard.showSandboxNotification("Dummy Health Reset!");
+            this.duelHistory.logMessage("[Sandbox] Reset Dummy Health.");
         });
 
         // 4. Populating Spell Catalog Scroll
@@ -3678,17 +3537,17 @@ export class Game extends Phaser.Scene {
                 // Add Cast Trigger
                 spellItem.querySelector('.spell-cast-action').addEventListener('click', () => {
                     if (this.phase === 'discard') {
-                        this.showSandboxNotification("Must discard first!");
+                        this.sandboxDashboard.showSandboxNotification("Must discard first!");
                         return;
                     }
                     
                     this.playSound('click');
-                    this.logMessage(`[Sandbox] Instant Casting: ${spell.name}!`);
+                    this.duelHistory.logMessage(`[Sandbox] Instant Casting: ${spell.name}!`);
                     const w = this.scale.width;
                     
                     // Visual spell fire from player center to AI center
-                    this.triggerSpellVisual(spell.element, w / 2 - 100, 500, w / 2 - 100, 100, () => {
-                        this.initiateAttack('player', 'ai', spell);
+                    this.triggerSpellVisual(spell, w / 2 - 100, 500, w / 2 - 100, 100, () => {
+                        this.combat.initiateAttack('player', 'ai', spell);
                     });
                 });
             });
