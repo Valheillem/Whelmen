@@ -859,7 +859,7 @@ export class Game extends Phaser.Scene {
     }
 
     drawMagicSigil(x, y, colorHex) {
-        const sigil = this.add.image(x, y, 'sigil').setDisplaySize(440, 440);
+        const sigil = this.add.image(x, y, 'sigil').setScale(440 / 864);
         sigil.setAlpha(0.35); // Transparent to blend into background
         
         // Subtle breathing animation for a premium element feel
