@@ -686,17 +686,10 @@ export class Game extends Phaser.Scene {
         this.cycleContainer = this.add.container(w / 2 - 20, h / 2 - 40);
         this.cycleLabels = [];
 
-        // Core cycle dial drawing
-        this.bgDial = this.add.graphics();
-        this.bgDial.fillStyle(0x261a12, 0.9);
-        this.bgDial.lineStyle(2, 0x4a4a4a, 0.4);
-        this.bgDial.fillCircle(0, 0, 95);
-        this.bgDial.strokeCircle(0, 0, 95);
-        this.cycleContainer.add(this.bgDial);
-
+        // Removed the old bgDial (the old sigil graphics)
         // Sigil overlay
-        this.bgSigil = this.add.image(0, 0, 'sigil').setDisplaySize(240, 240);
-        this.bgSigil.setAlpha(0.25); // subtle background glow
+        this.bgSigil = this.add.image(0, 0, 'sigil').setDisplaySize(300, 300);
+        this.bgSigil.setAlpha(0.85); // made more opaque and larger
         this.cycleContainer.add(this.bgSigil);
 
         // 4 Elements around the circle
@@ -731,7 +724,7 @@ export class Game extends Phaser.Scene {
     }
 
     updateCycleDisplayColor(element) {
-        if (!this.bgDial || !this.cycleCenterText) return;
+        if (!this.cycleCenterText) return;
 
         const color = element === 'fire' ? 0xdf1b2d :
                       element === 'water' ? 0x257ee4 :
@@ -746,13 +739,6 @@ export class Game extends Phaser.Scene {
         // Update center text
         this.cycleCenterText.setText(element.toUpperCase());
         this.cycleCenterText.setColor(hexColor);
-
-        // Update wheel ring color
-        this.bgDial.clear();
-        this.bgDial.fillStyle(0x261a12, 0.9);
-        this.bgDial.lineStyle(2, color, 0.4);
-        this.bgDial.fillCircle(0, 0, 95);
-        this.bgDial.strokeCircle(0, 0, 95);
     }
 
     triggerCycleParticles(element) {
