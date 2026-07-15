@@ -1,3 +1,5 @@
+import { getSpellFromCombo } from '../data/SpellCatalog.js';
+
 export class AIAgent {
     constructor(scene) {
         this.scene = scene;
@@ -61,7 +63,7 @@ export class AIAgent {
 
             combos.forEach(indices => {
                 const elements = indices.map(idx => this.scene.ai.board[idx]);
-                const spell = this.scene.getSpellFromCombo(elements);
+                const spell = getSpellFromCombo(elements);
                 if (spell) {
                     const score = this.scoreAISpell(spell, false, 0);
                     if (score > bestScore) {
@@ -146,7 +148,7 @@ export class AIAgent {
 
         combos.forEach(indices => {
             const elements = indices.map(idx => this.scene.ai.board[idx]);
-            const spell = this.scene.getSpellFromCombo(elements);
+            const spell = getSpellFromCombo(elements);
             if (spell) {
                 const score = this.scoreAISpell(spell, true, incomingDamage);
                 if (score > bestScore) {
