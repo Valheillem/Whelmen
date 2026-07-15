@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+        fetch('http://localhost:8000/log_error', {
+            method: 'POST',
+            body: JSON.stringify({msg, url, lineNo, columnNo, stack: error ? error.stack : ''})
+        });
+        return false;
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+        fetch('http://localhost:8000/log_error', {
+            method: 'POST',
+            body: JSON.stringify({msg: 'Unhandled Promise Rejection', reason: event.reason ? event.reason.stack || event.reason : ''})
+        });
+    });
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Whelmen - Elemental Card Duel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./src/styles.css?v=1.2.33">
+</head>
+<body>
+    <div id="rotate-overlay" class="overlay">
+        <div class="modal-card" style="text-align: center;">
+            <h2 style="font-family: 'Cinzel', serif; color: #ffffff; margin-bottom: 10px;">Please Rotate Device</h2>
+            <p id="rotate-msg-landscape" style="color: #cbd5e1; display: none;">Whelmen is designed for landscape mode.<br>Please rotate your phone sideways to play.</p>
+            <p id="rotate-msg-portrait" style="color: #cbd5e1; display: none;">The main menu is designed for portrait mode.<br>Please rotate your phone upright.</p>
+        </div>
+    </div>
+    <div id="game-container"></div>
+
+    <!-- HTML Main Menu Overlay (adapts to any screen size naturally) -->
+    <div id="main-menu-overlay">
+        <img src="./assets/WHELMEN_icon.png" alt="Whelmen" class="menu-title-icon" />
+        <div class="menu-buttons" id="view-main-buttons">
+            <button class="menu-btn" id="btn-play-ai">PLAY VS AI</button>
+            <button class="menu-btn" id="btn-play-online">PLAY ONLINE</button>
+            <button class="menu-btn" id="btn-test-range">TEST RANGE</button>
+            <button class="menu-btn" id="btn-spellbook">SPELLBOOK</button>
+            <button class="menu-btn" id="btn-how-to-play">HOW TO PLAY</button>
+            <button class="menu-btn" id="btn-share-game">SHARE GAME</button>
+        </div>
+
+        <div class="menu-buttons" id="view-lobby-choice" style="display: none; width: 100%; align-items: center;">
+            <div style="font-family: 'Cinzel', serif; font-size: clamp(32px, 8vw, 48px); color: #d4af37; text-align: center; margin-bottom: 30px; font-weight: bold; text-shadow: 2px 2px 0px rgba(0,0,0,0.8); -webkit-text-stroke: 1px #2a1e12;">ONLINE DUEL</div>
+            <button class="menu-btn" id="btn-lobby-create" style="padding: 20px 40px; font-size: clamp(20px, 5vw, 28px); margin-bottom: 15px; width: min(80vw, 400px);">CREATE LOBBY</button>
+            <button class="menu-btn" id="btn-lobby-join" style="padding: 20px 40px; font-size: clamp(20px, 5vw, 28px); margin-bottom: 40px; width: min(80vw, 400px);">JOIN LOBBY</button>
+            <button class="menu-btn" id="btn-lobby-choice-back" style="width: min(60vw, 250px);">← BACK</button>
+        </div>
+
+        <div class="menu-buttons" id="view-lobby-create" style="display: none; width: 100%; align-items: center;">
+            <div id="lobby-create-status" style="font-family: 'Outfit', sans-serif; font-size: 20px; color: #00e5ff; margin-bottom: 15px; text-align: center;">Creating lobby...</div>
+            <div id="lobby-create-code" style="font-family: 'Outfit', sans-serif; font-size: 56px; font-weight: bold; color: #ffffff; letter-spacing: 4px; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; display: none;"></div>
+            <div id="lobby-create-qr" style="display: none; justify-content: center; align-items: center; width: 150px; height: 150px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 10px;"></div>
+            <div id="lobby-create-url" style="font-family: 'Inter', sans-serif; font-size: 12px; color: #a0a0b0; text-align: center; max-width: 80vw; word-wrap: break-word; margin-bottom: 30px; display: none;"></div>
+            <div style="font-family: 'Inter', sans-serif; font-size: 14px; color: #a0a0b0; text-align: center; margin-bottom: 20px;">Share the code or QR with your opponent</div>
+            <button class="menu-btn" id="btn-lobby-create-back" style="width: min(60vw, 250px);">← CANCEL</button>
+        </div>
+
+        <div class="menu-buttons" id="view-lobby-join" style="display: none; width: 100%; align-items: center;">
+            <div id="lobby-join-status" style="font-family: 'Outfit', sans-serif; font-size: 20px; color: #a0a0b0; margin-bottom: 20px; text-align: center;">Enter the lobby code:</div>
+            <input type="text" id="input-lobby-code" class="lobby-input" placeholder="e.g. BLAZE" style="width: min(90vw, 360px); padding: 16px; font-size: 24px; font-family: 'Outfit', sans-serif; text-align: center; text-transform: uppercase; letter-spacing: 3px; background: rgba(26, 20, 16, 0.95); color: #ffffff; border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 8px; outline: none; margin-bottom: 30px; transition: border-color 0.2s;" onfocus="this.style.borderColor='#ffdd77'" onblur="this.style.borderColor='rgba(212, 175, 55, 0.6)'" />
+            <button class="menu-btn" id="btn-lobby-join-submit" style="padding: 16px 40px; font-size: 24px; margin-bottom: 40px; width: min(80vw, 360px);">JOIN DUEL</button>
+            <button class="menu-btn" id="btn-lobby-join-back" style="width: min(60vw, 250px);">← BACK</button>
+        </div>
+    </div>
+
+    <!-- QR Code Sharing Modal -->
+    <div id="share-overlay" class="overlay">
+        <div class="modal-card" id="share-modal">
+            <button class="modal-close" id="close-share">&times;</button>
+            <h2 class="modal-title">Share Duel</h2>
+            <p id="share-status" style="font-size: 0.9rem; color: #a0a0b0; margin-bottom: 8px;">Detecting your network address...</p>
+            <div class="qr-container">
+                <div id="qrcode"></div>
+            </div>
+            <div class="share-link-box">
+                <input type="text" id="share-link" class="share-link-input" value="" placeholder="http://192.168.x.x:5500/">
+                <button id="update-qr-btn" class="share-copy-btn" style="border-left: 1px solid rgba(255,255,255,0.1);">Update QR</button>
+                <button id="copy-share-btn" class="share-copy-btn">Copy</button>
+            </div>
+            <p style="font-size: 0.75rem; color: #666; margin-top: 10px;">Edit the URL above if auto-detection fails.</p>
+        </div>
+    </div>
+
+    <!-- How To Play Modal -->
+    <div id="tutorial-overlay" class="overlay">
+        <div class="modal-card tutorial-modal-card" id="tutorial-modal">
+            <button class="modal-close" id="close-tutorial">&times;</button>
+            <h2 class="modal-title">Rules of Whelmen</h2>
+            <div class="tutorial-content">
+                <h3>The Premise</h3>
+                <p>You are an elemental mage dueling an opponent. In <strong>Whelmen</strong>, there is no separate life bar—your <strong>cards are your health and your mana</strong>.</p>
+                <p>Your total health is represented by the active cards remaining in your <strong>Hand</strong> and placed on your <strong>Board</strong>. If your cards run out, you are defeated!</p>
+
+                <h3>The Structure</h3>
+                <p>At the start of your turn, you draw 1 card from the shared deck. Then, you may perform <strong>BOTH</strong> of the following actions in any order:</p>
+                <ul>
+                    <li><strong>Play Mana:</strong> Move 1 card from your hand to the board as mana. You can only play 1 mana card per turn.</li>
+                    <li><strong>Cast a Spell:</strong> Select up to 3 mana cards on your board and consume them to cast a spell. Casting a spell consumes your active cards, reducing your overall health!</li>
+                </ul>
+                <p>Alternatively, you may <strong>Pass & Draw</strong>: Skip your actions to draw 1 additional card.</p>
+                
+                <h3>Overwhelmed</h3>
+                <p>Your Maximum Hand Size is normally 8. If you exceed this limit, you must discard cards at the end of the turn. If you are forced to discard cards due to exceeding your hand size <strong>2 turns in a row</strong>, you become <strong>Overwhelmed</strong>! Your Maximum Hand Size will decrease by 1. A player can become Overwhelmed any number of times.</p>
+
+                                                <h3>The Cycle and Synergies</h3>
+                <p>A predictable, elemental weather cycle rotates every single turn in this order:</p>
+                <p style="text-align: center; font-weight: bold; margin: 10px 0;">Neutral ➔ <span class="element-fire">Fire</span> ➔ <span class="element-earth">Earth</span> ➔ <span class="element-air">Air</span> ➔ <span class="element-water">Water</span> ➔ <span class="element-fire">Fire</span></p>
+
+                
+                <p>Spells are categorized by how their component elements interact with each other and the active Cycle.</p>
+                <ul>
+                    <li><strong>Constructive Spells:</strong> Contain complementary elements (<span class="element-air">Air</span>/<span class="element-fire">Fire</span> or <span class="element-water">Water</span>/<span class="element-earth">Earth</span>). They are empowered when their primary element matches the active Cycle.</li>
+                    <li><strong>Destructive Spells:</strong> Contain conflicting elements (e.g. <span class="element-air">Air</span>/<span class="element-water">Water</span>). They are empowered when their minority element matches the active Cycle.</li>
+                    <li><strong>Prestructive Spells:</strong> Perfectly balanced components (Neutral). They are empowered only when the active Cycle does not match ANY of the spell's components.</li>
+                </ul>
+
+                <h3>Reactions</h3>
+                <p>When your opponent casts an offensive spell, you will enter a brief <strong>Reaction Phase</strong>.</p>
+                <p>If you have active mana cards on your board, you can select them to cast a defensive reaction spell (like <em>Pebble Shield</em> or <em>Mudslide</em>). Reaction spells resolve <strong>before</strong> the attack hits, setting up shields to protect your precious cards!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-Game How To Play Modal (No Grid) -->
+    <div id="tutorial-overlay-ingame" class="overlay">
+        <div class="modal-card tutorial-modal-card" id="tutorial-modal-ingame">
+            <button class="modal-close" id="close-tutorial-ingame">&times;</button>
+            <h2 class="modal-title">Rules of Whelmen</h2>
+            <div class="tutorial-content">
+                <h3>The Premise</h3>
+                <p>You are an elemental mage dueling an opponent. In <strong>Whelmen</strong>, there is no separate life bar—your <strong>cards are your health and your mana</strong>.</p>
+                <p>Your total health is represented by the active cards remaining in your <strong>Hand</strong> and placed on your <strong>Board</strong>. If your cards run out, you are defeated!</p>
+
+                <h3>The Structure</h3>
+                <p>At the start of your turn, you draw 1 card from the shared deck. Then, you may perform <strong>BOTH</strong> of the following actions in any order:</p>
+                <ul>
+                    <li><strong>Play Mana:</strong> Move 1 card from your hand to the board as mana. You can only play 1 mana card per turn.</li>
+                    <li><strong>Cast a Spell:</strong> Select up to 3 mana cards on your board and consume them to cast a spell. Casting a spell consumes your active cards, reducing your overall health!</li>
+                </ul>
+                <p>Alternatively, you may <strong>Pass & Draw</strong>: Skip your actions to draw 1 additional card.</p>
+                
+                <h3>Overwhelmed</h3>
+                <p>Your Maximum Hand Size is normally 8. If you exceed this limit, you must discard cards at the end of the turn. If you are forced to discard cards due to exceeding your hand size <strong>2 turns in a row</strong>, you become <strong>Overwhelmed</strong>! Your Maximum Hand Size will decrease by 1. A player can become Overwhelmed any number of times.</p>
+
+                                                <h3>The Cycle and Synergies</h3>
+                <p>A predictable, elemental weather cycle rotates every single turn in this order:</p>
+                <p style="text-align: center; font-weight: bold; margin: 10px 0;">Neutral ➔ <span class="element-fire">Fire</span> ➔ <span class="element-earth">Earth</span> ➔ <span class="element-air">Air</span> ➔ <span class="element-water">Water</span> ➔ <span class="element-fire">Fire</span></p>
+
+                
+                <p>Spells are categorized by how their component elements interact with each other and the active Cycle.</p>
+                <ul>
+                    <li><strong>Constructive Spells:</strong> Contain complementary elements (<span class="element-air">Air</span>/<span class="element-fire">Fire</span> or <span class="element-water">Water</span>/<span class="element-earth">Earth</span>). They are empowered when their primary element matches the active Cycle.</li>
+                    <li><strong>Destructive Spells:</strong> Contain conflicting elements (e.g. <span class="element-air">Air</span>/<span class="element-water">Water</span>). They are empowered when their minority element matches the active Cycle.</li>
+                    <li><strong>Prestructive Spells:</strong> Perfectly balanced components (Neutral). They are empowered only when the active Cycle does not match ANY of the spell's components.</li>
+                </ul>
+
+                <h3>Reactions</h3>
+                <p>When your opponent casts an offensive spell, you will enter a brief <strong>Reaction Phase</strong>.</p>
+                <p>If you have active mana cards on your board, you can select them to cast a defensive reaction spell (like <em>Pebble Shield</em> or <em>Mudslide</em>). Reaction spells resolve <strong>before</strong> the attack hits, setting up shields to protect your precious cards!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid-Based Spellbook Modal -->
+    <div id="spellbook-overlay" class="overlay">
+        <div class="modal-card spellbook-modal" id="spellbook-modal">
+            <button class="modal-close" id="close-spellbook">&times;</button>
+            <h2 class="modal-title spellbook-title">Tome of Spells</h2>
+            
+            <div class="spellbook-content">
+<div class="spell-tier">
+                    <h3 class="tier-title">Tier 1: Sprite</h3>
+                    <div class="spell-grid">
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div></div><div class="spell-name element-air">Breeze</div><div class="spell-desc">Drain 1. Synergy: Constructive: 2 drain</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div></div><div class="spell-name element-water">Stream</div><div class="spell-desc">Draw 1. Synergy: Constructive: 2 draw</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div></div><div class="spell-name element-fire">Spark</div><div class="spell-desc">1 DMG. Synergy: Constructive: 3 damage</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div></div><div class="spell-name element-earth">Shell</div><div class="spell-desc">+3 Shield. Synergy: Constructive: 5 shield</div></div>
+                    </div>
+                </div>
+
+                <div class="spell-tier">
+                    <h3 class="tier-title">Tier 2: Elemental</h3>
+                    <div class="spell-grid">
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Gust</div><div class="spell-desc">Drain 2. Synergy: Constructive: 3 drain</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Rain</div><div class="spell-desc">Draw 2. Synergy: Constructive: 3 draw</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Blast</div><div class="spell-desc">3 DMG. Synergy: Constructive: 5 damage</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Carapace</div><div class="spell-desc">+5 Shield. Synergy: Constructive: 8 shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Ignition</div><div class="spell-desc">1 DMG, Drain 1. Synergy: Prestructive: Next round, 2 mana can be played</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Haze</div><div class="spell-desc">1 DMG, Draw 1. Synergy: Prestructive: Next round, all players lose hand mana as they draw mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Quake</div><div class="spell-desc">1 DMG, +3 Shield. Synergy: Prestructive: Next round, applying Shield deals 1 damage</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div></div><div class="spell-name element-neutral">Dust</div><div class="spell-desc">+3 Shield, Drain 1. Synergy: Prestructive: Next round, damage has a 50% chance of missing</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Typhoon</div><div class="spell-desc">Draw 1, Drain 1. Synergy: Prestructive: Next round, drawn mana is immediately played</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Enrich</div><div class="spell-desc">+3 Shield, Draw 1. Synergy: Prestructive: Next round, everyone draws 3 mana</div></div>
+                    </div>
+                </div>
+
+                <div class="spell-tier">
+                    <h3 class="tier-title">Tier 3: Dynastic</h3>
+                    <div class="spell-grid">
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot fire"></div></div><div class="spell-name element-air">Firestorm</div><div class="spell-desc">1 DMG, Drain 2. Synergy: Constructive: Next played mana deals 1 damage to opponent</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-earth">Fortress</div><div class="spell-desc">+5 Shield, Draw 1. Synergy: Constructive: Next turn, draw an extra mana if you still have shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Wildfire</div><div class="spell-desc">3 DMG, Drain 1. Synergy: Constructive: Next turn, play 2 spells instead of 1</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Quagmire</div><div class="spell-desc">+3 Shield, Draw 2. Synergy: Constructive: Next turn, you can redraw up to 2 mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Billow</div><div class="spell-desc">1 DMG, Draw 2. Synergy: Destructive: Cycle the top 3 deck cards</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-fire">Vaporize</div><div class="spell-desc">3 DMG, Draw 1. Synergy: Destructive: Destroy the top 3 deck cards</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Surge</div><div class="spell-desc">3 DMG, +3 Shield. Synergy: Destructive: Next mana played by opponent deals 1 damage to them</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-earth">Crucible</div><div class="spell-desc">1 DMG, +5 Shield. Synergy: Destructive: Next round, deal 1 retaliation damage to attacking opponents</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot water"></div></div><div class="spell-name element-air">Hurricane</div><div class="spell-desc">Draw 1, Drain 2. Synergy: Destructive: Next round, opponent can't draw mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Flood</div><div class="spell-desc">Draw 2, Drain 1. Synergy: Destructive: Next round, opponent draws 4 mana</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Tower</div><div class="spell-desc">+5 Shield, Drain 1. Synergy: Destructive: Next round, opponent's spells have 50% chance of failing</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot earth"></div></div><div class="spell-name element-air">Scour</div><div class="spell-desc">+3 Shield, Drain 2. Synergy: Destructive: Remove opponent's Shield</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot air"></div><div class="dot air"></div></div><div class="spell-name element-air">Tempest</div><div class="spell-desc">Drain 3. Synergy: Force Cycle to Air</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot earth"></div><div class="dot earth"></div></div><div class="spell-name element-earth">Pillar</div><div class="spell-desc">+8 Shield. Synergy: Force Cycle to Earth</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot fire"></div><div class="dot fire"></div><div class="dot fire"></div></div><div class="spell-name element-fire">Blaze</div><div class="spell-desc">5 DMG. Synergy: Force Cycle to Fire</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot water"></div><div class="dot water"></div><div class="dot water"></div></div><div class="spell-name element-water">Deluge</div><div class="spell-desc">Draw 3. Synergy: Force Cycle to Water</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Mudslide</div><div class="spell-desc">+3 Shield, Draw 1, Drain 1. Synergy: Prestructive: Next round, everyone discards and replaces their hand</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Tide</div><div class="spell-desc">1 DMG, Draw 1, Drain 1. Synergy: Prestructive: Next round, everyone rotates hands clockwise</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot earth"></div><div class="dot fire"></div><div class="dot water"></div></div><div class="spell-name element-neutral">Aegis</div><div class="spell-desc">1 DMG, +3 Shield, Draw 1. Synergy: Prestructive: Next round, no damage can be dealt</div></div>
+                        <div class="spell-entry"><div class="combo-dots"><div class="dot air"></div><div class="dot earth"></div><div class="dot fire"></div></div><div class="spell-name element-neutral">Cataclysm</div><div class="spell-desc">1 DMG, +3 Shield, Drain 1. Synergy: Prestructive: Next round, spells are randomly targeted (including self)</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat mode for non-bundler usage) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+    <script src="./phaser.js"></script>
+    <script type="module" src="./src/main.js?v=1.2.33"></script>
+
+<script>
+// Intercept console.log to send to server
+const oldLog = console.log;
+console.log = function(...args) {
+    oldLog(...args);
+    fetch('/log_msg', {
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({msg: args.join(' ')})
+    });
+};
+
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const btn = document.getElementById('btn-vs-ai');
+        if(btn) btn.click();
+        
+        setInterval(() => {
+            const passBtn = document.getElementById('pass-btn');
+            if(passBtn && passBtn.style.display !== 'none' && !passBtn.disabled) {
+                passBtn.click();
+            }
+        }, 800);
+    }, 2000);
+});
+</script>
+</body>
+
+</html>
