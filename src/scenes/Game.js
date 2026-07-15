@@ -686,12 +686,6 @@ export class Game extends Phaser.Scene {
         this.cycleContainer = this.add.container(w / 2 - 20, h / 2 - 40);
         this.cycleLabels = [];
 
-        // Removed the old bgDial (the old sigil graphics)
-        // Sigil overlay
-        this.bgSigil = this.add.image(0, 0, 'sigil').setDisplaySize(300, 300);
-        this.bgSigil.setAlpha(0.85); // made more opaque and larger
-        this.cycleContainer.add(this.bgSigil);
-
         // 4 Elements around the circle
         const ringPositions = [
             { x: 0, y: -65, color: 0xdf1b2d, icon: 'icon_fire', label: 'FIRE' },
@@ -865,50 +859,13 @@ export class Game extends Phaser.Scene {
     }
 
     drawMagicSigil(x, y, colorHex) {
-        const sigil = this.add.graphics();
-        
-        // Concentric outer rings
-        sigil.lineStyle(1.5, colorHex, 0.25);
-        sigil.strokeCircle(x, y, 220);
-        
-        sigil.lineStyle(1, colorHex, 0.15);
-        sigil.strokeCircle(x, y, 205);
-        
-        // Concentric inner ring
-        sigil.lineStyle(2, colorHex, 0.4);
-        sigil.strokeCircle(x, y, 150);
-        
-        // Concentric innermost core circle
-        sigil.lineStyle(1, colorHex, 0.6);
-        sigil.strokeCircle(x, y, 110);
-        
-        // Draw crosshairs
-        sigil.lineStyle(1.5, colorHex, 0.3);
-        sigil.beginPath();
-        sigil.moveTo(x - 230, y);
-        sigil.lineTo(x + 230, y);
-        sigil.moveTo(x, y - 230);
-        sigil.lineTo(x, y + 230);
-        sigil.strokePath();
-
-        // Optional star geometry
-        sigil.beginPath();
-        sigil.moveTo(x, y - 220);
-        sigil.lineTo(x + 50, y - 50);
-        sigil.lineTo(x + 220, y);
-        sigil.lineTo(x + 50, y + 50);
-        sigil.lineTo(x, y + 220);
-        sigil.lineTo(x - 50, y + 50);
-        sigil.lineTo(x - 220, y);
-        sigil.lineTo(x - 50, y - 50);
-        sigil.closePath();
-        sigil.lineStyle(1, colorHex, 0.2);
-        sigil.strokePath();
+        const sigil = this.add.image(x, y, 'sigil').setDisplaySize(440, 440);
+        sigil.setAlpha(0.35); // Transparent to blend into background
         
         // Subtle breathing animation for a premium element feel
         this.tweens.add({
             targets: sigil,
-            alpha: 0.35,
+            alpha: 0.15,
             duration: 2000,
             yoyo: true,
             repeat: -1,
