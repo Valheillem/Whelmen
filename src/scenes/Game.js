@@ -1799,23 +1799,38 @@ export class Game extends Phaser.Scene {
         }
     }
 
-    forceDiscardRandom(who, count) {
+    forceDiscardRandom(who, count, source = 'hand') {
         const char = who === 'player' ? this.player : this.ai;
-        const actualCount = Math.min(count, char.hand.length);
-        this.duelHistory.logMessage(`${who.toUpperCase()} is forced to discard ${actualCount} card(s)!`);
+        const targetArray = source === 'board' ? char.board : char.hand;
+        const actualCount = Math.min(count, targetArray.length);
+        
+        if (source === 'board') {
+            this.duelHistory.logMessage(`${who.toUpperCase()} is forced to drain ${actualCount} board mana!`);
+        } else {
+            this.duelHistory.logMessage(`${who.toUpperCase()} is forced to discard ${actualCount} hand card(s)!`);
+        }
+
         for (let i = 0; i < actualCount; i++) {
-            const randIdx = Math.floor(Math.random() * char.hand.length);
-            const discarded = char.hand.splice(randIdx, 1)[0];
+            const randIdx = Math.floor(Math.random() * targetArray.length);
+            const discarded = targetArray.splice(randIdx, 1)[0];
             this.sharedDiscard.push(discarded);
         }
+        
         if (who === 'player') {
-            this.updatePlayerHandDisplay();
+            if (source === 'hand') this.updatePlayerHandDisplay();
+            else this.updatePlayerBoardDisplay();
             this.updatePlayerLifeDisplay();
         } else {
-            this.updateAIHandDisplay();
+            if (source === 'hand') this.updateAIHandDisplay();
+            else this.updateAIBoardDisplay();
             this.updateAILifeDisplay();
         }
         this.updateDeckDiscardDisplay();
+        
+        if (who === 'player' && source === 'board') {
+            this.selectedBoardMana = [];
+            this.updateComboPreview();
+        }
     }
 
     handlePassDrawOption() {

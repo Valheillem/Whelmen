@@ -152,7 +152,7 @@ export class CombatSystem {
         
         // Drain logic
         if (finalDrain > 0) {
-            this.scene.forceDiscardRandom(defender, finalDrain);
+            this.scene.forceDiscardRandom(defender, finalDrain, 'board');
         }
 
         if (isEmp) {
@@ -314,7 +314,7 @@ export class CombatSystem {
                     this.scene.logMessage('Waiting for opponent to discard...');
                 } else {
                     // AI automatically discards
-                    this.scene.runAIDiscardAutomation(amount);
+                    this.scene.aiAgent.runAIDiscardAutomation(amount);
                 }
             }
         } else {
