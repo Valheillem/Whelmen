@@ -1642,7 +1642,7 @@ export class Game extends Phaser.Scene {
         }
 
         const elements = this.selectedBoardMana.map(idx => this.player.board[idx]);
-        const spell = this.getSpellFromCombo(elements);
+        const spell = getSpellFromCombo(elements);
         const panelW = 264;
         const panelH = 132;
         
@@ -1876,7 +1876,7 @@ export class Game extends Phaser.Scene {
     handleCastSpellOption() {
         if (this.selectedBoardMana.length === 0) return;
         const elements = this.selectedBoardMana.map(idx => this.player.board[idx]);
-        const spell = this.getSpellFromCombo(elements);
+        const spell = getSpellFromCombo(elements);
 
         if (!spell) {
             this.duelHistory.logMessage("Cannot cast: invalid combo selected.");
@@ -2982,7 +2982,7 @@ export class Game extends Phaser.Scene {
 
         // 4. Populating Spell Catalog Scroll
         if (!this.spellsCatalog) {
-            this.getSpellFromCombo([]);
+            getSpellFromCombo([]);
         }
         
         const scrollList = document.getElementById('spell-list-scroll');
