@@ -168,7 +168,7 @@ export class GameOverScreen {
                 this.scene.scene.start('Start');
             });
         }
-    }\n
+    }
 
 
     showDisconnectOverlay() {
@@ -205,6 +205,6 @@ export class GameOverScreen {
             this.scene.cleanupOnline();
             this.scene.scene.start('Start');
         });
-    }\n
+    }
 
 }

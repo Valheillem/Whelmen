@@ -1,0 +1,7 @@
+{
+  "msg": "Uncaught SyntaxError: Unexpected reserved word",
+  "url": "http://localhost:8000/src/online/OnlineManager.js",
+  "lineNo": 65,
+  "columnNo": 13,
+  "stack": "SyntaxError: Unexpected reserved word"
+}

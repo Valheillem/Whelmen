@@ -291,7 +291,7 @@ export class SandboxDashboard {
             if (tabEl) tabEl.remove();
             if (panelEl) panelEl.remove();
         });
-    }\n
+    }
 
 
 
@@ -304,7 +304,7 @@ export class SandboxDashboard {
                 notif.classList.remove('show');
             }, 3000);
         }
-    }\n
+    }
 
 
 
@@ -338,7 +338,7 @@ export class SandboxDashboard {
             this.scene.updateComboPreview();
             this.scene.enablePlayerControls(true);
         }
-    }\n
+    }
 
 
 
@@ -371,6 +371,6 @@ export class SandboxDashboard {
             this.scene.cardsToDiscardCount = 0;
             if (this.scene.discardPromptText) this.scene.discardPromptText.setVisible(false);
         }
-    }\n
+    }
 
 }

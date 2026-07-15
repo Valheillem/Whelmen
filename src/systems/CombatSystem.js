@@ -174,7 +174,7 @@ export class CombatSystem {
                 this.scene.time.delayedCall(800, () => this.resolvePostAction());
             }
         }
-    }\n
+    }
 
 
 
@@ -205,7 +205,7 @@ export class CombatSystem {
                 });
             }
         }
-    }\n
+    }
 
 
 
@@ -265,7 +265,7 @@ export class CombatSystem {
         // Apply incoming damage minus final shield
         const finalDmg = this.scene.reactionTargetSpell.damage;
         this.scene.applyDamage(defender, finalDmg, this.scene.reactionTargetSpell.bypassShield || false);
-    }\n
+    }
 
 
 
@@ -335,6 +335,6 @@ export class CombatSystem {
                 }
             });
         }
-    }\n
+    }
 
 }

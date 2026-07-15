@@ -131,7 +131,7 @@ export class AIAgent {
         this.scene.time.delayedCall(1200, () => {
             this.scene.endTurn();
         });
-    }\n
+    }
 
 
 
@@ -172,7 +172,7 @@ export class AIAgent {
         }
 
         return null;
-    }\n
+    }
 
 
 
@@ -226,7 +226,7 @@ export class AIAgent {
                 this.scene.checkTurnContinuation();
             }
         });
-    }\n
+    }
 
 
     getValidBoardCombos(board) {
@@ -250,6 +250,6 @@ export class AIAgent {
         }
         
         return results;
-    }\n
+    }
 
 }

@@ -101,7 +101,7 @@ export class DuelHistory {
             this.scene.isDraggingHistory = false;
             this.scene.isDraggingScrollbar = false;
         });
-    }\n
+    }
 
 
 
@@ -168,13 +168,13 @@ export class DuelHistory {
             this.scene.logScrollContainer.y = 0;
         }
         this.updateScrollbar();
-    }\n
+    }
 
 
 
     showLogTooltip(spell, isAI) {
         this.scene.updatePanelVisuals(isAI, spell);
-    }\n
+    }
 
 
 
@@ -182,7 +182,7 @@ export class DuelHistory {
         if (this.scene.incomingSpellPanel) this.scene.incomingSpellPanel.setVisible(false);
         if (this.scene.primedSpellPanel) this.scene.primedSpellPanel.setVisible(false);
         this.scene.updateComboPreview();
-    }\n
+    }
 
 
 
@@ -190,7 +190,7 @@ export class DuelHistory {
         if (!this.scene.allLogTextLines || this.scene.allLogTextLines.length === 0) return 0;
         const lastLine = this.scene.allLogTextLines[this.scene.allLogTextLines.length - 1];
         return lastLine.y + lastLine.height + 15;
-    }\n
+    }
 
 
 
@@ -214,7 +214,7 @@ export class DuelHistory {
         
         this.scene.logScrollContainer.y = scrollRatio * maxScroll;
         this.updateScrollbar();
-    }\n
+    }
 
 
 
@@ -238,7 +238,7 @@ export class DuelHistory {
         
         this.scene.logScrollContainer.y = targetY;
         this.updateScrollbar();
-    }\n
+    }
 
 
 
@@ -248,7 +248,7 @@ export class DuelHistory {
         // Scroll by 1 line height (26px) per tick
         const scrollAmount = -Math.sign(deltaY) * 26;
         this.scrollDuelHistoryTo(this.scene.logScrollContainer.y + scrollAmount);
-    }\n
+    }
 
 
 
@@ -278,6 +278,6 @@ export class DuelHistory {
         this.scene.logScrollbarGraphics.lineStyle(1, 0xa78bfa, 0.95); // glowing border
         this.scene.logScrollbarGraphics.fillRoundedRect(328, handleY, 6, handleHeight, 3);
         this.scene.logScrollbarGraphics.strokeRoundedRect(328, handleY, 6, handleHeight, 3);
-    }\n
+    }
 
 }

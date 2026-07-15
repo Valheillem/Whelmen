@@ -791,10 +791,10 @@ export class Game extends Phaser.Scene {
         // Update Deck representation
         if (this.sharedDeck.length > 0) {
             this.deckCardImg.setVisible(true);
-            this.deckT.setText(`DECK\n(${this.sharedDeck.length})`);
+            this.deckT.setText(`DECK(${this.sharedDeck.length})`);
         } else {
             this.deckCardImg.setVisible(false);
-            this.deckT.setText('DECK\n(EMPTY)');
+            this.deckT.setText('DECK(EMPTY)');
         }
 
         // Update Discard representation
@@ -803,10 +803,10 @@ export class Game extends Phaser.Scene {
             const topEl = this.sharedDiscard[this.sharedDiscard.length - 1];
             this.discardCardImg.setTexture(`card_${topEl}`);
             this.discardCardImg.setVisible(true);
-            this.discardT.setText(`DISCARD\n(${this.sharedDiscard.length})`);
+            this.discardT.setText(`DISCARD(${this.sharedDiscard.length})`);
         } else {
             this.discardCardImg.setVisible(false);
-            this.discardT.setText('DISCARD\n(EMPTY)');
+            this.discardT.setText('DISCARD(EMPTY)');
 
             // Draw a clean, semi-transparent card slot outline for empty discard
             const cardW = 100 * 0.75;
@@ -2269,7 +2269,7 @@ export class Game extends Phaser.Scene {
             return;
         }
 
-        this.discardPromptText.setText(`DAMAGE! CHOOSE & DISCARD ${this.cardsToDiscardCount} CARD(S)\nFROM HAND OR BOARD MANA`);
+        this.discardPromptText.setText(`DAMAGE! CHOOSE & DISCARD ${this.cardsToDiscardCount} CARD(S)FROM HAND OR BOARD MANA`);
         this.discardPromptText.setVisible(true);
     }
 
@@ -2316,7 +2316,7 @@ export class Game extends Phaser.Scene {
                     });
                 }
             } else {
-                this.discardPromptText.setText(`DAMAGE! CHOOSE & DISCARD ${this.cardsToDiscardCount} CARD(S)\nFROM HAND OR BOARD MANA`);
+                this.discardPromptText.setText(`DAMAGE! CHOOSE & DISCARD ${this.cardsToDiscardCount} CARD(S)FROM HAND OR BOARD MANA`);
             }
         }
     }

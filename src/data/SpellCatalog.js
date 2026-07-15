@@ -1,4 +1,4 @@
-export const SPELLS_CATALOG = {
+export const SPELLS = {
     'air': { name: 'Breeze', element: 'air', combo: ['air'], damage: 0, shield: 0, draw: 0, drain: 1, synergyType: 'constructive', synergyText: 'Constructive: 2 drain', desc: 'Drain 1. Constructive: 2 drain' },
     'water': { name: 'Stream', element: 'water', combo: ['water'], damage: 0, shield: 0, draw: 1, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 2 draw', desc: 'Draw 1. Constructive: 2 draw' },
     'fire': { name: 'Spark', element: 'fire', combo: ['fire'], damage: 1, shield: 0, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 3 damage', desc: '1 DMG. Constructive: 3 damage' },
@@ -42,12 +42,12 @@ export function getSpellFromCombo(combo) {
     const sorted = [...combo].sort();
     const key = sorted.join(',');
 
-    return SPELLS_CATALOG[key] || null;
+    return SPELLS[key] || null;
 }
 
 export function findSpellInMessage(msg) {
     const lowerMsg = msg.toLowerCase();
-    const sortedSpells = Object.values(SPELLS_CATALOG).sort((a, b) => b.name.length - a.name.length);
+    const sortedSpells = Object.values(SPELLS).sort((a, b) => b.name.length - a.name.length);
     for (const spell of sortedSpells) {
         if (lowerMsg.includes(spell.name.toLowerCase())) {
             return spell;
@@ -57,5 +57,5 @@ export function findSpellInMessage(msg) {
 }
 
 export function getAllSpellNames() {
-    return Object.values(SPELLS_CATALOG).map(spell => spell.name);
+    return Object.values(SPELLS).map(spell => spell.name);
 }

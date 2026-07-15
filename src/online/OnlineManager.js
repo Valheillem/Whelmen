@@ -22,7 +22,7 @@ export class OnlineManager {
 
         // Both host and guest listen for state changes
         this.startFirebaseListener();
-    }\n
+    }
 
 
     serializeState() {
@@ -54,9 +54,9 @@ export class OnlineManager {
             discardTargetCount: this.scene.discardTargetCount || 0,
             seq: Date.now()
         };
-    }\n
+    }
 
- syncToFirebase(actionType) {
+ async syncToFirebase(actionType) {
         if (this.scene.mode !== 'online' || !this.scene.lobbyCode) return;
 
         try {
@@ -71,7 +71,7 @@ export class OnlineManager {
             console.error('[Whelmen Online] Sync error:', err);
             this.scene.duelHistory.logMessage('⚠ Network sync error. Retrying...');
         }
-    }\n
+    }
 
 
     startFirebaseListener() {
@@ -100,7 +100,7 @@ export class OnlineManager {
 
         ref.on('value', handler);
         this.scene.firebaseUnsub = () => ref.off('value', handler);
-    }\n
+    }
 
 
     loadFromFirebase(state) {
@@ -204,7 +204,7 @@ export class OnlineManager {
             this.scene.enablePlayerControls(false);
             this.scene.duelHistory.logMessage('Waiting for opponent...');
         }
-    }\n
+    }
 
 
     cleanupOnline() {
@@ -215,7 +215,7 @@ export class OnlineManager {
         if (this.scene.lobbyCode) {
             firebase.database().ref(`lobbies/${this.scene.lobbyCode}/status`).set('finished').catch(() => {});
         }
-    }\n
+    }
 
 
     refreshAllUI() {
@@ -236,6 +236,6 @@ export class OnlineManager {
         // Update shield visuals
         this.scene.updateShieldDisplay('player');
         this.scene.updateShieldDisplay('ai');
-    }\n
+    }
 
 }
