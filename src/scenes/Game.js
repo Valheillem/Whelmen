@@ -119,6 +119,7 @@ export class Game extends Phaser.Scene {
         this.load.image('icon_water', 'assets/icons/Water.png');
         this.load.image('icon_air', 'assets/icons/Air.png');
         this.load.image('game-bg', './assets/WHELMEN_background_horizontal.png');
+        this.load.image('sigil', './assets/WHELMEN_sigil.png');
     }
 
     createCardCanvas(key, w, h, drawFn) {
@@ -692,6 +693,11 @@ export class Game extends Phaser.Scene {
         this.bgDial.fillCircle(0, 0, 95);
         this.bgDial.strokeCircle(0, 0, 95);
         this.cycleContainer.add(this.bgDial);
+
+        // Sigil overlay
+        this.bgSigil = this.add.image(0, 0, 'sigil').setDisplaySize(240, 240);
+        this.bgSigil.setAlpha(0.25); // subtle background glow
+        this.cycleContainer.add(this.bgSigil);
 
         // 4 Elements around the circle
         const ringPositions = [
