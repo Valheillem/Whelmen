@@ -254,4 +254,41 @@ export class AIAgent {
         return results;
     }
 
+    scoreAISpell(spell, isReaction, incomingDamage) {
+        let score = 0;
+        const cycle = this.scene.cycleElements[this.scene.cycleIndex];
+        
+        let isEmp = this.scene.synergy.calculateSynergy(spell, cycle);
+
+        if (isReaction) {
+            if (spell.shield > 0) {
+                score += spell.shield * 10;
+                if (spell.shield >= incomingDamage) score += 20; // Bonus for fully blocking
+                if (isEmp) score += 5;
+                score -= spell.combo.length; // Tie-breaker: use fewer cards
+            } else {
+                return -1; // Not a defensive spell
+            }
+        } else {
+            score += spell.damage * 10;
+            score += spell.shield * 8;
+            score += spell.draw * 5;
+            score += spell.drain * 6;
+            
+            if (isEmp) score += 15; // Strongly prefer empowered spells
+            
+            // Situational adjustments
+            if (this.scene.ai.life <= 4) {
+                score += spell.shield * 10; // Desperate for shield
+                score += spell.drain * 10; // Desperate to drain opponent's capability
+            }
+            if (this.scene.player.life <= 4) {
+                score += spell.damage * 15; // Go for the kill
+            }
+            
+            score += spell.combo.length; 
+        }
+        
+        return score;
+    }
 }

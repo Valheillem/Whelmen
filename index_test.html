@@ -264,6 +264,16 @@ window.addEventListener('load', () => {
     }, 2000);
 });
 </script>
+
+<script>
+window.addEventListener('unhandledrejection', function(event) {
+  fetch('/log_error', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({msg: 'Unhandled Promise Rejection', reason: event.reason ? event.reason.stack || event.reason.toString() : 'Unknown'})
+  });
+});
+</script>
 </body>
 
 </html>

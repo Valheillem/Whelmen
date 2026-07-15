@@ -21,7 +21,7 @@ export class CombatSystem {
                 this.scene.phase = 'action';
                 this.scene.enablePlayerControls(true);
             } else {
-                this.scene.runAITurn();
+                this.scene.aiAgent.runAITurn();
             }
         } else {
             this.scene.checkTurnContinuation();
@@ -328,7 +328,7 @@ export class CombatSystem {
                         this.scene.phase = 'action';
                         this.scene.enablePlayerControls(true);
                     } else {
-                        this.scene.runAITurn();
+                        this.scene.aiAgent.runAITurn();
                     }
                 } else {
                     this.scene.checkTurnContinuation();
