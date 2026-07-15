@@ -551,51 +551,11 @@ export class Game extends Phaser.Scene {
 
     // --- RENDER VISUAL LAYOUT ---
     setupParticles() {
-
         this.spellEffects.setupParticles();
-
-    });
-        });
     }
 
     triggerSpellVisual(spell, startX, startY, endX, endY, onComplete) {
-
-
         this.spellEffects.playSpellCast(spell, startX, startY, endX, endY, onComplete);
-
-
-    }
-        
-        this.playSound(element === 'earth' ? 'shield' : element);
-        
-        let visual = this.add.circle(startX, startY, 20, 
-            element === 'fire' ? 0xdf1b2d : 
-            element === 'earth' ? 0xa67032 : 
-            element === 'water' ? 0x1084e9 : 0xbf8cff
-        );
-        visual.setStrokeStyle(4, 0xffffff);
-
-        // Dynamic tail particle flow
-        const emitter = this.spellEffects.emitters[element];
-        emitter.startFollow(visual);
-        emitter.start();
-
-        this.tweens.add({
-            targets: visual,
-            x: endX,
-            y: endY,
-            duration: 800,
-            ease: 'Quad.easeOut',
-            onComplete: () => {
-                visual.destroy();
-                emitter.stop();
-                
-                // Explode particles
-                emitter.explode(25, endX, endY);
-                this.playSound('hit');
-                onComplete();
-            }
-        });
     }
 
     drawCycleIndicator() {
@@ -677,44 +637,7 @@ export class Game extends Phaser.Scene {
     }
 
     playElementalBurst(x, y, element) {
-
-
         this.spellEffects.playElementalBurst(x, y, element);
-
-
-    } else if (element === 'water') {
-            this.playSound('water'); // Splash
-        } else if (element === 'earth') {
-            this.playSound('earth'); // Thud
-        } else if (element === 'air') {
-            this.playSound('air'); // Whoosh
-        }
-
-        // Create a localized particle explosion at the card's position
-        const color = element === 'fire' ? 0xdf1b2d :
-                      element === 'water' ? 0x257ee4 :
-                      element === 'earth' ? 0x4db15b :
-                      element === 'air' ? 0x9247d5 : 0xffffff;
-
-        const emitter = this.add.particles(0, 0, 'particle', {
-            x: x,
-            y: y,
-            speed: { min: 50, max: 200 },
-            angle: { min: 180, max: 360 }, // Burst upwards
-            scale: { start: 0.6, end: 0 },
-            tint: color,
-            alpha: { start: 1, end: 0 },
-            lifespan: 600,
-            gravityY: 400, // Particles fall down
-            blendMode: 'ADD'
-        });
-
-        emitter.explode(30);
-
-        // Cleanup emitter after explosion finishes
-        this.time.delayedCall(1000, () => {
-            emitter.destroy();
-        });
     }
 
     drawPlayerStats() {
