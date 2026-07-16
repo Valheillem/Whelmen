@@ -1259,6 +1259,11 @@ export class Game extends Phaser.Scene {
             const cardObj = this.add.image(x, y, `card_${el}`)
                 .setScale(0.8)
                 .setInteractive({ useHandCursor: true });
+                
+            const incoming = this.playerIncomingHandCards || 0;
+            if (index >= this.player.hand.length - incoming) {
+                cardObj.setAlpha(0);
+            }
 
             this.playerZone.add(cardObj);
             this.playerHandGroup.add(cardObj);
@@ -1315,6 +1320,11 @@ export class Game extends Phaser.Scene {
             // Facedown cards
             const cardObj = this.add.image(x, y, 'card_back')
                 .setScale(0.55);
+                
+            const incoming = this.aiIncomingHandCards || 0;
+            if (index >= this.ai.hand.length - incoming) {
+                cardObj.setAlpha(0);
+            }
 
             this.aiZone.add(cardObj);
             this.aiHandGroup.add(cardObj);
@@ -1365,6 +1375,12 @@ export class Game extends Phaser.Scene {
             const cardObj = this.add.image(x, y, `card_${el}`)
                 .setScale(hasSelected ? 0.72 : 0.65)
                 .setInteractive({ useHandCursor: true });
+                
+            const incoming = this.playerIncomingBoardCards || 0;
+            // Simplified incoming logic for board display
+            if (index >= uniqueElements.length - incoming) {
+                cardObj.setAlpha(0);
+            }
 
             // Glowing pulsing border highlight if any card in stack is selected
             if (hasSelected) {
@@ -1561,6 +1577,12 @@ export class Game extends Phaser.Scene {
 
             const cardObj = this.add.image(x, y, `card_${el}`)
                 .setScale(0.65);
+                
+            const incoming = this.aiIncomingBoardCards || 0;
+            if (index >= uniqueElements.length - incoming) {
+                cardObj.setAlpha(0);
+            }
+
             this.aiBoardGroup.add(cardObj);
 
             // Total Count Badge (Top-Right)
@@ -2828,14 +2850,30 @@ export class Game extends Phaser.Scene {
             return;
         }
         
+        if (toStr === 'hand') {
+            if (who === 'player') this.playerIncomingHandCards = (this.playerIncomingHandCards || 0) + 1;
+            else this.aiIncomingHandCards = (this.aiIncomingHandCards || 0) + 1;
+        } else if (toStr === 'board') {
+            if (who === 'player') this.playerIncomingBoardCards = (this.playerIncomingBoardCards || 0) + 1;
+            else this.aiIncomingBoardCards = (this.aiIncomingBoardCards || 0) + 1;
+        }
+        
         const w = this.scale.width;
         const h = this.scale.height;
         
         const getZoneCoords = (zone, player) => {
             if (zone === 'deck') return { x: w / 2 - 180, y: h / 2 + 35 };
             if (zone === 'discard') return { x: w / 2 + 140, y: h / 2 + 35 };
-            if (zone === 'hand') return player === 'player' ? { x: 200, y: h - 115 } : { x: 200, y: 110 };
-            if (zone === 'board') return player === 'player' ? { x: w / 2, y: h / 2 + 120 } : { x: w / 2, y: h / 2 - 200 };
+            if (zone === 'hand') {
+                const char = player === 'player' ? this.player : this.ai;
+                const count = Math.max(0, char.hand.length - 1);
+                return player === 'player' ? { x: 60 + count * 90, y: h - 115 } : { x: 60 + count * 60, y: 110 };
+            }
+            if (zone === 'board') {
+                const char = player === 'player' ? this.player : this.ai;
+                const count = Math.max(0, char.board.length - 1);
+                return player === 'player' ? { x: w / 2 - 90 + count * 90, y: h / 2 + 120 } : { x: w / 2 - 90 + count * 90, y: h / 2 - 200 };
+            }
             return { x: w / 2, y: h / 2 };
         };
 
@@ -2853,10 +2891,21 @@ export class Game extends Phaser.Scene {
             duration: 400,
             ease: 'Cubic.easeOut',
             onComplete: () => {
-                card.destroy();
+                if (toStr === 'hand') {
+                    if (who === 'player') this.playerIncomingHandCards = Math.max(0, this.playerIncomingHandCards - 1);
+                    else this.aiIncomingHandCards = Math.max(0, this.aiIncomingHandCards - 1);
+                    if (who === 'player') this.updatePlayerHandDisplay();
+                    else this.updateAIHandDisplay();
+                } else if (toStr === 'board') {
+                    if (who === 'player') this.playerIncomingBoardCards = Math.max(0, this.playerIncomingBoardCards - 1);
+                    else this.aiIncomingBoardCards = Math.max(0, this.aiIncomingBoardCards - 1);
+                    if (who === 'player') this.updatePlayerBoardDisplay();
+                    else this.updateAIBoardDisplay();
+                }
+
                 if (onComplete) onComplete();
+                card.destroy();
             }
         });
     }
 }
-
