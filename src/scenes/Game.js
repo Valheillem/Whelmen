@@ -744,7 +744,7 @@ export class Game extends Phaser.Scene {
             const pos = this.getPlayerPositionIndex(pid);
             
             let containerX = 0, containerY = 0;
-            if (pos === 0) { containerX = 0; containerY = h - 195; } // Bottom
+            if (pos === 0) { containerX = w / 2; containerY = h - 195; } // Bottom
             else if (pos === 1) { containerX = 40; containerY = h / 2 - 150; } // Left
             else if (pos === 2) { containerX = 0; containerY = 30; } // Top
             else if (pos === 3) { containerX = w - 195; containerY = h / 2 - 150; } // Right
@@ -768,7 +768,7 @@ export class Game extends Phaser.Scene {
             
             const isLocal = pos === 0;
             const displayName = isLocal ? 'YOU' : `PLAYER ${pid}`;
-            char.nameT = this.add.text(pos === 1 || pos === 3 ? 0 : 60, pos === 2 ? 180 : (pos === 0 ? -60 : 0), displayName, {
+            char.nameT = this.add.text(pos === 1 || pos === 3 ? 0 : (pos === 0 ? -150 : 60), pos === 2 ? 180 : (pos === 0 ? 140 : 0), displayName, {
                 fontFamily: '"Outfit", sans-serif',
                 fontSize: '18px',
                 fontWeight: '800',
@@ -845,9 +845,9 @@ export class Game extends Phaser.Scene {
             const pIdx = this.playerIds.indexOf(pid);
             if (pIdx === 0) {
                 // Bottom
-                char.shieldG.fillRoundedRect(80, 150, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(80, 150, 140, 24, 6);
-                char.shieldT.setPosition(90, 154);
+                char.shieldG.fillRoundedRect(-80, 140, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(-80, 140, 140, 24, 6);
+                char.shieldT.setPosition(-70, 144);
             } else if (pIdx === 2 || pIdx === 1) {
                 // Top or side
                 char.shieldG.fillRoundedRect(80, 0, 140, 24, 6);
@@ -1036,7 +1036,19 @@ export class Game extends Phaser.Scene {
         this.incomingSpellPanel.add(this.incomingSpellAdvantage);
 
         // Action Menu Container
-        this.btnHowToPlay = this.createActionButton(w - 180, h - 250, 'HOW TO PLAY', () => this.handleHowToPlayOption());
+        const btnHowToPlayTop = this.add.text(w - 150, 25, 'HOW TO PLAY', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '16px',
+            fontWeight: '600',
+            color: '#ffffff',
+            backgroundColor: 'rgba(13,11,28,0.85)',
+            padding: { left: 8, right: 8, top: 4, bottom: 4 }
+        }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+        btnHowToPlayTop.on('pointerover', () => { btnHowToPlayTop.setColor('#000000'); btnHowToPlayTop.setBackgroundColor('#ffffff'); });
+        btnHowToPlayTop.on('pointerout', () => { btnHowToPlayTop.setColor('#ffffff'); btnHowToPlayTop.setBackgroundColor('rgba(13,11,28,0.85)'); });
+        btnHowToPlayTop.on('pointerdown', () => this.handleHowToPlayOption());
+        this.btnHowToPlay = btnHowToPlayTop;
+
         this.btnSpellBook = this.createActionButton(w - 180, h - 190, 'SPELL BOOK', () => this.handleSpellBookOption());
         this.btnCastSpell = this.createActionButton(w - 180, h - 130, 'CAST SPELL', () => this.handleCastSpellOption());
         this.btnPassDraw = this.createActionButton(w - 180, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
@@ -1356,16 +1368,25 @@ export class Game extends Phaser.Scene {
         const startX = 60;
         const spaceX = pos === 0 ? 90 : 60;
 
+        const totalW = Math.max(0, (char.hand.length - 1) * spaceX);
         char.hand.forEach((el, index) => {
             let x = 0, y = 0, angle = 0;
-            if (pos === 0 || pos === 2) {
-                x = startX + index * spaceX;
-                y = pos === 0 ? 80 : 0;
-                angle = pos === 0 ? 0 : 180;
-            } else {
-                y = startX + index * spaceX;
-                x = pos === 1 ? 0 : 0;
-                angle = pos === 1 ? 90 : -90;
+            if (pos === 0) {
+                x = -totalW / 2 + index * spaceX;
+                y = 90;
+                angle = 0;
+            } else if (pos === 2) {
+                x = 150 - totalW / 2 + index * spaceX;
+                y = 20;
+                angle = 180;
+            } else if (pos === 1) {
+                y = 150 - totalW / 2 + index * spaceX;
+                x = 0;
+                angle = 90;
+            } else if (pos === 3) {
+                y = 150 - totalW / 2 + index * spaceX;
+                x = 80;
+                angle = -90;
             }
 
             const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
@@ -1448,18 +1469,18 @@ export class Game extends Phaser.Scene {
             let x = 0, y = 0, angle = 0;
             if (pos === 0) {
                 x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
-                y = centerY + 160;
+                y = centerY + 70;
                 angle = 0;
             } else if (pos === 1) {
-                x = centerX + 180;
+                x = centerX - 110;
                 y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
                 angle = 90;
             } else if (pos === 2) {
                 x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
-                y = centerY - 160;
+                y = centerY - 110;
                 angle = 180;
             } else if (pos === 3) {
-                x = centerX - 180;
+                x = centerX + 80;
                 y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
                 angle = -90;
             }
@@ -2889,14 +2910,20 @@ export class Game extends Phaser.Scene {
             if (zone === 'hand') {
                 const count = Math.max(0, char.hand.length - 1);
                 let x = 0, y = 0;
-                const startX = 60;
                 const spaceX = pos === 0 ? 90 : 60;
-                if (pos === 0 || pos === 2) {
-                    x = zx + startX + count * spaceX;
-                    y = zy + (pos === 0 ? 80 : 0);
-                } else {
-                    y = zy + startX + count * spaceX;
-                    x = zx + (pos === 1 ? 0 : 0);
+                const totalW = count * spaceX;
+                if (pos === 0) {
+                    x = zx - totalW / 2 + count * spaceX;
+                    y = zy + 90;
+                } else if (pos === 2) {
+                    x = zx + 150 - totalW / 2 + count * spaceX;
+                    y = zy + 20;
+                } else if (pos === 1) {
+                    y = zy + 150 - totalW / 2 + count * spaceX;
+                    x = zx + 0;
+                } else if (pos === 3) {
+                    y = zy + 150 - totalW / 2 + count * spaceX;
+                    x = zx + 80;
                 }
                 return { x, y };
             }
@@ -2911,15 +2938,15 @@ export class Game extends Phaser.Scene {
                 let x = 0, y = 0;
                 if (pos === 0) {
                     x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
-                    y = centerY + 160;
+                    y = centerY + 70;
                 } else if (pos === 1) {
-                    x = centerX + 180;
+                    x = centerX - 110;
                     y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
                 } else if (pos === 2) {
                     x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
-                    y = centerY - 160;
+                    y = centerY - 110;
                 } else if (pos === 3) {
-                    x = centerX - 180;
+                    x = centerX + 80;
                     y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
                 }
                 return { x, y };
@@ -2929,8 +2956,14 @@ export class Game extends Phaser.Scene {
 
         const start = getZoneCoords(fromStr, who);
         const end = getZoneCoords(toStr, who);
+        
+        const isLocal = who === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        let tex = `card_${element}`;
+        if (!isLocal && toStr === 'hand' && fromStr === 'deck') {
+            tex = 'card_back';
+        }
 
-        const card = this.add.image(start.x, start.y, `card_${element}`)
+        const card = this.add.image(start.x, start.y, tex)
             .setScale(0.8)
             .setDepth(3000);
 
