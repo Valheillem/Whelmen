@@ -742,9 +742,9 @@ export class Game extends Phaser.Scene {
             const pos = this.getPlayerPositionIndex(pid);
             
             let containerX = 0, containerY = 0;
-            if (pos === 0) { containerX = w / 2; containerY = h - 195; } // Bottom
+            if (pos === 0) { containerX = w / 2 - 40; containerY = h - 195; } // Bottom
             else if (pos === 1) { containerX = 40; containerY = h / 2 - 150; } // Left
-            else if (pos === 2) { containerX = 0; containerY = 30; } // Top
+            else if (pos === 2) { containerX = w / 2 - 40; containerY = 30; } // Top (mirrors bottom)
             else if (pos === 3) { containerX = w - 195; containerY = h / 2 - 150; } // Right
 
             const zone = this.add.container(containerX, containerY);
@@ -767,10 +767,10 @@ export class Game extends Phaser.Scene {
             const isLocal = pos === 0;
             const displayName = isLocal ? 'YOU' : `PLAYER ${pid}`;
             let nx = 0, ny = 0;
-            if (pos === 0) { nx = -150; ny = 110; }
-            else if (pos === 1) { nx = -10; ny = 20; }
-            else if (pos === 2) { nx = 100; ny = -30; }
-            else if (pos === 3) { nx = 70; ny = 20; }
+            if (pos === 0) { nx = -150; ny = 160; }
+            else if (pos === 1) { nx = -10; ny = -60; }
+            else if (pos === 2) { nx = -60; ny = -40; }
+            else if (pos === 3) { nx = 70; ny = -60; }
 
             char.nameT = this.add.text(nx, ny, displayName, {
                 fontFamily: '"Outfit", sans-serif',
@@ -846,10 +846,10 @@ export class Game extends Phaser.Scene {
             
             const pos = this.getPlayerPositionIndex(pid);
             let sx = 0, sy = 0;
-            if (pos === 0) { sx = 0; sy = 135; }
-            else if (pos === 1) { sx = 0; sy = -110; }
-            else if (pos === 2) { sx = 90; sy = -140; }
-            else if (pos === 3) { sx = 10; sy = -110; }
+            if (pos === 0) { sx = 0; sy = 155; }
+            else if (pos === 1) { sx = 0; sy = -90; }
+            else if (pos === 2) { sx = -60; sy = -70; }
+            else if (pos === 3) { sx = 10; sy = -90; }
 
             char.shieldG.fillRoundedRect(sx, sy, 140, 24, 6);
             char.shieldG.strokeRoundedRect(sx, sy, 140, 24, 6);
@@ -1371,13 +1371,13 @@ export class Game extends Phaser.Scene {
 
         pGroup.handGroup = this.add.group();
         const startX = 60;
-        const spaceX = pos === 0 ? 90 : 60;
+        const spaceX = pos === 0 ? 55 : 40;
 
         const count = char.hand.length;
         const totalW = Math.max(0, (count - 1) * spaceX);
         const middle = (count - 1) / 2;
-        const curveAmount = 6;
-        const rotAmount = 4;
+        const curveAmount = 4;
+        const rotAmount = 5;
 
         char.hand.forEach((el, index) => {
             const t = index - middle;
@@ -1390,16 +1390,16 @@ export class Game extends Phaser.Scene {
                 y = 90 + curveY;
                 angle = rotDeg;
             } else if (pos === 2) {
-                x = 150 - totalW / 2 + index * spaceX;
-                y = 20 - curveY;
-                angle = 180 + rotDeg;
+                x = -totalW / 2 + index * spaceX;
+                y = 20 + curveY;
+                angle = 180 - rotDeg;
             } else if (pos === 1) {
-                y = 150 - totalW / 2 + index * spaceX;
-                x = 0 - curveY;
-                angle = 90 + rotDeg;
+                y = -totalW / 2 + index * spaceX;
+                x = 0 + curveY;
+                angle = 90 - rotDeg;
             } else if (pos === 3) {
-                y = 150 - totalW / 2 + index * spaceX;
-                x = 80 + curveY;
+                y = -totalW / 2 + index * spaceX;
+                x = 80 - curveY;
                 angle = -90 + rotDeg;
             }
 
@@ -1675,7 +1675,7 @@ export class Game extends Phaser.Scene {
         
         // Exact matching for curve math from hand display
         const count = this.player.hand.length; 
-        const handSpaceX = posIndex === 0 ? 90 : 60;
+        const handSpaceX = posIndex === 0 ? 55 : 40;
         const totalW = Math.max(0, (count - 1) * handSpaceX);
         const middle = (count - 1) / 2;
         const offset = index - middle;
