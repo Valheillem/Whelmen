@@ -1419,7 +1419,7 @@ export class Game extends Phaser.Scene {
                     this.playSound('click');
                     this.tweens.add({
                         targets: cardObj,
-                        y: pos === 0 ? 60 : y,
+                        y: pos === 0 ? y - 30 : y,
                         scaleX: 0.88,
                         scaleY: 0.88,
                         duration: 100,
@@ -1430,7 +1430,7 @@ export class Game extends Phaser.Scene {
                 cardObj.on('pointerout', () => {
                     this.tweens.add({
                         targets: cardObj,
-                        y: pos === 0 ? 80 : y,
+                        y: pos === 0 ? y : y,
                         scaleX: 0.8,
                         scaleY: 0.8,
                         duration: 100,
@@ -1662,8 +1662,33 @@ export class Game extends Phaser.Scene {
         // Calculate Start Position (from hand)
         const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
         const pGroup = this.playerGroups[localId];
-        const startX = pGroup.zone.x + 60 + index * 90;
-        const startY = pGroup.zone.y + 80;
+        const posIndex = this.getPlayerPositionIndex(localId);
+        
+        // Exact matching for curve math from hand display
+        const count = this.player.hand.length; 
+        const spaceX = posIndex === 0 ? 90 : 60;
+        const totalW = Math.max(0, (count - 1) * spaceX);
+        const middle = (count - 1) / 2;
+        const offset = index - middle;
+        const curveOffset = Math.abs(offset) * Math.abs(offset) * 6;
+        
+        let relX = 0, relY = 0;
+        if (posIndex === 0) {
+            relX = -totalW / 2 + index * spaceX;
+            relY = -20 + curveOffset;
+        } else if (posIndex === 2) {
+            relX = 150 - totalW / 2 + index * spaceX;
+            relY = 20 - curveOffset;
+        } else if (posIndex === 1) {
+            relY = 150 - totalW / 2 + index * spaceX;
+            relX = -curveOffset;
+        } else if (posIndex === 3) {
+            relY = 150 - totalW / 2 + index * spaceX;
+            relX = 80 + curveOffset;
+        }
+        
+        const startX = pGroup.zone.x + relX;
+        const startY = pGroup.zone.y + relY;
 
         // Apply state changes to calculate target layout
         this.player.hand.splice(index, 1);
