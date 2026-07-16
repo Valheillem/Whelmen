@@ -28,9 +28,9 @@ export class AIAgent {
                 this.scene.logMessage(`AI's mana play deals 3 damage to Player!`);
             }
             
-            this.scene.updateAIHandDisplay();
-            this.scene.updateAIBoardDisplay();
-            this.scene.updateAILifeDisplay();
+            this.scene.updatePlayerHandDisplay('ai');
+            this.scene.updatePlayerBoardDisplay('ai');
+            this.scene.updatePlayerLifeDisplay('ai');
 
             this.scene.time.delayedCall(1200, () => {
                 // Check bonusManaPlays: AI gets a second mana play
@@ -41,9 +41,9 @@ export class AIAgent {
                     const el2 = this.scene.ai.hand.splice(0, 1)[0];
                     this.scene.ai.board.push(el2);
                     this.scene.logMessage(`AI plays [${el2.toUpperCase()}] mana to board.`);
-                    this.scene.updateAIHandDisplay();
-                    this.scene.updateAIBoardDisplay();
-                    this.scene.updateAILifeDisplay();
+                    this.scene.updatePlayerHandDisplay('ai');
+                    this.scene.updatePlayerBoardDisplay('ai');
+                    this.scene.updatePlayerLifeDisplay('ai');
                 }
                 this.runAITurn();
             });
@@ -79,8 +79,8 @@ export class AIAgent {
                     this.scene.sharedDiscard.push(consumed);
                 });
 
-                this.scene.updateAIBoardDisplay();
-                this.scene.updateAILifeDisplay();
+                this.scene.updatePlayerBoardDisplay('ai');
+                this.scene.updatePlayerLifeDisplay('ai');
                 this.scene.updateDeckDiscardDisplay();
 
                 this.scene.logMessage(`AI casts: ${bestSpell.name}!`);
@@ -121,9 +121,9 @@ export class AIAgent {
                 this.scene.logMessage(`AI lost a hand mana from drawing!`);
             }
 
-            this.scene.updateAIHandDisplay();
-            this.scene.updateAIBoardDisplay();
-            this.scene.updateAILifeDisplay();
+            this.scene.updatePlayerHandDisplay('ai');
+            this.scene.updatePlayerBoardDisplay('ai');
+            this.scene.updatePlayerLifeDisplay('ai');
         }
 
         this.scene.time.delayedCall(1200, () => {
@@ -163,8 +163,8 @@ export class AIAgent {
                 this.scene.sharedDiscard.push(consumed);
             });
 
-            this.scene.updateAIBoardDisplay();
-            this.scene.updateAILifeDisplay();
+            this.scene.updatePlayerBoardDisplay('ai');
+            this.scene.updatePlayerLifeDisplay('ai');
             this.scene.updateDeckDiscardDisplay();
             return bestSpell;
         }
@@ -180,9 +180,9 @@ export class AIAgent {
             this.scene.logMessage("AI is out of cards!");
             this.scene.ai.hand = [];
             this.scene.ai.board = [];
-            this.scene.updateAIHandDisplay();
-            this.scene.updateAIBoardDisplay();
-            this.scene.updateAILifeDisplay();
+            this.scene.updatePlayerHandDisplay('ai');
+            this.scene.updatePlayerBoardDisplay('ai');
+            this.scene.updatePlayerLifeDisplay('ai');
             this.scene.checkDefeatCondition('ai');
             return;
         }
@@ -201,9 +201,9 @@ export class AIAgent {
             this.scene.playSound('fire');
         }
 
-        this.scene.updateAIHandDisplay();
-        this.scene.updateAIBoardDisplay();
-        this.scene.updateAILifeDisplay();
+        this.scene.updatePlayerHandDisplay('ai');
+        this.scene.updatePlayerBoardDisplay('ai');
+        this.scene.updatePlayerLifeDisplay('ai');
         this.scene.updateDeckDiscardDisplay();
 
         this.scene.phase = 'action';

@@ -323,9 +323,9 @@ export class SandboxDashboard {
             this.scene.ai.board.push(this.scene.drawCard() || 'earth');
         }
         
-        this.scene.updateAIHandDisplay();
-        this.scene.updateAIBoardDisplay();
-        this.scene.updateAILifeDisplay();
+        this.scene.updatePlayerHandDisplay('ai');
+        this.scene.updatePlayerBoardDisplay('ai');
+        this.scene.updatePlayerLifeDisplay('ai');
         this.scene.updateShieldDisplay('ai');
 
         if (this.scene.mode === 'test') {

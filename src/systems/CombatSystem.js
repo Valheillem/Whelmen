@@ -152,7 +152,7 @@ export class CombatSystem {
                 }
             }
             this.scene.updatePlayerHandDisplay(); this.scene.updatePlayerBoardDisplay(); this.scene.updatePlayerLifeDisplay();
-            this.scene.updateAIHandDisplay(); this.scene.updateAIBoardDisplay(); this.scene.updateAILifeDisplay();
+            this.scene.updatePlayerHandDisplay('ai'); this.scene.updatePlayerBoardDisplay('ai'); this.scene.updatePlayerLifeDisplay('ai');
         }
         
         // Drain logic deferred to after reaction phase
