@@ -165,6 +165,7 @@ export class Game extends Phaser.Scene {
         this.cycleIndex = 0; // Neutral start
         this.firstCycleIndex = Math.floor(Math.random() * 4) + 1; // 1 to 4
         this.turn = 'player'; // Player starts
+        this.round = 1; // Round 1 starts
         this.phase = 'action'; // Starting action phase
         this.manaPlacedThisTurn = false; this.spellCastThisTurn = false; // Player can do 1 action per turn
 
@@ -348,11 +349,6 @@ export class Game extends Phaser.Scene {
             this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
             this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
-
-        // Decrease statuses AFTER applying effects
-        for (let k in char.status) {
-            if (char.status[k] > 0) char.status[k]--;
-        }
         
         this.phase = 'action';
         this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
@@ -377,9 +373,11 @@ export class Game extends Phaser.Scene {
             // Check autoPlayDraw: drawn mana goes to board instead of hand
             if (char.status.autoPlayDraw > 0 && char.board.length < 3) {
                 char.board.push(card);
+                this.animateCardMovement(card, 'deck', 'board', who);
                 this.duelHistory.logMessage(`${who.toUpperCase()}'s drawn mana is auto-played to board!`);
             } else {
                 char.hand.push(card);
+                this.animateCardMovement(card, 'deck', 'hand', who);
             }
 
             // Check loseManaOnDraw: lose a hand card when drawing
@@ -431,6 +429,16 @@ export class Game extends Phaser.Scene {
         }
     }
 
+    startRound() {
+        // Decrease statuses at the start of a new round
+        ['player', 'ai'].forEach(who => {
+            const char = who === 'player' ? this.player : this.ai;
+            for (let k in char.status) {
+                if (char.status[k] > 0) char.status[k]--;
+            }
+        });
+    }
+
     endTurn() {
         // Rotate Cycle
         this.rotateCycle();
@@ -445,6 +453,15 @@ export class Game extends Phaser.Scene {
 
         // Toggle turn
         const nextTurn = this.turn === 'player' ? 'ai' : 'player';
+
+        // Check for round increment
+        if (nextTurn === 'player') {
+            this.round++;
+            if (this.roundText) this.roundText.setText(`ROUND ${this.round}`);
+            this.duelHistory.logMessage(`=== ROUND ${this.round} ===`);
+            this.startRound();
+        }
+
         this.startTurn(nextTurn);
 
         // ONLINE: sync state to Firebase AFTER transitioning to opponent's turn.
@@ -1058,10 +1075,17 @@ export class Game extends Phaser.Scene {
         this.add.text(w - 370, 25, 'DUEL HISTORY:', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
-            fontWeight: '600',
-            color: '#1a1a1a',
-            letterSpacing: 1
+            color: '#8a8a9e'
         });
+
+        this.roundText = this.add.text(w / 2, 25, 'ROUND 1', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '16px',
+            fontWeight: '700',
+            color: '#ffffff',
+            backgroundColor: 'rgba(13,11,28,0.85)',
+            padding: { x: 12, y: 6 }
+        }).setOrigin(0.5, 0).setDepth(2000);
 
         this.allLogTextLines = [];
         this.logContainer = this.add.container(w - 370, 50);
@@ -1813,6 +1837,7 @@ export class Game extends Phaser.Scene {
         for (let i = 0; i < actualCount; i++) {
             const randIdx = Math.floor(Math.random() * targetArray.length);
             const discarded = targetArray.splice(randIdx, 1)[0];
+            this.animateCardMovement(discarded, source, 'discard', who);
             this.sharedDiscard.push(discarded);
         }
         
@@ -1864,9 +1889,11 @@ export class Game extends Phaser.Scene {
             // Check autoPlayDraw: drawn mana goes to board instead of hand
             if (this.player.status.autoPlayDraw > 0 && this.player.board.length < 3) {
                 this.player.board.push(extraCard);
+                this.animateCardMovement(extraCard, 'deck', 'board', 'player');
                 this.duelHistory.logMessage(`Player's drawn mana is auto-played to board!`);
             } else {
                 this.player.hand.push(extraCard);
+                this.animateCardMovement(extraCard, 'deck', 'hand', 'player');
             }
 
             // Check loseManaOnDraw: lose a hand card when drawing
@@ -1903,6 +1930,7 @@ export class Game extends Phaser.Scene {
             this.selectedBoardMana.sort((a,b) => b-a);
             this.selectedBoardMana.forEach(idx => {
                 const consumed = this.player.board.splice(idx, 1)[0];
+                this.animateCardMovement(consumed, 'board', 'discard', 'player');
                 this.sharedDiscard.push(consumed);
             });
             this.updatePlayerBoardDisplay();
@@ -1931,6 +1959,7 @@ export class Game extends Phaser.Scene {
         this.selectedBoardMana.sort((a, b) => b - a);
         this.selectedBoardMana.forEach(idx => {
             const consumed = this.player.board.splice(idx, 1)[0];
+            this.animateCardMovement(consumed, 'board', 'discard', 'player');
             this.sharedDiscard.push(consumed);
         });
 
@@ -2300,6 +2329,7 @@ export class Game extends Phaser.Scene {
                 this.updatePlayerBoardDisplay();
             }
 
+            this.animateCardMovement(discarded, zone, 'discard', 'player');
             this.sharedDiscard.push(discarded);
             this.updateDeckDiscardDisplay();
             this.updatePlayerLifeDisplay();
@@ -2786,5 +2816,41 @@ export class Game extends Phaser.Scene {
         this.logScrollbarGraphics.strokeRoundedRect(328, handleY, 6, handleHeight, 3);
     }
 
+    animateCardMovement(element, fromStr, toStr, who = 'player', onComplete = null) {
+        if (!element) {
+            if (onComplete) onComplete();
+            return;
+        }
+        
+        const w = this.scale.width;
+        const h = this.scale.height;
+        
+        const getZoneCoords = (zone, player) => {
+            if (zone === 'deck') return { x: w / 2 - 180, y: h / 2 + 35 };
+            if (zone === 'discard') return { x: w / 2 + 140, y: h / 2 + 35 };
+            if (zone === 'hand') return player === 'player' ? { x: w / 2, y: h - 115 } : { x: w / 2, y: 110 };
+            if (zone === 'board') return player === 'player' ? { x: w / 2, y: h / 2 + 120 } : { x: w / 2, y: h / 2 - 200 };
+            return { x: w / 2, y: h / 2 };
+        };
+
+        const start = getZoneCoords(fromStr, who);
+        const end = getZoneCoords(toStr, who);
+
+        const card = this.add.image(start.x, start.y, `card_${element}`)
+            .setScale(0.8)
+            .setDepth(3000);
+
+        this.tweens.add({
+            targets: card,
+            x: end.x,
+            y: end.y,
+            duration: 400,
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                card.destroy();
+                if (onComplete) onComplete();
+            }
+        });
+    }
 }
 
