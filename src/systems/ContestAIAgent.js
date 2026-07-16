@@ -1,4 +1,4 @@
-import { getSpellFromCombo } from '../core/Spells.js';
+import { getSpellFromCombo } from '../data/SpellCatalog.js';
 
 export class ContestAIAgent {
     constructor(scene) {
