@@ -1424,42 +1424,88 @@ export class Game extends Phaser.Scene {
         }
 
         pGroup.boardGroup = this.add.group();
-        const startX = 60;
-        const spaceX = 90;
 
-        char.board.forEach((el, index) => {
+        const w = this.scale.width;
+        const h = this.scale.height;
+        const centerX = w / 2 - 20;
+        const centerY = h / 2 - 40;
+
+        const uniqueElements = [...new Set(char.board)];
+        const spaceX = 75;
+
+        uniqueElements.forEach((el, elIndex) => {
+            const count = char.board.filter(b => b === el).length;
+            const indicesForEl = [];
+            char.board.forEach((bEl, i) => { if (bEl === el) indicesForEl.push(i); });
+
             let x = 0, y = 0, angle = 0;
-            if (pos === 0 || pos === 2) {
-                x = startX + index * spaceX;
-                y = pos === 0 ? -30 : 110;
-                angle = pos === 0 ? 0 : 180;
-            } else {
-                y = startX + index * spaceX;
-                x = pos === 1 ? 110 : -110;
-                angle = pos === 1 ? 90 : -90;
+            if (pos === 0) {
+                x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                y = centerY + 160;
+                angle = 0;
+            } else if (pos === 1) {
+                x = centerX + 180;
+                y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                angle = 90;
+            } else if (pos === 2) {
+                x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                y = centerY - 160;
+                angle = 180;
+            } else if (pos === 3) {
+                x = centerX - 180;
+                y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                angle = -90;
             }
 
             const cardObj = this.add.image(x, y, `card_${el}`).setScale(0.8).setAngle(angle);
 
+            let badgeBg, badgeTxt;
+            if (count > 1) {
+                let bx = x + 25, by = y - 35;
+                if (pos === 1) { bx = x + 35; by = y + 25; }
+                else if (pos === 2) { bx = x - 25; by = y + 35; }
+                else if (pos === 3) { bx = x - 35; by = y - 25; }
+
+                badgeBg = this.add.circle(bx, by, 12, 0xff0000).setDepth(10);
+                badgeTxt = this.add.text(bx, by, count.toString(), {
+                    fontFamily: '"Outfit", sans-serif',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    color: '#ffffff'
+                }).setOrigin(0.5).setDepth(11);
+            }
+
             const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
             if (isLocal) {
                 cardObj.setInteractive({ useHandCursor: true });
-                if (this.selectedBoardMana.includes(index)) {
-                    cardObj.setTint(0x88ff88);
-                    cardObj.y -= 15;
-                } else {
-                    cardObj.clearTint();
+                const selectedCount = indicesForEl.filter(i => this.selectedBoardMana.includes(i)).length;
+                if (selectedCount > 0) {
+                    cardObj.setTint(selectedCount === count ? 0x88ff88 : 0xffff88);
+                    if (pos === 0) cardObj.y -= 15;
+                    else if (pos === 1) cardObj.x -= 15;
+                    else if (pos === 2) cardObj.y += 15;
+                    else if (pos === 3) cardObj.x += 15;
+                    
+                    if (badgeBg) {
+                        if (pos === 0) { badgeBg.y -= 15; badgeTxt.y -= 15; }
+                        else if (pos === 1) { badgeBg.x -= 15; badgeTxt.x -= 15; }
+                        else if (pos === 2) { badgeBg.y += 15; badgeTxt.y += 15; }
+                        else if (pos === 3) { badgeBg.x += 15; badgeTxt.x += 15; }
+                    }
                 }
 
                 cardObj.on('pointerdown', () => {
                     if (this.phase === 'discard' || this.phase === 'discard_request_active') {
-                        this.discardCardFromZone('board', index, pid);
+                        this.discardCardFromZone('board', indicesForEl[0], pid);
                     } else if (this.phase === 'action' && this.turn === pid) {
-                        const idx = this.selectedBoardMana.indexOf(index);
-                        if (idx > -1) {
-                            this.selectedBoardMana.splice(idx, 1);
+                        if (selectedCount < count) {
+                            const toSelect = indicesForEl.find(i => !this.selectedBoardMana.includes(i));
+                            this.selectedBoardMana.push(toSelect);
                         } else {
-                            this.selectedBoardMana.push(index);
+                            indicesForEl.forEach(i => {
+                                const idx = this.selectedBoardMana.indexOf(i);
+                                if (idx > -1) this.selectedBoardMana.splice(idx, 1);
+                            });
                         }
                         this.updatePlayerBoardDisplay(pid);
                         this.updateComboPreview();
@@ -1467,8 +1513,10 @@ export class Game extends Phaser.Scene {
                 });
             }
 
-            pGroup.zone.add(cardObj);
+            // DO NOT ADD TO pGroup.zone because we are using global center coordinates!
             pGroup.boardGroup.add(cardObj);
+            if (badgeBg) pGroup.boardGroup.add(badgeBg);
+            if (badgeTxt) pGroup.boardGroup.add(badgeTxt);
         });
     }
 
@@ -2817,16 +2865,26 @@ export class Game extends Phaser.Scene {
                 return { x, y };
             }
             if (zone === 'board') {
-                const count = Math.max(0, char.board.length - 1);
+                const centerX = w / 2 - 20;
+                const centerY = h / 2 - 40;
+                const uniqueElements = [...new Set(char.board)];
+                let elIndex = uniqueElements.indexOf(element);
+                if (elIndex === -1) elIndex = 0;
+                const spaceX = 75;
+
                 let x = 0, y = 0;
-                const startX = 60;
-                const spaceX = 90;
-                if (pos === 0 || pos === 2) {
-                    x = zx + startX + count * spaceX;
-                    y = zy + (pos === 0 ? -30 : 110);
-                } else {
-                    y = zy + startX + count * spaceX;
-                    x = zx + (pos === 1 ? 110 : -110);
+                if (pos === 0) {
+                    x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                    y = centerY + 160;
+                } else if (pos === 1) {
+                    x = centerX + 180;
+                    y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                } else if (pos === 2) {
+                    x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                    y = centerY - 160;
+                } else if (pos === 3) {
+                    x = centerX - 180;
+                    y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
                 }
                 return { x, y };
             }
