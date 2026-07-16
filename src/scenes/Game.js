@@ -1139,8 +1139,8 @@ export class Game extends Phaser.Scene {
         if (this.phase === 'reaction' || this.phase === 'reaction_request_active') {
             this.btnHowToPlay.setEnabled(true);
             this.btnSpellBook.setEnabled(true);
-            // Can cast shield reaction spell if combo selected
             this.btnCastSpell.setEnabled(this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
+            this.btnPassDraw.setText('PASS REACTION');
             this.btnPassDraw.setEnabled(true); // Serve as "Pass Reaction" option!
             return;
         }
@@ -1497,7 +1497,7 @@ export class Game extends Phaser.Scene {
                 cardObj.on('pointerdown', () => {
                     if (this.phase === 'discard' || this.phase === 'discard_request_active') {
                         this.discardCardFromZone('board', indicesForEl[0], pid);
-                    } else if (this.phase === 'action' && this.turn === pid) {
+                    } else if ((this.phase === 'action' && this.turn === pid) || this.phase === 'reaction' || this.phase === 'reaction_request_active') {
                         if (selectedCount < count) {
                             const toSelect = indicesForEl.find(i => !this.selectedBoardMana.includes(i));
                             this.selectedBoardMana.push(toSelect);
