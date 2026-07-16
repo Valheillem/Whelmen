@@ -2473,7 +2473,9 @@ export class Game extends Phaser.Scene {
             firstCycleIndex: this.firstCycleIndex,
             turn: this.turn === 'player' ? myKey : oppKey,
             phase: this.phase,
-            actionUsed: this.actionUsedThisTurn,
+            actionUsed: this.actionUsedThisTurn || false,
+            manaPlacedThisTurn: this.manaPlacedThisTurn || false,
+            spellCastThisTurn: this.spellCastThisTurn || false,
             [`${myKey}Hand`]: this.player.hand.slice(),
             [`${myKey}Board`]: this.player.board.slice(),
             [`${myKey}Shield`]: this.player.shield,
@@ -2576,6 +2578,8 @@ export class Game extends Phaser.Scene {
 
         // Update action state
         this.actionUsedThisTurn = state.actionUsed || false;
+        this.manaPlacedThisTurn = state.manaPlacedThisTurn || false;
+        this.spellCastThisTurn = state.spellCastThisTurn || false;
         this.phase = state.phase || 'action';
 
         // Determine whose turn it is locally

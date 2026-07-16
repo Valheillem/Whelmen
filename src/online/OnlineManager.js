@@ -36,7 +36,9 @@ export class OnlineManager {
             firstCycleIndex: this.scene.firstCycleIndex,
             turn: this.scene.turn === 'player' ? myKey : oppKey,
             phase: this.scene.phase,
-            actionUsed: this.scene.actionUsedThisTurn,
+            actionUsed: this.scene.actionUsedThisTurn || false,
+            manaPlacedThisTurn: this.scene.manaPlacedThisTurn || false,
+            spellCastThisTurn: this.scene.spellCastThisTurn || false,
             [`${myKey}Hand`]: this.scene.player.hand.slice(),
             [`${myKey}Board`]: this.scene.player.board.slice(),
             [`${myKey}Shield`]: this.scene.player.shield,
@@ -131,6 +133,8 @@ export class OnlineManager {
 
         // Update action state
         this.scene.actionUsedThisTurn = state.actionUsed || false;
+        this.scene.manaPlacedThisTurn = state.manaPlacedThisTurn || false;
+        this.scene.spellCastThisTurn = state.spellCastThisTurn || false;
         this.scene.phase = state.phase || 'action';
 
         // Determine whose turn it is locally
@@ -195,7 +199,9 @@ export class OnlineManager {
         // Normal Turn Logic
         if (isMyTurn) {
             this.scene.duelHistory.logMessage("--- YOUR TURN ---");
-            this.scene.manaPlacedThisTurn = false; this.scene.spellCastThisTurn = false;
+            if (state.phase !== 'action') {
+                this.scene.manaPlacedThisTurn = false; this.scene.spellCastThisTurn = false;
+            }
             this.scene.selectedBoardMana = [];
             this.scene.updateComboPreview();
             this.scene.enablePlayerControls(true);
