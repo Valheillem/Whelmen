@@ -404,13 +404,13 @@ export class Game extends Phaser.Scene {
             }
 
             if (who === 'player') {
-                this.updatePlayerHandDisplay();
-                this.updatePlayerBoardDisplay();
-                this.updatePlayerLifeDisplay();
+                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
             } else {
-                this.updateAIHandDisplay();
-                this.updateAIBoardDisplay();
-                this.updateAILifeDisplay();
+                this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+                this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+                this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
             }
         }
 
@@ -543,11 +543,11 @@ export class Game extends Phaser.Scene {
                 this.playSound('damage');
             }
             if (who === 'player') {
-                this.updatePlayerHandDisplay();
-                this.updatePlayerLifeDisplay();
+                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
             } else {
-                this.updateAIHandDisplay();
-                this.updateAILifeDisplay();
+                this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+                this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
             }
             this.updateDeckDiscardDisplay();
         } else {
@@ -1627,9 +1627,9 @@ export class Game extends Phaser.Scene {
             ease: 'Power2',
             onComplete: () => {
                 phantom.destroy();
-                this.updatePlayerHandDisplay();
-                this.updatePlayerBoardDisplay();
-                this.updatePlayerLifeDisplay();
+                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
                 
                 this.playElementalBurst(targetX, targetY, el);
 
@@ -1725,13 +1725,13 @@ export class Game extends Phaser.Scene {
         }
         
         if (who === 'player') {
-            if (source === 'hand') this.updatePlayerHandDisplay();
-            else this.updatePlayerBoardDisplay();
-            this.updatePlayerLifeDisplay();
+            if (source === 'hand') this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            else this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
         } else {
-            if (source === 'hand') this.updateAIHandDisplay();
-            else this.updateAIBoardDisplay();
-            this.updateAILifeDisplay();
+            if (source === 'hand') this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+            else this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+            this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
         }
         this.updateDeckDiscardDisplay();
         
@@ -1787,9 +1787,9 @@ export class Game extends Phaser.Scene {
                 this.duelHistory.logMessage(`Player lost a hand mana from drawing!`);
             }
 
-            this.updatePlayerHandDisplay();
-            this.updatePlayerBoardDisplay();
-            this.updatePlayerLifeDisplay();
+            this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
         }
 
         this.enablePlayerControls(false);
@@ -1816,9 +1816,9 @@ export class Game extends Phaser.Scene {
                 this.animateCardMovement(consumed, 'board', 'discard', 'player');
                 this.sharedDiscard.push(consumed);
             });
-            this.updatePlayerBoardDisplay();
+            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
             this.updateDeckDiscardDisplay();
-            this.updatePlayerLifeDisplay();
+            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
 
             if (this.phase === 'reaction_request_active') {
                 this.phase = 'reaction_response';
@@ -1846,8 +1846,8 @@ export class Game extends Phaser.Scene {
             this.sharedDiscard.push(consumed);
         });
 
-        this.updatePlayerBoardDisplay();
-        this.updatePlayerLifeDisplay();
+        this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
         this.updateDeckDiscardDisplay();
 
         this.selectedBoardMana = [];
@@ -2028,8 +2028,7 @@ export class Game extends Phaser.Scene {
                     }
                 }
             }
-            this.updatePlayerHandDisplay(); this.updatePlayerBoardDisplay(); this.updatePlayerLifeDisplay();
-            this.updateAIHandDisplay(); this.updateAIBoardDisplay(); this.updateAILifeDisplay();
+            this.playerIds.forEach(pid => { this.updatePlayerHandDisplay(pid); this.updatePlayerBoardDisplay(pid); this.updatePlayerLifeDisplay(pid); });
         }
         
         // Drain logic is now deferred to after the reaction phase
@@ -2257,9 +2256,9 @@ export class Game extends Phaser.Scene {
             this.duelHistory.logMessage("Player is out of cards!");
             this.player.hand = [];
             this.player.board = [];
-            this.updatePlayerHandDisplay();
-            this.updatePlayerBoardDisplay();
-            this.updatePlayerLifeDisplay();
+            this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
             this.checkDefeatCondition('player');
             return;
         }
@@ -2274,16 +2273,16 @@ export class Game extends Phaser.Scene {
             let discarded;
             if (zone === 'hand') {
                 discarded = char.hand.splice(index, 1)[0];
-                this.updatePlayerHandDisplay();
+                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
             } else {
                 discarded = char.board.splice(index, 1)[0];
-                this.updatePlayerBoardDisplay();
+                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
             }
 
             this.animateCardMovement(discarded, zone, 'discard', 'player');
             this.sharedDiscard.push(discarded);
             this.updateDeckDiscardDisplay();
-            this.updatePlayerLifeDisplay();
+            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
 
             this.cardsToDiscardCount--;
             this.playSound('fire');
@@ -2582,12 +2581,12 @@ export class Game extends Phaser.Scene {
      * Refresh all UI elements to match current state.
      */
     refreshAllUI() {
-        this.updatePlayerHandDisplay();
-        this.updatePlayerBoardDisplay();
-        this.updatePlayerLifeDisplay();
-        this.updateAIHandDisplay();
-        this.updateAIBoardDisplay();
-        this.updateAILifeDisplay();
+        this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+        this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+        this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
         this.updateDeckDiscardDisplay();
         // Update cycle indicator rotation directly
         if (this.cycleContainer) {
@@ -2821,13 +2820,13 @@ export class Game extends Phaser.Scene {
                 if (toStr === 'hand') {
                     if (who === 'player') this.playerIncomingHandCards = Math.max(0, this.playerIncomingHandCards - 1);
                     else this.aiIncomingHandCards = Math.max(0, this.aiIncomingHandCards - 1);
-                    if (who === 'player') this.updatePlayerHandDisplay();
-                    else this.updateAIHandDisplay();
+                    this.updatePlayerHandDisplay(who);
+                    else this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
                 } else if (toStr === 'board') {
                     if (who === 'player') this.playerIncomingBoardCards = Math.max(0, this.playerIncomingBoardCards - 1);
                     else this.aiIncomingBoardCards = Math.max(0, this.aiIncomingBoardCards - 1);
-                    if (who === 'player') this.updatePlayerBoardDisplay();
-                    else this.updateAIBoardDisplay();
+                    if (who === 'player') this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                    else this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
                 }
 
                 if (onComplete) onComplete();
