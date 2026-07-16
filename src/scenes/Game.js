@@ -1639,8 +1639,26 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
         const uniqueElements = [...new Set(this.player.board)];
         const elIndex = uniqueElements.indexOf(el);
-        const targetX = pGroup.zone.x + 60 + (this.player.board.length - 1) * 90;
-        const targetY = pGroup.zone.y - 30;
+        const centerX = w / 2 - 20;
+        const centerY = h / 2 - 40;
+        const pos = this.getPlayerPositionIndex(localId);
+        
+        const spaceX = 75;
+
+        let targetX = 0, targetY = 0;
+        if (pos === 0) {
+            targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+            targetY = centerY + 160;
+        } else if (pos === 1) {
+            targetX = centerX + 180;
+            targetY = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+        } else if (pos === 2) {
+            targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+            targetY = centerY - 160;
+        } else if (pos === 3) {
+            targetX = centerX - 180;
+            targetY = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+        }
 
         // Create the phantom card sprite
         const phantom = this.add.image(startX, startY, `card_${el}`)
