@@ -1,3 +1,5 @@
+import { SPELLS } from '../data/SpellCatalog.js';
+
 export class SandboxDashboard {
     constructor(scene) {
         this.scene = scene;
@@ -215,10 +217,6 @@ export class SandboxDashboard {
         });
 
         // 4. Populating Spell Catalog Scroll
-        if (!this.scene.spellsCatalog) {
-            this.scene.getSpellFromCombo([]);
-        }
-        
         const scrollList = document.getElementById('spell-list-scroll');
         const searchInput = document.getElementById('spell-search-input');
         
@@ -226,8 +224,8 @@ export class SandboxDashboard {
             scrollList.innerHTML = '';
             const lowerFilter = filterText.toLowerCase();
             
-            Object.keys(this.scene.spellsCatalog).forEach(comboKey => {
-                const spell = this.scene.spellsCatalog[comboKey];
+            Object.keys(SPELLS).forEach(comboKey => {
+                const spell = SPELLS[comboKey];
                 
                 if (filterText && !spell.name.toLowerCase().includes(lowerFilter) && !spell.element.toLowerCase().includes(lowerFilter)) {
                     return;
