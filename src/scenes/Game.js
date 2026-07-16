@@ -1509,6 +1509,7 @@ export class Game extends Phaser.Scene {
                         }
                         this.updatePlayerBoardDisplay(pid);
                         this.updateComboPreview();
+                        this.enablePlayerControls(true);
                     }
                 });
             }
