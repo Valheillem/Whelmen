@@ -752,10 +752,10 @@ export class Game extends Phaser.Scene {
                 char.shieldG.strokeRoundedRect(80, 150, 140, 24, 6);
                 char.shieldT.setPosition(90, 154);
             } else {
-                // Place below the AI hand (relative to aiZone)
-                char.shieldG.fillRoundedRect(80, 160, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(80, 160, 140, 24, 6);
-                char.shieldT.setPosition(90, 164);
+                // Place above the AI hand (relative to aiZone) to mirror player layout
+                char.shieldG.fillRoundedRect(80, 0, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(80, 0, 140, 24, 6);
+                char.shieldT.setPosition(90, 4);
             }
             char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
         } else {
