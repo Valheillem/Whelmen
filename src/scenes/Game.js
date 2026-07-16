@@ -1047,6 +1047,15 @@ export class Game extends Phaser.Scene {
         btnHowToPlayTop.on('pointerover', () => { btnHowToPlayTop.setColor('#000000'); btnHowToPlayTop.setBackgroundColor('#ffffff'); });
         btnHowToPlayTop.on('pointerout', () => { btnHowToPlayTop.setColor('#ffffff'); btnHowToPlayTop.setBackgroundColor('rgba(13,11,28,0.85)'); });
         btnHowToPlayTop.on('pointerdown', () => this.handleHowToPlayOption());
+        btnHowToPlayTop.setEnabled = function(enabled) {
+            if (enabled) {
+                this.setAlpha(1);
+                this.setInteractive();
+            } else {
+                this.setAlpha(0.5);
+                this.disableInteractive();
+            }
+        };
         this.btnHowToPlay = btnHowToPlayTop;
 
         this.btnSpellBook = this.createActionButton(w - 180, h - 190, 'SPELL BOOK', () => this.handleSpellBookOption());
