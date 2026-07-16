@@ -586,7 +586,7 @@ export class Game extends Phaser.Scene {
     }
 
     checkDefeatCondition(who) {
-        const char = who === 'player' ? this.player : this.ai;
+        const char = this.players[who];
         const totalCards = char.hand.length + char.board.length;
         if (totalCards === 0) {
             if (this.mode === 'test') {
@@ -1799,7 +1799,7 @@ export class Game extends Phaser.Scene {
     }
 
     forceDiscardRandom(who, count, source = 'hand') {
-        const char = who === 'player' ? this.player : this.ai;
+        const char = this.players[who];
         const targetArray = source === 'board' ? char.board : char.hand;
         const actualCount = Math.min(count, targetArray.length);
         
@@ -2040,8 +2040,8 @@ export class Game extends Phaser.Scene {
 
     // --- COMBAT RESOLUTION & REACTION WINDOW ---
     initiateAttack(attacker, defender, spell) {
-        let defChar = defender === 'player' ? this.player : this.ai;
-        let attChar = attacker === 'player' ? this.player : this.ai;
+        let defChar = this.players[defender];
+        let attChar = this.players[attacker];
         const cycle = this.cycleElements[this.cycleIndex];
 
         // Status: Random Targeting
@@ -2153,11 +2153,11 @@ export class Game extends Phaser.Scene {
         // the startTurn decrement (they decrement to 1, still > 0 when checked)
         if (isEmp) {
             if (spell.name === 'Ignition') attChar.status.bonusManaPlays = 2;
-            if (spell.name === 'Haze') { this.player.status.loseManaOnDraw = 2; this.ai.status.loseManaOnDraw = 2; }
+            if (spell.name === 'Haze') { this.playerIds.forEach(p => this.players[p].status.loseManaOnDraw = 2); }
             if (spell.name === 'Quake') attChar.status.shieldDamageDebuff = 2;
-            if (spell.name === 'Dust') { this.player.status.missChance = 2; this.ai.status.missChance = 2; }
+            if (spell.name === 'Dust') { this.playerIds.forEach(p => this.players[p].status.missChance = 2); }
             if (spell.name === 'Typhoon') attChar.status.autoPlayDraw = 2;
-            if (spell.name === 'Enrich') { this.player.status.everyoneDraw3 = 1; this.ai.status.everyoneDraw3 = 1; }
+            if (spell.name === 'Enrich') { this.playerIds.forEach(p => this.players[p].status.everyoneDraw3 = 1); }
             if (spell.name === 'Firestorm') attChar.status.manaPlayDamage = 2;
             if (spell.name === 'Fortress') attChar.status.extraDrawIfShield = 1;
             if (spell.name === 'Quagmire') attChar.status.redrawMana = 1;
@@ -2166,10 +2166,10 @@ export class Game extends Phaser.Scene {
             if (spell.name === 'Hurricane') defChar.status.noDrawDebuff = 2;
             if (spell.name === 'Flood') defChar.status.oppDraw4 = 1;
             if (spell.name === 'Tower') defChar.status.spellFailChance = 2;
-            if (spell.name === 'Mudslide') { this.player.status.discardReplaceHand = 1; this.ai.status.discardReplaceHand = 1; }
-            if (spell.name === 'Tide') { this.player.status.rotateHands = 1; this.ai.status.rotateHands = 1; }
-            if (spell.name === 'Aegis') { this.player.status.damageImmunity = 2; this.ai.status.damageImmunity = 2; }
-            if (spell.name === 'Cataclysm') { this.player.status.randomTargeting = 2; this.ai.status.randomTargeting = 2; }
+            if (spell.name === 'Mudslide') { this.playerIds.forEach(p => this.players[p].status.discardReplaceHand = 1); }
+            if (spell.name === 'Tide') { this.playerIds.forEach(p => this.players[p].status.rotateHands = 1); }
+            if (spell.name === 'Aegis') { this.playerIds.forEach(p => this.players[p].status.damageImmunity = 2); }
+            if (spell.name === 'Cataclysm') { this.playerIds.forEach(p => this.players[p].status.randomTargeting = 2); }
         }
         
         // Trigger reaction window if defender has active mana
@@ -2241,8 +2241,8 @@ export class Game extends Phaser.Scene {
 
         const defender = this.reactionCaster;
         const attacker = this.reactionSource;
-        const defChar = defender === 'player' ? this.player : this.ai;
-        const attChar = attacker === 'player' ? this.player : this.ai;
+        const defChar = this.players[defender];
+        const attChar = this.players[attacker];
 
         if (reactionSpell) {
             this.duelHistory.logMessage(`${defender.toUpperCase()} casts reaction: ${reactionSpell.name}!`);
@@ -2299,7 +2299,7 @@ export class Game extends Phaser.Scene {
     }
 
     applyDamage(who, amount, bypassShield = false) {
-        const char = who === 'player' ? this.player : this.ai;
+        const char = this.players[who];
         
         // Shield absorption (Lava Surge bypasses shields entirely)
         if (bypassShield) {
@@ -2318,8 +2318,8 @@ export class Game extends Phaser.Scene {
         }
 
         // Clean giant fortress temporary shield
-        if (who === 'player' && char.shield > 90) char.shield = 0;
-        if (who === 'ai' && char.shield > 90) char.shield = 0;
+        
+        if (char.shield > 90) char.shield = 0;
         this.updateShieldDisplay(who);
 
         if (amount > 0) {
@@ -2342,7 +2342,7 @@ export class Game extends Phaser.Scene {
                 } else {
                     // AI automatically discards
                     if (this.mode === 'ai_contest') {
-                        this.contestAiAgent.runAIDiscardAutomation(pid, amount);
+                        this.contestAiAgent.runAIDiscardAutomation(who, amount);
                     } else {
                         this.aiAgent.runAIDiscardAutomation(amount);
                     }
