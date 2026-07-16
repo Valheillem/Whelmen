@@ -199,8 +199,8 @@ export class Game extends Phaser.Scene {
         }
         
         // For backwards compatibility in other modules until refactored:
-        Object.defineProperty(this, 'player', { get: () => this.players[this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole] || this.players[this.playerIds[0]] });
-        Object.defineProperty(this, 'ai', { get: () => this.players[this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole))] || this.players[this.playerIds[1]] });
+        Object.defineProperty(this, 'player', { configurable: true, get: () => this.players[this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole] || this.players[this.playerIds[0]] });
+        Object.defineProperty(this, 'ai', { configurable: true, get: () => this.players[this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole))] || this.players[this.playerIds[1]] });
 
         // Spells Selected by player for casting
         this.selectedBoardMana = [];

@@ -12,7 +12,7 @@ export class Start extends Phaser.Scene {
         let ctx = starCanvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, 4, 4);
-        this.textures.addCanvas('star', starCanvas);
+        if(!this.textures.exists('star')) this.textures.addCanvas('star', starCanvas);
 
         // Create a glow circle texture for background nebulas
         let nebulaCanvas = document.createElement('canvas');
@@ -24,7 +24,7 @@ export class Start extends Phaser.Scene {
         grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         nCtx.fillStyle = grad;
         nCtx.fillRect(0, 0, 128, 128);
-        this.textures.addCanvas('nebula', nebulaCanvas);
+        if(!this.textures.exists('nebula')) this.textures.addCanvas('nebula', nebulaCanvas);
     }
 
     init() {
