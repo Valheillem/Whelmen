@@ -854,6 +854,7 @@ export class Game extends Phaser.Scene {
             char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
         } else {
             char.shieldT.setText('');
+        }
     }
 
     drawDeckDiscardPiles() {
@@ -2824,5 +2825,4 @@ export class Game extends Phaser.Scene {
             }
         });
     }
-}
 }
