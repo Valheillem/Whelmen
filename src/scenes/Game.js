@@ -768,14 +768,18 @@ export class Game extends Phaser.Scene {
             
             const isLocal = pos === 0;
             const displayName = isLocal ? 'YOU' : `PLAYER ${pid}`;
-            char.nameT = this.add.text(pos === 1 || pos === 3 ? 0 : (pos === 0 ? -150 : 60), pos === 2 ? 180 : (pos === 0 ? 140 : 0), displayName, {
+            let nx = 0, ny = 0;
+            if (pos === 0) { nx = -150; ny = 110; }
+            else if (pos === 1) { nx = -10; ny = 20; }
+            else if (pos === 2) { nx = 100; ny = -30; }
+            else if (pos === 3) { nx = 70; ny = 20; }
+
+            char.nameT = this.add.text(nx, ny, displayName, {
                 fontFamily: '"Outfit", sans-serif',
                 fontSize: '18px',
                 fontWeight: '800',
                 color: '#ffffff'
             });
-            if (pos === 1) { char.nameT.setAngle(-90); char.nameT.setPosition(-30, 150); }
-            if (pos === 3) { char.nameT.setAngle(90); char.nameT.setPosition(150, 0); }
             
             zone.add(char.nameT);
 
@@ -842,22 +846,16 @@ export class Game extends Phaser.Scene {
             char.shieldG.fillStyle(0xa67032, 0.15);
             char.shieldG.lineStyle(2, 0xa67032, 0.7);
             
-            const pIdx = this.playerIds.indexOf(pid);
-            if (pIdx === 0) {
-                // Bottom
-                char.shieldG.fillRoundedRect(-80, 140, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(-80, 140, 140, 24, 6);
-                char.shieldT.setPosition(-70, 144);
-            } else if (pIdx === 2 || pIdx === 1) {
-                // Top or side
-                char.shieldG.fillRoundedRect(80, 0, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(80, 0, 140, 24, 6);
-                char.shieldT.setPosition(90, 4);
-            } else {
-                char.shieldG.fillRoundedRect(80, 0, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(80, 0, 140, 24, 6);
-                char.shieldT.setPosition(90, 4);
-            }
+            const pos = this.getPlayerPositionIndex(pid);
+            let sx = 0, sy = 0;
+            if (pos === 0) { sx = 10; sy = 110; }
+            else if (pos === 1) { sx = -10; sy = 45; }
+            else if (pos === 2) { sx = 100; sy = -55; }
+            else if (pos === 3) { sx = 70; sy = 45; }
+
+            char.shieldG.fillRoundedRect(sx, sy, 140, 24, 6);
+            char.shieldG.strokeRoundedRect(sx, sy, 140, 24, 6);
+            char.shieldT.setPosition(sx + 10, sy + 4);
             char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
         } else {
             char.shieldT.setText('');
@@ -948,7 +946,7 @@ export class Game extends Phaser.Scene {
         const panelW = 264;
         const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(80, h - 350).setVisible(false);
+        this.primedSpellPanel = this.add.container(20, h - 180).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
@@ -1478,18 +1476,18 @@ export class Game extends Phaser.Scene {
             let x = 0, y = 0, angle = 0;
             if (pos === 0) {
                 x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
-                y = centerY + 70;
+                y = centerY + 180;
                 angle = 0;
             } else if (pos === 1) {
-                x = centerX - 110;
+                x = centerX - 250;
                 y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
                 angle = 90;
             } else if (pos === 2) {
                 x = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
-                y = centerY - 110;
+                y = centerY - 180;
                 angle = 180;
             } else if (pos === 3) {
-                x = centerX + 80;
+                x = centerX + 250;
                 y = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
                 angle = -90;
             }
