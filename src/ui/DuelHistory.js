@@ -13,16 +13,17 @@ export class DuelHistory {
 
     drawActionLog() {
         const w = this.scene.scale.width;
-        this.titleText = this.scene.add.text(w - 370, 25, 'DUEL HISTORY:', {
+        const h = this.scene.scale.height;
+        this.titleText = this.scene.add.text(20, h - 425, 'DUEL HISTORY:', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
             fontWeight: '600',
-            color: '#1a1a1a',
+            color: '#ffffff',
             letterSpacing: 1
         });
 
         this.scene.allLogTextLines = [];
-        this.scene.logContainer = this.scene.add.container(w - 370, 50);
+        this.scene.logContainer = this.scene.add.container(20, h - 400);
 
         // Drawer backing
         const logBg = this.scene.add.graphics();
@@ -37,10 +38,10 @@ export class DuelHistory {
         this.scene.logContainer.add(this.scene.logScrollContainer);
 
         // Mask to restrict visible area to the inside of the history box
-        // Viewport bounds: X = w - 370 + 8, Y = 50 + 10, Width = 324, Height = 360
+        // Viewport bounds: X = 20 + 8, Y = h - 400 + 10, Width = 324, Height = 360
         const maskShape = this.scene.make.graphics();
         maskShape.fillStyle(0xffffff);
-        maskShape.fillRoundedRect(w - 370 + 8, 50 + 10, 324, 360, 8);
+        maskShape.fillRoundedRect(28, h - 390, 324, 360, 8);
         const mask = maskShape.createGeometryMask();
         this.scene.logScrollContainer.setMask(mask);
 

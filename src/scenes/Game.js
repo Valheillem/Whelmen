@@ -211,9 +211,7 @@ export class Game extends Phaser.Scene {
 
         // Drawing fields FIRST (UI must exist before game logic references it)
         this.duelHistory.drawActionLog();
-        if (this.playerIds.length > 2) {
-            this.duelHistory.setVisible(false);
-        }
+
         
         this.drawCycleIndicator();
         this.drawAllStats();
@@ -848,10 +846,10 @@ export class Game extends Phaser.Scene {
             
             const pos = this.getPlayerPositionIndex(pid);
             let sx = 0, sy = 0;
-            if (pos === 0) { sx = 0; sy = 170; }
-            else if (pos === 1) { sx = 0; sy = -70; }
-            else if (pos === 2) { sx = 110; sy = -90; }
-            else if (pos === 3) { sx = 40; sy = -70; }
+            if (pos === 0) { sx = 0; sy = 135; }
+            else if (pos === 1) { sx = 0; sy = -110; }
+            else if (pos === 2) { sx = 90; sy = -140; }
+            else if (pos === 3) { sx = 10; sy = -110; }
 
             char.shieldG.fillRoundedRect(sx, sy, 140, 24, 6);
             char.shieldG.strokeRoundedRect(sx, sy, 140, 24, 6);
@@ -946,7 +944,7 @@ export class Game extends Phaser.Scene {
         const panelW = 264;
         const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(20, h - 180).setVisible(false);
+        this.primedSpellPanel = this.add.container(w - 460, h - 180).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
