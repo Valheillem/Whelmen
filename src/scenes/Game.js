@@ -743,9 +743,9 @@ export class Game extends Phaser.Scene {
             
             let containerX = 0, containerY = 0;
             if (pos === 0) { containerX = w / 2 - 20; containerY = h - 195; } // Bottom
-            else if (pos === 1) { containerX = 40; containerY = h / 2 - 50; } // Left
+            else if (pos === 1) { containerX = 40; containerY = h / 2; } // Left
             else if (pos === 2) { containerX = w / 2 - 20; containerY = 30; } // Top (mirrors bottom)
-            else if (pos === 3) { containerX = w - 195; containerY = h / 2 - 50; } // Right
+            else if (pos === 3) { containerX = w - 195; containerY = h / 2; } // Right
 
             const zone = this.add.container(containerX, containerY);
             
@@ -769,7 +769,7 @@ export class Game extends Phaser.Scene {
             let nx = 0, ny = 0;
             if (pos === 0) { nx = 0; ny = 0; }
             else if (pos === 1) { nx = 10; ny = -150; }
-            else if (pos === 2) { nx = -160; ny = 10; }
+            else if (pos === 2) { nx = -130; ny = 10; }
             else if (pos === 3) { nx = 30; ny = -150; }
 
             char.nameT = this.add.text(nx, ny, displayName, {
@@ -1396,11 +1396,11 @@ export class Game extends Phaser.Scene {
             } else if (pos === 1) {
                 y = -totalW / 2 + index * spaceX;
                 x = 30 - curveY;
-                angle = 90 - rotDeg;
+                angle = 90 + rotDeg;
             } else if (pos === 3) {
                 y = -totalW / 2 + index * spaceX;
                 x = 50 + curveY;
-                angle = -90 + rotDeg;
+                angle = -90 - rotDeg;
             }
 
             const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
