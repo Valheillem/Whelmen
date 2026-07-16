@@ -848,10 +848,10 @@ export class Game extends Phaser.Scene {
             
             const pos = this.getPlayerPositionIndex(pid);
             let sx = 0, sy = 0;
-            if (pos === 0) { sx = 10; sy = 110; }
-            else if (pos === 1) { sx = -10; sy = 45; }
-            else if (pos === 2) { sx = 100; sy = -55; }
-            else if (pos === 3) { sx = 70; sy = 45; }
+            if (pos === 0) { sx = 0; sy = 170; }
+            else if (pos === 1) { sx = 0; sy = -70; }
+            else if (pos === 2) { sx = 110; sy = -90; }
+            else if (pos === 3) { sx = 40; sy = -70; }
 
             char.shieldG.fillRoundedRect(sx, sy, 140, 24, 6);
             char.shieldG.strokeRoundedRect(sx, sy, 140, 24, 6);
