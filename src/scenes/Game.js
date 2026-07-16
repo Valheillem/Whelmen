@@ -2087,11 +2087,8 @@ export class Game extends Phaser.Scene {
             this.updateAIHandDisplay(); this.updateAIBoardDisplay(); this.updateAILifeDisplay();
         }
         
-        // Drain logic
-        if (finalDrain > 0) {
-            this.forceDiscardRandom(defender, finalDrain);
-        }
-
+        // Drain logic is now deferred to after the reaction phase
+        
         // DEFERRED STATUS EFFECTS: Applied AFTER shield/draw/drain so they
         // don't fire during the same spell that set them (Bug 4 fix)
         // Statuses checked during action/draw phase use value 2 to survive
@@ -2119,9 +2116,13 @@ export class Game extends Phaser.Scene {
         
         // Trigger reaction window if defender has active mana
         if (defChar.board.length > 0) {
-            this.combat.startReactionPhase(attacker, defender, { ...spell, damage: finalDmg, bypassShield: false });
+            this.combat.startReactionPhase(attacker, defender, { ...spell, damage: finalDmg, bypassShield: false, drain: finalDrain });
         } else {
             // Direct hit
+            if (finalDrain > 0) {
+                this.forceDiscardRandom(defender, finalDrain);
+            }
+            
             if (finalDmg > 0) {
                 if (defChar.status.retaliationDamage > 0) {
                     this.forceDiscardRandom(attacker, 1);
@@ -2230,6 +2231,11 @@ export class Game extends Phaser.Scene {
         // Apply incoming damage minus final shield
         const finalDmg = this.reactionTargetSpell.damage;
         this.combat.applyDamage(defender, finalDmg, this.reactionTargetSpell.bypassShield || false);
+
+        // Apply deferred drain
+        if (this.reactionTargetSpell.drain > 0) {
+            this.forceDiscardRandom(defender, this.reactionTargetSpell.drain);
+        }
     }
 
     applyDamage(who, amount, bypassShield = false) {
