@@ -14,7 +14,7 @@ export class DuelHistory {
     drawActionLog() {
         const w = this.scene.scale.width;
         const h = this.scene.scale.height;
-        this.titleText = this.scene.add.text(20, h - 425, 'DUEL HISTORY:', {
+        this.titleText = this.scene.add.text(60, h - 225, 'DUEL HISTORY:', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
             fontWeight: '600',
@@ -23,14 +23,14 @@ export class DuelHistory {
         });
 
         this.scene.allLogTextLines = [];
-        this.scene.logContainer = this.scene.add.container(20, h - 400);
+        this.scene.logContainer = this.scene.add.container(60, h - 200);
 
         // Drawer backing
         const logBg = this.scene.add.graphics();
         logBg.fillStyle(0x1a1410, 0.8);
         logBg.lineStyle(1, 0x4a4a4a, 0.25);
-        logBg.fillRoundedRect(0, 0, 340, 380, 8);
-        logBg.strokeRoundedRect(0, 0, 340, 380, 8);
+        logBg.fillRoundedRect(0, 0, 240, 200, 8);
+        logBg.strokeRoundedRect(0, 0, 240, 200, 8);
         this.scene.logContainer.add(logBg);
 
         // Scrolling container for log lines
@@ -38,10 +38,10 @@ export class DuelHistory {
         this.scene.logContainer.add(this.scene.logScrollContainer);
 
         // Mask to restrict visible area to the inside of the history box
-        // Viewport bounds: X = 20 + 8, Y = h - 400 + 10, Width = 324, Height = 360
+        // Viewport bounds: X = 60 + 8, Y = h - 200 + 10, Width = 224, Height = 180
         const maskShape = this.scene.make.graphics();
         maskShape.fillStyle(0xffffff);
-        maskShape.fillRoundedRect(28, h - 390, 324, 360, 8);
+        maskShape.fillRoundedRect(68, h - 190, 224, 180, 8);
         const mask = maskShape.createGeometryMask();
         this.scene.logScrollContainer.setMask(mask);
 
@@ -61,7 +61,7 @@ export class DuelHistory {
             const relativeX = pointer.x - (w - 370);
             const relativeY = pointer.y - 50;
             // Check if pointer is inside the history box
-            if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 380) {
+            if (relativeX >= 0 && relativeX <= 240 && relativeY >= 0 && relativeY <= 200) {
                 this.scrollDuelHistory(deltaY);
             }
         });
@@ -72,11 +72,11 @@ export class DuelHistory {
             const relativeY = pointer.y - 50;
 
             // Check if pointer is inside the history box
-            if (relativeX >= 0 && relativeX <= 340 && relativeY >= 0 && relativeY <= 380) {
+            if (relativeX >= 0 && relativeX <= 240 && relativeY >= 0 && relativeY <= 200) {
                 // If it is inside the scrollbar area (X: 320 to 338, Y: 10 to 370)
-                if (relativeX >= 320 && relativeX <= 338 && relativeY >= 10 && relativeY <= 370) {
+                if (relativeX >= 220 && relativeX <= 238 && relativeY >= 10 && relativeY <= 190) {
                     const totalHeight = this.getLogTotalHeight();
-                    const viewportHeight = 360;
+                    const viewportHeight = 180;
                     if (totalHeight > viewportHeight) {
                         this.scene.isDraggingScrollbar = true;
                         const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
@@ -95,7 +95,7 @@ export class DuelHistory {
             if (this.scene.isDraggingScrollbar) {
                 const relativeY = pointer.y - 50;
                 const totalHeight = this.getLogTotalHeight();
-                const viewportHeight = 360;
+                const viewportHeight = 180;
                 const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
                 this.scrollHistoryByScrollbarY(relativeY, handleHeight);
             } else if (this.scene.isDraggingHistory) {
@@ -144,7 +144,7 @@ export class DuelHistory {
             fontFamily: '"Inter", sans-serif',
             fontSize: '15px',
             color: color,
-            wordWrap: { width: 305 }
+            wordWrap: { width: 205 }
         });
 
         // Make interactive for hovering spell details
@@ -168,7 +168,7 @@ export class DuelHistory {
 
         // Auto-scroll to the bottom when a new message is added
         const totalHeight = this.getLogTotalHeight();
-        const viewportHeight = 360;
+        const viewportHeight = 180;
         if (totalHeight > viewportHeight) {
             this.scene.logScrollContainer.y = viewportHeight - totalHeight;
         } else {
@@ -202,7 +202,7 @@ export class DuelHistory {
 
 
     scrollHistoryByScrollbarY(relativeY, handleHeight) {
-        const viewportHeight = 360;
+        const viewportHeight = 180;
         const totalHeight = this.getLogTotalHeight();
         
         // Calculate clicked center and map it
@@ -228,7 +228,7 @@ export class DuelHistory {
     scrollDuelHistoryTo(targetY) {
         if (!this.scene.logScrollContainer || !this.scene.allLogTextLines || this.scene.allLogTextLines.length === 0) return;
         
-        const viewportHeight = 360;
+        const viewportHeight = 180;
         const totalHeight = this.getLogTotalHeight();
         
         if (totalHeight <= viewportHeight) {
@@ -264,7 +264,7 @@ export class DuelHistory {
         
         this.scene.logScrollbarGraphics.clear();
         
-        const viewportHeight = 360;
+        const viewportHeight = 180;
         const totalHeight = this.getLogTotalHeight();
         
         if (totalHeight <= viewportHeight) return;

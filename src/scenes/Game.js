@@ -944,7 +944,7 @@ export class Game extends Phaser.Scene {
         const panelW = 264;
         const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(w - 460, h - 180).setVisible(false);
+        this.primedSpellPanel = this.add.container(w - 550, h - 180).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
@@ -1259,7 +1259,7 @@ export class Game extends Phaser.Scene {
                 // If it is inside the scrollbar area (X: 320 to 338, Y: 10 to 370)
                 if (relativeX >= 320 && relativeX <= 338 && relativeY >= 10 && relativeY <= 370) {
                     const totalHeight = this.duelHistory.getLogTotalHeight();
-                    const viewportHeight = 360;
+                    const viewportHeight = 180;
                     if (totalHeight > viewportHeight) {
                         this.isDraggingScrollbar = true;
                         const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
@@ -1278,7 +1278,7 @@ export class Game extends Phaser.Scene {
             if (this.isDraggingScrollbar) {
                 const relativeY = pointer.y - 50;
                 const totalHeight = this.duelHistory.getLogTotalHeight();
-                const viewportHeight = 360;
+                const viewportHeight = 180;
                 const handleHeight = Math.max(30, (viewportHeight / totalHeight) * viewportHeight);
                 this.duelHistory.scrollHistoryByScrollbarY(relativeY, handleHeight);
             } else if (this.isDraggingHistory) {
@@ -1349,7 +1349,7 @@ export class Game extends Phaser.Scene {
 
         // Auto-scroll to the bottom when a new message is added
         const totalHeight = this.duelHistory.getLogTotalHeight();
-        const viewportHeight = 360;
+        const viewportHeight = 180;
         if (totalHeight > viewportHeight) {
             this.logScrollContainer.y = viewportHeight - totalHeight;
         } else {
@@ -2811,13 +2811,13 @@ export class Game extends Phaser.Scene {
     }
 
     scrollHistoryByScrollbarY(relativeY, handleHeight) {
-        const viewportHeight = 360;
+        const viewportHeight = 180;
         const totalHeight = this.duelHistory.getLogTotalHeight();
         
         // Calculate clicked center and map it
         // The handle travel range is from 10 to 10 + 360 - handleHeight
         const minHandleY = 10;
-        const maxHandleTravel = 360 - handleHeight;
+        const maxHandleTravel = 180 - handleHeight;
         
         // Clamp handle target position
         let targetHandleY = relativeY - handleHeight / 2;
@@ -2835,7 +2835,7 @@ export class Game extends Phaser.Scene {
     scrollDuelHistoryTo(targetY) {
         if (!this.logScrollContainer || !this.allLogTextLines || this.allLogTextLines.length === 0) return;
         
-        const viewportHeight = 360;
+        const viewportHeight = 180;
         const totalHeight = this.duelHistory.getLogTotalHeight();
         
         if (totalHeight <= viewportHeight) {
@@ -2867,7 +2867,7 @@ export class Game extends Phaser.Scene {
         
         this.logScrollbarGraphics.clear();
         
-        const viewportHeight = 360;
+        const viewportHeight = 180;
         const totalHeight = this.duelHistory.getLogTotalHeight();
         
         if (totalHeight <= viewportHeight) return;
@@ -2876,7 +2876,7 @@ export class Game extends Phaser.Scene {
         const maxScroll = viewportHeight - totalHeight;
         const scrollRatio = maxScroll === 0 ? 0 : (this.logScrollContainer.y / maxScroll);
         
-        const maxHandleTravel = 360 - handleHeight;
+        const maxHandleTravel = 180 - handleHeight;
         const handleY = 10 + scrollRatio * maxHandleTravel;
         
         // Draw track with a subtle, premium glassmorphic border/fill (height 360)
