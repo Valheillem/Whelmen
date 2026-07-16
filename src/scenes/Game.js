@@ -1373,25 +1373,34 @@ export class Game extends Phaser.Scene {
         const startX = 60;
         const spaceX = pos === 0 ? 90 : 60;
 
-        const totalW = Math.max(0, (char.hand.length - 1) * spaceX);
+        const count = char.hand.length;
+        const totalW = Math.max(0, (count - 1) * spaceX);
+        const middle = (count - 1) / 2;
+        const curveAmount = 6;
+        const rotAmount = 4;
+
         char.hand.forEach((el, index) => {
+            const t = index - middle;
+            const curveY = Math.abs(t) * Math.abs(t) * curveAmount;
+            const rotDeg = t * rotAmount;
+
             let x = 0, y = 0, angle = 0;
             if (pos === 0) {
                 x = -totalW / 2 + index * spaceX;
-                y = 90;
-                angle = 0;
+                y = 90 + curveY;
+                angle = rotDeg;
             } else if (pos === 2) {
                 x = 150 - totalW / 2 + index * spaceX;
-                y = 20;
-                angle = 180;
+                y = 20 - curveY;
+                angle = 180 + rotDeg;
             } else if (pos === 1) {
                 y = 150 - totalW / 2 + index * spaceX;
-                x = 0;
-                angle = 90;
+                x = 0 - curveY;
+                angle = 90 + rotDeg;
             } else if (pos === 3) {
                 y = 150 - totalW / 2 + index * spaceX;
-                x = 80;
-                angle = -90;
+                x = 80 + curveY;
+                angle = -90 + rotDeg;
             }
 
             const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
@@ -1419,7 +1428,7 @@ export class Game extends Phaser.Scene {
                     this.playSound('click');
                     this.tweens.add({
                         targets: cardObj,
-                        y: pos === 0 ? y - 30 : y,
+                        y: y - 30,
                         scaleX: 0.88,
                         scaleY: 0.88,
                         duration: 100,
@@ -1430,7 +1439,7 @@ export class Game extends Phaser.Scene {
                 cardObj.on('pointerout', () => {
                     this.tweens.add({
                         targets: cardObj,
-                        y: pos === 0 ? y : y,
+                        y: y,
                         scaleX: 0.8,
                         scaleY: 0.8,
                         duration: 100,
