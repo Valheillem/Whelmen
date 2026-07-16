@@ -60,7 +60,9 @@ export async function createLobby(hostId) {
 
     await ref.set({
         hostId: hostId,
-        guestId: null,
+        players: {
+            [hostId]: { role: 'host' }
+        },
         status: 'waiting',
         createdAt: firebase.database.ServerValue.TIMESTAMP,
         gameState: null,
@@ -89,16 +91,20 @@ export async function joinLobby(code, guestId) {
     if (data.status !== 'waiting') {
         throw new Error('This lobby already has a game in progress.');
     }
-    if (data.guestId) {
+    
+    if (!data.players) data.players = {};
+    if (Object.keys(data.players).length >= 4) {
         throw new Error('This lobby is already full.');
     }
-    if (data.hostId === guestId) {
-        throw new Error('You cannot join your own lobby.');
+    if (data.players[guestId]) {
+        throw new Error('You are already in this lobby.');
     }
 
+    data.players[guestId] = { role: `guest${Object.keys(data.players).length}` };
+
     await ref.update({
-        guestId: guestId,
-        status: 'ready'
+        players: data.players
+        // Note: we don't set status to ready immediately, host starts the game
     });
 
     return data;
@@ -147,8 +153,12 @@ export async function setLobbyStatus(code, status) {
     await db.ref(`lobbies/${code}/status`).set(status);
 }
 
+export async function startLobbyGame(code) {
+    await db.ref(`lobbies/${code}/status`).set('ready');
+}
+
 export async function deleteLobby(code) {
     await db.ref(`lobbies/${code}`).remove();
 }
 
-export { db };
+export { db, startLobbyGame };

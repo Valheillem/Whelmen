@@ -1,13 +1,19 @@
 export class DuelHistory {
     constructor(scene) {
         this.scene = scene;
+        this.titleText = null;
+    }
+
+    setVisible(visible) {
+        if (this.titleText) this.titleText.setVisible(visible);
+        if (this.scene.logContainer) this.scene.logContainer.setVisible(visible);
     }
 
 
 
     drawActionLog() {
         const w = this.scene.scale.width;
-        this.scene.add.text(w - 370, 25, 'DUEL HISTORY:', {
+        this.titleText = this.scene.add.text(w - 370, 25, 'DUEL HISTORY:', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
             fontWeight: '600',

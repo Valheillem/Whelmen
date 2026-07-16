@@ -96,8 +96,32 @@ export class Lobby extends Phaser.Scene {
             urlEl.style.display = 'block';
 
             this.unsubscribe = listenToLobby(this.lobbyCode, (lobbyData) => {
-                if (lobbyData && lobbyData.guestId && lobbyData.status === 'ready') {
-                    this.startGame('host');
+                if (!lobbyData) return;
+                
+                const listEl = document.getElementById('lobby-players-list');
+                if (listEl) {
+                    const pCount = lobbyData.players ? Object.keys(lobbyData.players).length : 1;
+                    listEl.innerText = `Players: ${pCount} / 4`;
+                }
+                
+                const startBtn = document.getElementById('btn-lobby-start');
+                if (startBtn) {
+                    const pCount = lobbyData.players ? Object.keys(lobbyData.players).length : 1;
+                    if (pCount >= 2) {
+                        startBtn.style.display = 'block';
+                        startBtn.onclick = async () => {
+                            startBtn.innerText = 'Starting...';
+                            startBtn.disabled = true;
+                            const { startLobbyGame } = await import('../firebase.js');
+                            await startLobbyGame(this.lobbyCode);
+                        };
+                    } else {
+                        startBtn.style.display = 'none';
+                    }
+                }
+
+                if (lobbyData.status === 'ready') {
+                    this.startGame('host', lobbyData.players);
                 }
             });
         } catch (err) {
@@ -123,11 +147,14 @@ export class Lobby extends Phaser.Scene {
             this.lobbyCode = code;
             await joinLobby(code, this.playerId);
 
-            statusEl.innerText = 'Joined! Starting game...';
+            statusEl.innerText = 'Joined! Waiting for host...';
             statusEl.style.color = '#00e676';
 
-            this.time.delayedCall(800, () => {
-                this.startGame('guest');
+            this.unsubscribe = listenToLobby(this.lobbyCode, (lobbyData) => {
+                if (lobbyData && lobbyData.status === 'ready') {
+                    const myRole = lobbyData.players[this.playerId].role;
+                    this.startGame(myRole, lobbyData.players);
+                }
             });
         } catch (err) {
             statusEl.innerText = 'Error: ' + err.message;
@@ -135,13 +162,14 @@ export class Lobby extends Phaser.Scene {
         }
     }
 
-    startGame(role) {
+    startGame(role, players) {
         this.cleanup();
         this.scene.start('Game', {
             mode: 'online',
             lobbyCode: this.lobbyCode,
             myRole: role,
-            playerId: this.playerId
+            playerId: this.playerId,
+            players: players
         });
     }
 

@@ -26,36 +26,38 @@ export class OnlineManager {
 
 
     serializeState() {
-        const myKey = this.scene.myRole;
-        const oppKey = this.scene.myRole === 'host' ? 'guest' : 'host';
-
-        return {
+        const state = {
             deck: this.scene.sharedDeck.slice(),
             discard: this.scene.sharedDiscard.slice(),
             cycleIndex: this.scene.cycleIndex,
             firstCycleIndex: this.scene.firstCycleIndex,
-            turn: this.scene.turn === 'player' ? myKey : oppKey,
+            turn: this.scene.turn,
             phase: this.scene.phase,
             actionUsed: this.scene.actionUsedThisTurn || false,
             manaPlacedThisTurn: this.scene.manaPlacedThisTurn || false,
             spellCastThisTurn: this.scene.spellCastThisTurn || false,
-            [`${myKey}Hand`]: this.scene.player.hand.slice(),
-            [`${myKey}Board`]: this.scene.player.board.slice(),
-            [`${myKey}Shield`]: this.scene.player.shield,
-            [`${myKey}Life`]: this.scene.player.life,
-            [`${myKey}SteamDebuff`]: this.scene.player.steamDebuff || false,
-            [`${oppKey}Hand`]: this.scene.ai.hand.slice(),
-            [`${oppKey}Board`]: this.scene.ai.board.slice(),
-            [`${oppKey}Shield`]: this.scene.ai.shield,
-            [`${oppKey}Life`]: this.scene.ai.life,
-            [`${oppKey}SteamDebuff`]: this.scene.ai.steamDebuff || false,
             reactionTargetSpell: this.scene.reactionTargetSpell || null,
             reactionResponseSpell: this.scene.reactionResponseSpell || null,
             reactionSource: this.scene.reactionSource || null,
             reactionCaster: this.scene.reactionCaster || null,
             discardTargetCount: this.scene.discardTargetCount || 0,
-            seq: Date.now()
+            seq: Date.now(),
+            playersData: {}
         };
+
+        for (const pid of this.scene.playerIds) {
+            const p = this.scene.players[pid];
+            state.playersData[pid] = {
+                hand: p.hand.slice(),
+                board: p.board.slice(),
+                shield: p.shield,
+                life: p.life,
+                steamDebuff: p.steamDebuff || false,
+                status: Object.assign({}, p.status)
+            };
+        }
+
+        return state;
     }
 
  async syncToFirebase(actionType) {
@@ -106,9 +108,6 @@ export class OnlineManager {
 
 
     loadFromFirebase(state) {
-        const myKey = this.scene.myRole;
-        const oppKey = this.scene.myRole === 'host' ? 'guest' : 'host';
-
         // Update deck and discard
         this.scene.sharedDeck = state.deck ? state.deck.slice() : [];
         this.scene.sharedDiscard = state.discard ? state.discard.slice() : [];
@@ -117,29 +116,35 @@ export class OnlineManager {
         this.scene.cycleIndex = state.cycleIndex || 0;
         this.scene.firstCycleIndex = state.firstCycleIndex || 1;
 
-        // Map MY data to this.scene.player
-        this.scene.player.hand = (state[`${myKey}Hand`] || []).slice();
-        this.scene.player.board = (state[`${myKey}Board`] || []).slice();
-        this.scene.player.shield = state[`${myKey}Shield`] || 0;
-        this.scene.player.life = this.scene.player.hand.length + this.scene.player.board.length;
-        this.scene.player.steamDebuff = state[`${myKey}SteamDebuff`] || false;
-
-        // Map OPPONENT data to this.scene.ai
-        this.scene.ai.hand = (state[`${oppKey}Hand`] || []).slice();
-        this.scene.ai.board = (state[`${oppKey}Board`] || []).slice();
-        this.scene.ai.shield = state[`${oppKey}Shield`] || 0;
-        this.scene.ai.life = this.scene.ai.hand.length + this.scene.ai.board.length;
-        this.scene.ai.steamDebuff = state[`${oppKey}SteamDebuff`] || false;
+        // Load all players
+        if (state.playersData) {
+            for (const pid of this.scene.playerIds) {
+                const pData = state.playersData[pid];
+                if (pData) {
+                    this.scene.players[pid].hand = (pData.hand || []).slice();
+                    this.scene.players[pid].board = (pData.board || []).slice();
+                    this.scene.players[pid].shield = pData.shield || 0;
+                    this.scene.players[pid].life = (pData.hand ? pData.hand.length : 0) + (pData.board ? pData.board.length : 0);
+                    this.scene.players[pid].steamDebuff = pData.steamDebuff || false;
+                    if (pData.status) {
+                        this.scene.players[pid].status = Object.assign({}, pData.status);
+                    }
+                }
+            }
+        }
 
         // Update action state
         this.scene.actionUsedThisTurn = state.actionUsed || false;
         this.scene.manaPlacedThisTurn = state.manaPlacedThisTurn || false;
         this.scene.spellCastThisTurn = state.spellCastThisTurn || false;
         this.scene.phase = state.phase || 'action';
+        this.scene.turn = state.turn || this.scene.playerIds[0];
 
         // Determine whose turn it is locally
-        const isMyTurn = state.turn === myKey;
-        this.scene.turn = isMyTurn ? 'player' : 'ai';
+        const myKey = this.scene.myRole === 'host' || this.scene.mode !== 'online' ? 'player' : this.scene.myRole;
+        // Map local backward compatible alias turn check if needed:
+        const mappedMyKey = this.scene.myRole === 'host' && this.scene.playerIds.includes('host') ? 'host' : myKey;
+        const isMyTurn = (state.turn === mappedMyKey) || (state.turn === this.scene.myRole);
 
         // Refresh all UI
         this.refreshAllUI();
@@ -225,12 +230,13 @@ export class OnlineManager {
 
 
     refreshAllUI() {
-        this.scene.updatePlayerHandDisplay();
-        this.scene.updatePlayerBoardDisplay();
-        this.scene.updatePlayerLifeDisplay();
-        this.scene.updateAIHandDisplay();
-        this.scene.updateAIBoardDisplay();
-        this.scene.updateAILifeDisplay();
+        for (const pid of this.scene.playerIds) {
+            this.scene.updatePlayerHandDisplay(pid);
+            this.scene.updatePlayerBoardDisplay(pid);
+            this.scene.updatePlayerLifeDisplay(pid);
+            this.scene.updateShieldDisplay(pid);
+        }
+        
         this.scene.updateDeckDiscardDisplay();
         // Update cycle indicator rotation directly
         if (this.scene.cycleContainer) {
@@ -238,10 +244,6 @@ export class OnlineManager {
             this.scene.updateCycleDisplayColor(this.scene.cycleElements[this.scene.cycleIndex]);
         }
         this.scene.updateComboPreview();
-
-        // Update shield visuals
-        this.scene.updateShieldDisplay('player');
-        this.scene.updateShieldDisplay('ai');
     }
 
 }

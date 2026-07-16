@@ -4,7 +4,7 @@ export class CombatSystem {
     }
 
     consumeBoardMana(who, indices) {
-        const state = who === 'player' ? this.scene.player : this.scene.ai;
+        const state = this.scene.players[who];
         const sorted = [...indices].sort((a, b) => b - a);
         for (const i of sorted) {
             this.scene.sharedDiscard.push(state.board.splice(i, 1)[0]);
@@ -29,7 +29,7 @@ export class CombatSystem {
     }
 
     drawCardWithStatusEffects(who) {
-        const char = who === 'player' ? this.scene.player : this.scene.ai;
+        const char = this.scene.players[who];
         const drawn = this.scene.drawCard();
         if (drawn) {
             if (char.status.autoPlayDraw > 0 && char.board.length < 3) {
@@ -49,8 +49,8 @@ export class CombatSystem {
 
 
     initiateAttack(attacker, defender, spell) {
-        let defChar = defender === 'player' ? this.scene.player : this.scene.ai;
-        let attChar = attacker === 'player' ? this.scene.player : this.scene.ai;
+        let defChar = this.scene.players[defender];
+        let attChar = this.scene.players[attacker];
         const cycle = this.scene.cycleElements[this.scene.cycleIndex];
 
         // Status: Random Targeting
@@ -120,13 +120,18 @@ export class CombatSystem {
 
         // Apply self buffs immediately (like shields)
         if (finalShield > 0) {
-            if (attChar.status.shieldDamageDebuff > 0) {
-                this.scene.forceDiscardRandom(attacker, 1);
-                this.scene.logMessage(`${attacker.toUpperCase()} takes 1 damage from unstable shield!`);
+            if (attChar.status.shieldFailChance > 0 && Math.random() < 0.5) {
+                finalShield = 0;
+                this.scene.logMessage(`${attacker.toUpperCase()}'s Shield application failed due to Quake!`);
+            } else {
+                if (attChar.status.shieldDamageDebuff > 0) {
+                    this.scene.forceDiscardRandom(attacker, 1);
+                    this.scene.logMessage(`${attacker.toUpperCase()} takes 1 damage from unstable shield!`);
+                }
+                attChar.shield += finalShield;
+                this.scene.updateShieldDisplay(attacker);
+                this.scene.logMessage(`${attacker.toUpperCase()} gains ${finalShield} Shield.`);
             }
-            attChar.shield += finalShield;
-            this.scene.updateShieldDisplay(attacker);
-            this.scene.logMessage(`${attacker.toUpperCase()} gains ${finalShield} Shield.`);
         }
 
         // Draw logic
@@ -161,13 +166,21 @@ export class CombatSystem {
         } else {
             // Direct hit
             if (finalDrain > 0) {
-                this.scene.forceDiscardRandom(defender, finalDrain, 'board');
+                if (attChar.status.drainFailChance > 0 && Math.random() < 0.5) {
+                    this.scene.logMessage(`${attacker.toUpperCase()}'s Drain missed due to Tower!`);
+                } else {
+                    this.scene.forceDiscardRandom(defender, finalDrain, 'board');
+                }
             }
             
             if (finalDmg > 0) {
+                if (attChar.status.oppSpellReflect > 0) {
+                    this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
+                    this.applyDamage(attacker, finalDmg, false);
+                }
                 if (defChar.status.retaliationDamage > 0) {
-                    this.scene.forceDiscardRandom(attacker, 1);
-                    this.scene.logMessage(`${defender.toUpperCase()} retaliates for 1 damage!`);
+                    this.scene.forceDiscardRandom(attacker, 3);
+                    this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
                 }
                 this.scene.applyDamage(defender, finalDmg, false);
             } else {
@@ -216,8 +229,8 @@ export class CombatSystem {
 
         const defender = this.scene.reactionCaster;
         const attacker = this.scene.reactionSource;
-        const defChar = defender === 'player' ? this.scene.player : this.scene.ai;
-        const attChar = attacker === 'player' ? this.scene.player : this.scene.ai;
+        const defChar = this.scene.players[defender];
+        const attChar = this.scene.players[attacker];
 
         if (reactionSpell) {
             this.scene.logMessage(`${defender.toUpperCase()} casts reaction: ${reactionSpell.name}!`);
@@ -243,9 +256,13 @@ export class CombatSystem {
 
             // Apply reaction shield
             if (rShield > 0) {
-                defChar.shield += rShield;
-                this.scene.updateShieldDisplay(defender);
-                this.scene.logMessage(`${defender.toUpperCase()} gains ${rShield} Reaction Shield.`);
+                if (defChar.status.shieldFailChance > 0 && Math.random() < 0.5) {
+                    this.scene.logMessage(`${defender.toUpperCase()}'s Reaction Shield failed due to Quake!`);
+                } else {
+                    defChar.shield += rShield;
+                    this.scene.updateShieldDisplay(defender);
+                    this.scene.logMessage(`${defender.toUpperCase()} gains ${rShield} Reaction Shield.`);
+                }
             }
 
             // Counter damage check
@@ -259,17 +276,25 @@ export class CombatSystem {
 
         // Retaliaton damage: fires when defender has retaliationDamage status
         if (defChar.status.retaliationDamage > 0) {
-            this.scene.forceDiscardRandom(attacker, 1);
-            this.scene.logMessage(`${defender.toUpperCase()} retaliates for 1 damage!`);
+            this.scene.forceDiscardRandom(attacker, 3);
+            this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
         }
 
         // Apply incoming damage minus final shield
         const finalDmg = this.scene.reactionTargetSpell.damage;
+        if (finalDmg > 0 && attChar.status.oppSpellReflect > 0) {
+            this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
+            this.applyDamage(attacker, finalDmg, false);
+        }
         this.scene.applyDamage(defender, finalDmg, this.scene.reactionTargetSpell.bypassShield || false);
 
         // Apply deferred drain
         if (this.scene.reactionTargetSpell.drain > 0) {
-            this.scene.forceDiscardRandom(defender, this.scene.reactionTargetSpell.drain, 'board');
+            if (attChar.status.drainFailChance > 0 && Math.random() < 0.5) {
+                this.scene.logMessage(`${attacker.toUpperCase()}'s Drain missed due to Tower!`);
+            } else {
+                this.scene.forceDiscardRandom(defender, this.scene.reactionTargetSpell.drain, 'board');
+            }
         }
     }
 
@@ -278,7 +303,7 @@ export class CombatSystem {
 
 
     applyDamage(who, amount, bypassShield = false) {
-        const char = who === 'player' ? this.scene.player : this.scene.ai;
+        const char = this.scene.players[who];
         
         // Shield absorption (Lava Surge bypasses shields entirely)
         if (bypassShield) {
@@ -297,7 +322,7 @@ export class CombatSystem {
         }
 
         // Clean giant fortress temporary shield
-        if (who === 'player' && char.shield > 90) char.shield = 0;
+        if (who === (this.scene.myRole === "host" || this.scene.mode !== "online" ? "player" : this.scene.myRole) && char.shield > 90) char.shield = 0;
         if (who === 'ai' && char.shield > 90) char.shield = 0;
         this.scene.updateShieldDisplay(who);
 
@@ -309,7 +334,7 @@ export class CombatSystem {
             this.scene.phase = 'discard';
             this.scene.enablePlayerControls(false);
 
-            if (who === 'player') {
+            if (who === (this.scene.myRole === "host" || this.scene.mode !== "online" ? "player" : this.scene.myRole)) {
                 this.scene.cardsToDiscardCount = amount;
                 this.scene.promptDiscardSelection();
             } else {

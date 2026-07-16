@@ -24,12 +24,8 @@ export class AIAgent {
             this.scene.playSound('draw');
             this.scene.logMessage(`AI plays [${el.toUpperCase()}] mana to board.`);
             if (this.scene.ai.status.manaPlayDamage > 0) {
-                this.scene.forceDiscardRandom('player', 1);
-                this.scene.logMessage(`AI's mana play deals 1 damage to Player!`);
-            }
-            if (this.scene.player.status.oppManaPlayDamage > 0) {
-                this.scene.forceDiscardRandom('ai', 1);
-                this.scene.logMessage(`AI takes 1 damage from playing mana due to Player Surge!`);
+                this.scene.forceDiscardRandom('player', 3);
+                this.scene.logMessage(`AI's mana play deals 3 damage to Player!`);
             }
             
             this.scene.updateAIHandDisplay();

@@ -24,8 +24,17 @@ export class Game extends Phaser.Scene {
         this.lobbyCode = data?.lobbyCode || null;
         this.myRole = data?.myRole || 'host'; // 'host' or 'guest'
         this.playerId = data?.playerId || null;
+        this.lobbyPlayers = data?.players || null;
         this.firebaseUnsub = null;
         this.isOnlineInitialized = false;
+        
+        // Setup Player IDs
+        if (this.mode === 'online' && this.lobbyPlayers) {
+            this.playerIds = Object.values(this.lobbyPlayers).map(p => p.role).sort();
+        } else {
+            this.playerIds = ['player', 'ai'];
+        }
+        
         if (this.mode === 'test') {
             this.dummyMode = 'passive'; // 'passive' or 'active'
         }
@@ -164,36 +173,30 @@ export class Game extends Phaser.Scene {
         this.cycleElements = ['neutral', 'fire', 'earth', 'air', 'water'];
         this.cycleIndex = 0; // Neutral start
         this.firstCycleIndex = Math.floor(Math.random() * 4) + 1; // 1 to 4
-        this.turn = 'player'; // Player starts
+        this.turn = this.playerIds[0]; // First player starts
         this.round = 1; // Round 1 starts
         this.phase = 'action'; // Starting action phase
         this.manaPlacedThisTurn = false; this.spellCastThisTurn = false; // Player can do 1 action per turn
 
-        this.player = {
-            hand: [],
-            board: [],
-            shield: 0,
-            life: 8,
-            maxHand: 8,
-            consecutiveDiscards: 0,
-            shieldG: null,
-            shieldT: null,
-                        steamDebuff: false,
-            status: { bonusManaPlays: 0, loseManaOnDraw: 0, shieldDamageDebuff: 0, missChance: 0, autoPlayDraw: 0, everyoneDraw3: 0, discardReplaceHand: 0, rotateHands: 0, damageImmunity: 0, randomTargeting: 0, manaPlayDamage: 0, extraDrawIfShield: 0, bonusSpellPlays: 0, redrawMana: 0, oppManaPlayDamage: 0, retaliationDamage: 0, noDrawDebuff: 0, oppDraw4: 0, spellFailChance: 0 }
-        };
-
-        this.ai = {
-            hand: [],
-            board: [],
-            shield: 0,
-            life: 8,
-            maxHand: 8,
-            consecutiveDiscards: 0,
-            shieldG: null,
-            shieldT: null,
-                        steamDebuff: false,
-            status: { bonusManaPlays: 0, loseManaOnDraw: 0, shieldDamageDebuff: 0, missChance: 0, autoPlayDraw: 0, everyoneDraw3: 0, discardReplaceHand: 0, rotateHands: 0, damageImmunity: 0, randomTargeting: 0, manaPlayDamage: 0, extraDrawIfShield: 0, bonusSpellPlays: 0, redrawMana: 0, oppManaPlayDamage: 0, retaliationDamage: 0, noDrawDebuff: 0, oppDraw4: 0, spellFailChance: 0 }
-        };
+        this.players = {};
+        for (let pid of this.playerIds) {
+            this.players[pid] = {
+                hand: [],
+                board: [],
+                shield: 0,
+                life: 8,
+                maxHand: 8,
+                consecutiveDiscards: 0,
+                shieldG: null,
+                shieldT: null,
+                steamDebuff: false,
+                status: { bonusManaPlays: 0, loseManaOnDraw: 0, shieldDamageDebuff: 0, missChance: 0, autoPlayDraw: 0, everyoneDraw3: 0, discardReplaceHand: 0, rotateHands: 0, damageImmunity: 0, randomTargeting: 0, manaPlayDamage: 0, extraDrawIfShield: 0, bonusSpellPlays: 0, redrawMana: 0, oppManaPlayDamage: 0, retaliationDamage: 0, noDrawDebuff: 0, oppDraw4: 0, spellFailChance: 0, shieldFailChance: 0, oppSpellReflect: 0, drainFailChance: 0, rotateShields: 0 }
+            };
+        }
+        
+        // For backwards compatibility in other modules until refactored:
+        Object.defineProperty(this, 'player', { get: () => this.players[this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole] || this.players[this.playerIds[0]] });
+        Object.defineProperty(this, 'ai', { get: () => this.players[this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole))] || this.players[this.playerIds[1]] });
 
         // Spells Selected by player for casting
         this.selectedBoardMana = [];
@@ -204,9 +207,12 @@ export class Game extends Phaser.Scene {
 
         // Drawing fields FIRST (UI must exist before game logic references it)
         this.duelHistory.drawActionLog();
+        if (this.playerIds.length > 2) {
+            this.duelHistory.setVisible(false);
+        }
+        
         this.drawCycleIndicator();
-        this.drawPlayerStats();
-        this.drawAIStats();
+        this.drawAllStats();
         this.drawDeckDiscardPiles();
         this.drawUIControls();
         this.createTopRightUI();
@@ -270,68 +276,79 @@ export class Game extends Phaser.Scene {
 
     dealStartingHands() {
         for (let i = 0; i < 4; i++) {
-            this.player.hand.push(this.drawCard(true));
-            this.ai.hand.push(this.drawCard(true));
+            this.playerIds.forEach(pid => {
+                this.players[pid].hand.push(this.drawCard(true));
+            });
         }
-        this.updatePlayerHandDisplay();
-        this.updateAIHandDisplay();
-        this.updatePlayerLifeDisplay();
-        this.updateAILifeDisplay();
+        this.playerIds.forEach(pid => {
+            this.updatePlayerHandDisplay(pid);
+            this.updatePlayerLifeDisplay(pid);
+        });
     }
 
     // --- STATE MACHINE TURNS ---
     startTurn(who) {
         this.turn = who;
-        let char = who === 'player' ? this.player : this.ai;
-        let opp = who === 'player' ? this.ai : this.player;
+        let char = this.players[who];
+        
+        this.updateTurnHighlights();
 
         // Apply start of turn effects BEFORE decrementing
         if (char.status.everyoneDraw3 > 0) {
             for(let i=0;i<3;i++) { 
-                let d = this.drawCard(); if(d) char.hand.push(d); 
-                let d2 = this.drawCard(); if(d2) opp.hand.push(d2); 
+                this.playerIds.forEach(pid => {
+                    let d = this.drawCard(); 
+                    if(d) this.players[pid].hand.push(d);
+                });
             }
             this.duelHistory.logMessage("Everyone draws 3 mana!");
-            char.status.everyoneDraw3 = 0; opp.status.everyoneDraw3 = 0;
-            this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
-            this.updateAIHandDisplay(); this.updateAILifeDisplay();
+            this.playerIds.forEach(pid => this.players[pid].status.everyoneDraw3 = 0);
+            this.playerIds.forEach(pid => {
+                this.updatePlayerHandDisplay(pid); 
+                this.updatePlayerLifeDisplay(pid);
+            });
         }
         
         if (char.status.discardReplaceHand > 0) {
-            let chCount = char.hand.length; let opCount = opp.hand.length;
-            while(char.hand.length>0) this.sharedDiscard.push(char.hand.pop());
-            while(opp.hand.length>0) this.sharedDiscard.push(opp.hand.pop());
-            for(let i=0;i<chCount;i++) { let d = this.drawCard(); if(d) char.hand.push(d); }
-            for(let i=0;i<opCount;i++) { let d = this.drawCard(); if(d) opp.hand.push(d); }
-            char.status.discardReplaceHand = 0; opp.status.discardReplaceHand = 0;
+            this.playerIds.forEach(pid => {
+                let pChar = this.players[pid];
+                let count = pChar.hand.length;
+                while(pChar.hand.length > 0) this.sharedDiscard.push(pChar.hand.pop());
+                for(let i=0;i<count;i++) { let d = this.drawCard(); if(d) pChar.hand.push(d); }
+                pChar.status.discardReplaceHand = 0;
+                this.updatePlayerHandDisplay(pid); 
+                this.updatePlayerLifeDisplay(pid);
+            });
             this.duelHistory.logMessage("Hands were discarded and replaced!");
-            this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
-            this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
 
         if (char.status.rotateHands > 0) {
-            let temp = [...char.hand];
-            char.hand = [...opp.hand];
-            opp.hand = temp;
-            char.status.rotateHands = 0; opp.status.rotateHands = 0;
+            // Rotate hands clockwise
+            const firstHand = [...this.players[this.playerIds[0]].hand];
+            for (let i = 0; i < this.playerIds.length - 1; i++) {
+                this.players[this.playerIds[i]].hand = [...this.players[this.playerIds[i+1]].hand];
+            }
+            this.players[this.playerIds[this.playerIds.length - 1]].hand = firstHand;
+            
+            this.playerIds.forEach(pid => {
+                this.players[pid].status.rotateHands = 0;
+                this.updatePlayerHandDisplay(pid);
+                this.updatePlayerLifeDisplay(pid);
+            });
             this.duelHistory.logMessage("Hands were rotated!");
-            this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
-            this.updateAIHandDisplay(); this.updateAILifeDisplay();
         }
         
         if (char.status.oppDraw4 > 0) {
             for(let i=0;i<4;i++) { let d = this.drawCard(); if(d) char.hand.push(d); }
             char.status.oppDraw4 = 0;
             this.duelHistory.logMessage(`${who.toUpperCase()} is flooded with 4 extra mana!`);
-            this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
-            this.updateAIHandDisplay(); this.updateAILifeDisplay();
+            this.updatePlayerHandDisplay(who); this.updatePlayerLifeDisplay(who);
         }
         
         if (char.status.extraDrawIfShield > 0 && char.shield > 0) {
             let d = this.drawCard(); if(d) char.hand.push(d);
             this.duelHistory.logMessage(`${who.toUpperCase()} draws extra mana from Shield!`);
-            this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
-            this.updateAIHandDisplay(); this.updateAILifeDisplay();
+            this.updatePlayerHandDisplay(who); this.updatePlayerLifeDisplay(who);
         }
 
         // Quagmire redrawMana: discard up to 2 hand cards and draw replacements
@@ -346,8 +363,7 @@ export class Game extends Phaser.Scene {
             }
             char.status.redrawMana = 0;
             this.duelHistory.logMessage(`${who.toUpperCase()} redraws ${redrawCount} mana!`);
-            this.updatePlayerHandDisplay(); this.updatePlayerLifeDisplay();
-            this.updateAIHandDisplay(); this.updateAILifeDisplay();
+            this.updatePlayerHandDisplay(who); this.updatePlayerLifeDisplay(who);
         }
         
         this.phase = 'action';
@@ -355,9 +371,8 @@ export class Game extends Phaser.Scene {
         this.selectedBoardMana = [];
         this.updateComboPreview();
 
-        const displayName = (this.mode === 'online' && who === 'player') ? 'YOUR' :
-                            (this.mode === 'online' && who === 'ai') ? "OPPONENT'S" :
-                            who.toUpperCase() + "'S";
+        const isLocal = who === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        const displayName = (this.mode === 'online' && isLocal) ? 'YOUR' : who.toUpperCase() + "'S";
         this.duelHistory.logMessage(`--- ${displayName} TURN ---`);
 
         // Draw phase
@@ -430,9 +445,22 @@ export class Game extends Phaser.Scene {
     }
 
     startRound() {
+        // Aegis: Rotate Shields
+        if (this.playerIds.some(pid => this.players[pid].status.rotateShields > 0)) {
+            // Rotate clockwise
+            const firstShield = this.players[this.playerIds[0]].shield;
+            for (let i = 0; i < this.playerIds.length - 1; i++) {
+                this.players[this.playerIds[i]].shield = this.players[this.playerIds[i+1]].shield;
+            }
+            this.players[this.playerIds[this.playerIds.length - 1]].shield = firstShield;
+            
+            this.playerIds.forEach(pid => this.players[pid].status.rotateShields = 0);
+            this.duelHistory.logMessage("Aegis rotates the Shields clockwise!");
+        }
+
         // Decrease statuses at the start of a new round
-        ['player', 'ai'].forEach(who => {
-            const char = who === 'player' ? this.player : this.ai;
+        this.playerIds.forEach(pid => {
+            const char = this.players[pid];
             for (let k in char.status) {
                 if (char.status[k] > 0) char.status[k]--;
             }
@@ -444,24 +472,51 @@ export class Game extends Phaser.Scene {
         this.rotateCycle();
 
         // Enforce hand limit cleanup
-        this.cleanupHandLimit('player');
-        this.cleanupHandLimit('ai');
+        this.playerIds.forEach(pid => {
+            this.cleanupHandLimit(pid);
+        });
 
         // Check defeat
-        if (this.checkDefeatCondition('player')) return;
-        if (this.checkDefeatCondition('ai')) return;
+        this.playerIds.forEach(pid => {
+            if (this.checkDefeatCondition(pid)) {
+                // If this is FFA and someone dies, maybe they should be removed from turn order?
+                // But wait, the existing logic just calls checkDefeatCondition which might return and transition to gameover.
+                // In FFA, game over happens when 1 player is left. We need to implement this.
+            }
+        });
+        
+        // Remove dead players from turn order
+        this.playerIds = this.playerIds.filter(pid => this.players[pid].hand.length > 0 || this.players[pid].board.length > 0);
+        
+        if (this.playerIds.length <= 1) {
+            this.phase = 'gameover';
+            this.enablePlayerControls(false);
+            if (this.playerIds.length === 1) {
+                const winner = this.playerIds[0];
+                this.gameOverScreen.showGameOver(winner === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole) ? 'VICTORY' : 'DEFEAT');
+            } else {
+                this.gameOverScreen.showGameOver('DEFEAT'); // Draw/All dead
+            }
+            if (this.mode === 'online') {
+                this.onlineManager.syncToFirebase('gameover');
+            }
+            return;
+        }
 
         // Toggle turn
-        const nextTurn = this.turn === 'player' ? 'ai' : 'player';
+        let currentIndex = this.playerIds.indexOf(this.turn);
+        let nextIndex = currentIndex + 1;
 
         // Check for round increment
-        if (nextTurn === 'player') {
+        if (nextIndex >= this.playerIds.length) {
+            nextIndex = 0;
             this.round++;
             if (this.roundText) this.roundText.setText(`ROUND ${this.round}`);
             this.duelHistory.logMessage(`=== ROUND ${this.round} ===`);
             this.startRound();
         }
 
+        const nextTurn = this.playerIds[nextIndex];
         this.startTurn(nextTurn);
 
         // ONLINE: sync state to Firebase AFTER transitioning to opponent's turn.
@@ -657,25 +712,80 @@ export class Game extends Phaser.Scene {
         this.spellEffects.playElementalBurst(x, y, element);
     }
 
-    drawPlayerStats() {
+
+    getPlayerPositionIndex(pid) {
+        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        if (pid === localId) return 0;
+        
+        let localIdx = this.playerIds.indexOf(localId);
+        if (localIdx === -1) localIdx = 0; // Fallback
+        let pidIdx = this.playerIds.indexOf(pid);
+        
+        // Return 0 for bottom, 1 for left, 2 for top, 3 for right
+        let diff = (pidIdx - localIdx + this.playerIds.length) % this.playerIds.length;
+        if (this.playerIds.length === 2 && diff === 1) return 2; // In 1v1, opponent is top
+        return diff;
+    }
+
+    drawAllStats() {
         const w = this.scale.width;
         const h = this.scale.height;
+        this.playerGroups = {};
 
-        this.playerZone = this.add.container(0, h - 195);
+        this.playerIds.forEach(pid => {
+            const char = this.players[pid];
+            const pos = this.getPlayerPositionIndex(pid);
+            
+            let containerX = 0, containerY = 0;
+            if (pos === 0) { containerX = 0; containerY = h - 195; } // Bottom
+            else if (pos === 1) { containerX = 40; containerY = h / 2 - 150; } // Left
+            else if (pos === 2) { containerX = 0; containerY = 30; } // Top
+            else if (pos === 3) { containerX = w - 195; containerY = h / 2 - 150; } // Right
 
+            const zone = this.add.container(containerX, containerY);
+            
+            char.shieldG = this.add.graphics();
+            zone.add(char.shieldG);
 
+            char.shieldT = this.add.text(0, 0, '', {
+                fontFamily: '"Outfit", sans-serif',
+                fontSize: '16px',
+                fontWeight: '700',
+                color: '#a67032'
+            });
+            zone.add(char.shieldT);
 
-        // Draw Player Shield indicator
-        this.player.shieldG = this.add.graphics();
-        this.playerZone.add(this.player.shieldG);
+            // Name highlight
+            char.nameHighlightG = this.add.graphics();
+            zone.add(char.nameHighlightG);
+            
+            const isLocal = pos === 0;
+            const displayName = isLocal ? 'YOU' : `PLAYER ${pid}`;
+            char.nameT = this.add.text(pos === 1 || pos === 3 ? 0 : 60, pos === 2 ? 180 : (pos === 0 ? -60 : 0), displayName, {
+                fontFamily: '"Outfit", sans-serif',
+                fontSize: '18px',
+                fontWeight: '800',
+                color: '#ffffff'
+            });
+            if (pos === 1) { char.nameT.setAngle(-90); char.nameT.setPosition(-30, 150); }
+            if (pos === 3) { char.nameT.setAngle(90); char.nameT.setPosition(150, 0); }
+            
+            zone.add(char.nameT);
 
-        this.player.shieldT = this.add.text(600, -31, '', {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '16px',
-            fontWeight: '700',
-            color: '#a67032'
+            this.playerGroups[pid] = { zone: zone, handGroup: null, boardGroup: null };
         });
-        this.playerZone.add(this.player.shieldT);
+    }
+
+    updateTurnHighlights() {
+        this.playerIds.forEach(pid => {
+            const char = this.players[pid];
+            const pos = this.getPlayerPositionIndex(pid);
+            char.nameHighlightG.clear();
+            if (this.turn === pid) {
+                char.nameHighlightG.fillStyle(0xd4af37, 0.4);
+                char.nameHighlightG.fillRoundedRect(char.nameT.x - 10, char.nameT.y - 10, char.nameT.width + 20, char.nameT.height + 20, 6);
+            }
+        });
     }
 
     createTopRightUI() {
@@ -708,50 +818,44 @@ export class Game extends Phaser.Scene {
         });
     }
 
-    drawAIStats() {
-        const w = this.scale.width;
-
-        this.aiZone = this.add.container(0, 30);
 
 
-
-        // Draw AI Shield indicator
-        this.ai.shieldG = this.add.graphics();
-        this.aiZone.add(this.ai.shieldG);
-
-        this.ai.shieldT = this.add.text(600, 169, '', {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '16px',
-            fontWeight: '700',
-            color: '#a67032'
-        });
-        this.aiZone.add(this.ai.shieldT);
+    updatePlayerLifeDisplay(pid) {
+        if (!pid) return;
+        const char = this.players[pid];
+        char.life = char.hand.length + char.board.length;
     }
 
-
-
-    updatePlayerLifeDisplay() {
-        const total = this.player.hand.length + this.player.board.length;
-        this.player.life = total;
-    }
-
-    updateAILifeDisplay() {
-        const total = this.ai.hand.length + this.ai.board.length;
-        this.ai.life = total;
-    }
-
-    updateShieldDisplay(who) {
-        const char = who === 'player' ? this.player : this.ai;
+    updateShieldDisplay(pid) {
+        if (!pid) return;
+        const char = this.players[pid];
+        if (!char.shieldG) return;
         char.shieldG.clear();
         if (char.shield > 0) {
             char.shieldG.fillStyle(0xa67032, 0.15);
             char.shieldG.lineStyle(2, 0xa67032, 0.7);
-            if (who === 'player') {
-                // Place below the player hand (relative to playerZone) to avoid overlap
+            
+            const pIdx = this.playerIds.indexOf(pid);
+            if (pIdx === 0) {
+                // Bottom
                 char.shieldG.fillRoundedRect(80, 150, 140, 24, 6);
                 char.shieldG.strokeRoundedRect(80, 150, 140, 24, 6);
                 char.shieldT.setPosition(90, 154);
+            } else if (pIdx === 2 || pIdx === 1) {
+                // Top or side
+                char.shieldG.fillRoundedRect(80, 0, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(80, 0, 140, 24, 6);
+                char.shieldT.setPosition(90, 4);
             } else {
+                char.shieldG.fillRoundedRect(80, 0, 140, 24, 6);
+                char.shieldG.strokeRoundedRect(80, 0, 140, 24, 6);
+                char.shieldT.setPosition(90, 4);
+            }
+            char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
+        } else {
+            char.shieldT.setText('');
+        }
+    } else {
                 // Place above the AI hand (relative to aiZone) to mirror player layout
                 char.shieldG.fillRoundedRect(80, 0, 140, 24, 6);
                 char.shieldG.strokeRoundedRect(80, 0, 140, 24, 6);
@@ -1241,382 +1345,143 @@ export class Game extends Phaser.Scene {
     }
 
     // --- CARD HAND RENDERING ---
-    updatePlayerHandDisplay() {
-        // Destroy existing hand card objects
-        if (this.playerHandGroup) {
-            this.playerHandGroup.destroy(true);
+    updatePlayerHandDisplay(pid) {
+        if (!pid) return;
+        const char = this.players[pid];
+        const pos = this.getPlayerPositionIndex(pid);
+        const pGroup = this.playerGroups[pid];
+        
+        if (pGroup.handGroup) {
+            pGroup.handGroup.destroy(true);
         }
 
-        this.playerHandGroup = this.add.group();
+        pGroup.handGroup = this.add.group();
         const startX = 60;
-        const spaceX = 90;
-        const h = this.scale.height;
+        const spaceX = pos === 0 ? 90 : 60;
 
-        this.player.hand.forEach((el, index) => {
-            const x = startX + index * spaceX;
-            const y = 80;
-
-            const cardObj = this.add.image(x, y, `card_${el}`)
-                .setScale(0.8)
-                .setInteractive({ useHandCursor: true });
-                
-            const incoming = this.playerIncomingHandCards || 0;
-            if (index >= this.player.hand.length - incoming) {
-                cardObj.setAlpha(0);
+        char.hand.forEach((el, index) => {
+            let x = 0, y = 0, angle = 0;
+            if (pos === 0 || pos === 2) {
+                x = startX + index * spaceX;
+                y = pos === 0 ? 80 : 0;
+                angle = pos === 0 ? 0 : 180;
+            } else {
+                y = startX + index * spaceX;
+                x = pos === 1 ? 0 : 0;
+                angle = pos === 1 ? 90 : -90;
             }
 
-            this.playerZone.add(cardObj);
-            this.playerHandGroup.add(cardObj);
+            const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            const tex = isLocal ? `card_${el}` : 'card_back';
+            const scaleAmt = isLocal ? 0.8 : 0.55;
 
-            // Bind click to play mana or select for discard depending on state
-            cardObj.on('pointerdown', () => {
-                if (this.phase === 'discard' || this.phase === 'discard_request_active') {
-                    this.discardCardFromZone('hand', index, 'player');
-                } else if (this.phase === 'action' && !this.manaPlacedThisTurn && this.turn === 'player') {
-                    // Quick Action: Play as Board Mana directly on click!
-                    this.playHandCardToBoard(index);
+            const cardObj = this.add.image(x, y, tex).setScale(scaleAmt).setAngle(angle);
+
+            if (isLocal) {
+                cardObj.setInteractive({ useHandCursor: true });
+                const incoming = this.playerIncomingHandCards || 0;
+                if (index >= char.hand.length - incoming) {
+                    cardObj.setAlpha(0);
                 }
-            });
 
-            // Gentle Hover Scaling
-            cardObj.on('pointerover', () => {
-                this.playSound('click');
-                this.tweens.add({
-                    targets: cardObj,
-                    y: 60,
-                    scaleX: 0.88,
-                    scaleY: 0.88,
-                    duration: 100,
-                    ease: 'Quad.easeOut'
+                cardObj.on('pointerdown', () => {
+                    if (this.phase === 'discard' || this.phase === 'discard_request_active') {
+                        this.discardCardFromZone('hand', index, pid);
+                    } else if (this.phase === 'action' && !this.manaPlacedThisTurn && this.turn === pid) {
+                        this.playHandCardToBoard(index);
+                    }
                 });
-            });
 
-            cardObj.on('pointerout', () => {
-                this.tweens.add({
-                    targets: cardObj,
-                    y: 80,
-                    scaleX: 0.8,
-                    scaleY: 0.8,
-                    duration: 100,
-                    ease: 'Quad.easeOut'
+                cardObj.on('pointerover', () => {
+                    this.playSound('click');
+                    this.tweens.add({
+                        targets: cardObj,
+                        y: pos === 0 ? 60 : y,
+                        scaleX: 0.88,
+                        scaleY: 0.88,
+                        duration: 100,
+                        ease: 'Quad.easeOut'
+                    });
                 });
-            });
-        });
-    }
 
-    updateAIHandDisplay() {
-        if (this.aiHandGroup) {
-            this.aiHandGroup.destroy(true);
-        }
-
-        this.aiHandGroup = this.add.group();
-        const startX = 60;
-        const spaceX = 60;
-
-        this.ai.hand.forEach((el, index) => {
-            const x = startX + index * spaceX;
-            const y = 80;
-
-            // Facedown cards
-            const cardObj = this.add.image(x, y, 'card_back')
-                .setScale(0.55);
-                
-            const incoming = this.aiIncomingHandCards || 0;
-            if (index >= this.ai.hand.length - incoming) {
-                cardObj.setAlpha(0);
+                cardObj.on('pointerout', () => {
+                    this.tweens.add({
+                        targets: cardObj,
+                        y: pos === 0 ? 80 : y,
+                        scaleX: 0.8,
+                        scaleY: 0.8,
+                        duration: 100,
+                        ease: 'Quad.easeOut'
+                    });
+                });
             }
 
-            this.aiZone.add(cardObj);
-            this.aiHandGroup.add(cardObj);
+            pGroup.zone.add(cardObj);
+            pGroup.handGroup.add(cardObj);
         });
     }
+
 
     // --- BOARD MANA DISPLAY ---
-    updatePlayerBoardDisplay() {
-        if (this.playerBoardGroup) {
-            this.playerBoardGroup.destroy(true);
+    updatePlayerBoardDisplay(pid) {
+        if (!pid) return;
+        const char = this.players[pid];
+        const pos = this.getPlayerPositionIndex(pid);
+        const pGroup = this.playerGroups[pid];
+        
+        if (pGroup.boardGroup) {
+            pGroup.boardGroup.destroy(true);
         }
 
-        this.playerBoardGroup = this.add.group();
-        const w = this.scale.width;
-        const h = this.scale.height;
-        const y = h / 2 - 40 + 160;
+        pGroup.boardGroup = this.add.group();
+        const startX = 60;
+        const spaceX = 90;
 
-        // Group player board elements dynamically
-        const stacks = {};
-        const uniqueElements = [];
-        this.player.board.forEach((el, index) => {
-            if (!stacks[el]) {
-                stacks[el] = {
-                    element: el,
-                    count: 0,
-                    indices: [],
-                    selectedCount: 0
-                };
-                uniqueElements.push(el);
-            }
-            stacks[el].count++;
-            stacks[el].indices.push(index);
-            if (this.selectedBoardMana.includes(index)) {
-                stacks[el].selectedCount++;
-            }
-        });
-
-        // Dynamic symmetric centering around player board
-        const centerX = w / 2 - 20;
-        const spaceX = 75;
-        const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
-
-        uniqueElements.forEach((el, index) => {
-            const x = startX + index * spaceX;
-            const stack = stacks[el];
-            const hasSelected = stack.selectedCount > 0;
-
-            const cardObj = this.add.image(x, y, `card_${el}`)
-                .setScale(hasSelected ? 0.72 : 0.65)
-                .setInteractive({ useHandCursor: true });
-                
-            const incoming = this.playerIncomingBoardCards || 0;
-            // Simplified incoming logic for board display
-            if (index >= uniqueElements.length - incoming) {
-                cardObj.setAlpha(0);
+        char.board.forEach((el, index) => {
+            let x = 0, y = 0, angle = 0;
+            if (pos === 0 || pos === 2) {
+                x = startX + index * spaceX;
+                y = pos === 0 ? -30 : 110;
+                angle = pos === 0 ? 0 : 180;
+            } else {
+                y = startX + index * spaceX;
+                x = pos === 1 ? 110 : -110;
+                angle = pos === 1 ? 90 : -90;
             }
 
-            // Glowing pulsing border highlight if any card in stack is selected
-            if (hasSelected) {
-                const borderW = cardObj.width * 0.72 + 8;
-                const borderH = cardObj.height * 0.72 + 8;
-                
-                const borderHighlight = this.add.graphics();
-                
-                // Outer glow shadow ring
-                borderHighlight.lineStyle(1.5, 0xbf8cff, 0.45);
-                borderHighlight.strokeRoundedRect(
-                    x - borderW / 2 - 2, 
-                    y - borderH / 2 - 2, 
-                    borderW + 4, 
-                    borderH + 4, 
-                    12
-                );
-                
-                // Core bright border stroke
-                borderHighlight.lineStyle(3, 0x00ffff, 0.95);
-                borderHighlight.strokeRoundedRect(
-                    x - borderW / 2, 
-                    y - borderH / 2, 
-                    borderW, 
-                    borderH, 
-                    10
-                );
+            const cardObj = this.add.image(x, y, `card_${el}`).setScale(0.8).setAngle(angle);
 
-                this.playerBoardGroup.add(borderHighlight);
+            const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            if (isLocal) {
+                cardObj.setInteractive({ useHandCursor: true });
+                if (this.selectedBoardMana.includes(index)) {
+                    cardObj.setTint(0x88ff88);
+                    cardObj.y -= 15;
+                } else {
+                    cardObj.clearTint();
+                }
 
-                // Breathing pulse animation for premium feel
-                this.tweens.add({
-                    targets: borderHighlight,
-                    alpha: 0.4,
-                    duration: 900,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Sine.easeInOut'
+                cardObj.on('pointerdown', () => {
+                    if (this.phase === 'discard' || this.phase === 'discard_request_active') {
+                        this.discardCardFromZone('board', index, pid);
+                    } else if (this.phase === 'action' && this.turn === pid) {
+                        const idx = this.selectedBoardMana.indexOf(index);
+                        if (idx > -1) {
+                            this.selectedBoardMana.splice(idx, 1);
+                        } else {
+                            this.selectedBoardMana.push(index);
+                        }
+                        this.updatePlayerBoardDisplay(pid);
+                        this.updateComboPreview();
+                    }
                 });
             }
 
-            this.playerBoardGroup.add(cardObj);
-
-            // Click listener
-            cardObj.on('pointerdown', () => {
-                if (this.phase === 'discard' || this.phase === 'discard_request_active') {
-                    // Discard the last index in the stack
-                    const discardIdx = stack.indices[stack.indices.length - 1];
-                    this.discardCardFromZone('board', discardIdx, 'player');
-                    return;
-                }
-
-                // If in action or reaction, select card for casting combos
-                if (this.turn === 'player' || this.phase === 'reaction' || this.phase === 'reaction_request_active') {
-                    const unselectedIndices = stack.indices.filter(idx => !this.selectedBoardMana.includes(idx));
-                    const selectedIndices = stack.indices.filter(idx => this.selectedBoardMana.includes(idx));
-
-                    if (unselectedIndices.length > 0 && this.selectedBoardMana.length < 3) {
-                        // Select one more
-                        const nextToSelect = unselectedIndices[0];
-                        this.selectedBoardMana.push(nextToSelect);
-                    } else {
-                        // Deselect all selected cards of this element in the stack
-                        selectedIndices.forEach(idx => {
-                            const selIdx = this.selectedBoardMana.indexOf(idx);
-                            if (selIdx > -1) {
-                                this.selectedBoardMana.splice(selIdx, 1);
-                            }
-                        });
-                    }
-                    this.playSound('click');
-                    this.updatePlayerBoardDisplay();
-                    this.updateComboPreview();
-                    this.enablePlayerControls(true);
-                }
-            });
-
-            // Float hover
-            cardObj.on('pointerover', () => {
-                if (this.phase === 'discard') {
-                    cardObj.setTint(0xdf1b2d);
-                } else if (!hasSelected) {
-                    cardObj.setScale(0.7);
-                }
-            });
-
-            cardObj.on('pointerout', () => {
-                if (this.phase === 'discard') {
-                    cardObj.clearTint();
-                } else if (!hasSelected) {
-                    cardObj.setScale(0.65);
-                }
-            });
-
-            // Calculate exact corners relative to current scale
-            const currentScale = hasSelected ? 0.72 : 0.65;
-            const wHalf = (100 * currentScale) / 2;
-            const hHalf = (150 * currentScale) / 2;
-
-            // 1. Draw Total Count Badge (Top-Right)
-            if (stack.count > 1) {
-                const badgeX = x + wHalf - 8;
-                const badgeY = y - hHalf + 8;
-                
-                const elementColors = {
-                    fire: 0xdf1b2d,
-                    earth: 0xa67032,
-                    water: 0x1084e9,
-                    air: 0xbf8cff
-                };
-                const elementColorHex = elementColors[el] || 0xffffff;
-
-                const countBadgeG = this.add.graphics();
-                countBadgeG.fillStyle(0x261a12, 0.95);
-                countBadgeG.lineStyle(1.5, elementColorHex, 0.9);
-                countBadgeG.fillCircle(badgeX, badgeY, 11);
-                countBadgeG.strokeCircle(badgeX, badgeY, 11);
-                this.playerBoardGroup.add(countBadgeG);
-                
-                const countText = this.add.text(badgeX, badgeY, `${stack.count}`, {
-                    fontFamily: '"Outfit", sans-serif',
-                    fontSize: '11px',
-                    fontWeight: '800',
-                    color: '#ffffff'
-                }).setOrigin(0.5);
-                this.playerBoardGroup.add(countText);
-            }
-
-            // 2. Draw Selected Count Badge (Bottom-Right)
-            if (stack.selectedCount > 0) {
-                const badgeX = x + wHalf - 8;
-                const badgeY = y + hHalf - 8;
-                
-                const selBadgeG = this.add.graphics();
-                const isAllSelected = (stack.selectedCount === stack.count);
-                
-                if (isAllSelected) {
-                    selBadgeG.fillStyle(0x00ffff, 0.95);
-                    selBadgeG.lineStyle(1.5, 0xffffff, 1);
-                    selBadgeG.fillCircle(badgeX, badgeY, 11);
-                    selBadgeG.strokeCircle(badgeX, badgeY, 11);
-                } else {
-                    selBadgeG.fillStyle(0x1a1410, 0.95);
-                    selBadgeG.lineStyle(2, 0xbf8cff, 0.95);
-                    selBadgeG.fillCircle(badgeX, badgeY, 11);
-                    selBadgeG.strokeCircle(badgeX, badgeY, 11);
-                }
-                this.playerBoardGroup.add(selBadgeG);
-                
-                const selTextVal = isAllSelected ? `✓` : `${stack.selectedCount}`;
-                const selText = this.add.text(badgeX, badgeY, selTextVal, {
-                    fontFamily: '"Outfit", sans-serif',
-                    fontSize: '11px',
-                    fontWeight: '800',
-                    color: isAllSelected ? '#040212' : '#bf8cff'
-                }).setOrigin(0.5);
-                this.playerBoardGroup.add(selText);
-            }
+            pGroup.zone.add(cardObj);
+            pGroup.boardGroup.add(cardObj);
         });
     }
 
-    updateAIBoardDisplay() {
-        if (this.aiBoardGroup) {
-            this.aiBoardGroup.destroy(true);
-        }
-
-        this.aiBoardGroup = this.add.group();
-        const w = this.scale.width;
-        const h = this.scale.height;
-        const y = h / 2 - 40 - 160;
-
-        // Group AI board elements dynamically
-        const stacks = {};
-        const uniqueElements = [];
-        this.ai.board.forEach((el, index) => {
-            if (!stacks[el]) {
-                stacks[el] = {
-                    element: el,
-                    count: 0
-                };
-                uniqueElements.push(el);
-            }
-            stacks[el].count++;
-        });
-
-        // Dynamic symmetric centering around AI board
-        const centerX = w / 2 - 20;
-        const spaceX = 75;
-        const startX = centerX - ((uniqueElements.length - 1) * spaceX) / 2;
-
-        uniqueElements.forEach((el, index) => {
-            const x = startX + index * spaceX;
-            const stack = stacks[el];
-
-            const cardObj = this.add.image(x, y, `card_${el}`)
-                .setScale(0.65);
-                
-            const incoming = this.aiIncomingBoardCards || 0;
-            if (index >= uniqueElements.length - incoming) {
-                cardObj.setAlpha(0);
-            }
-
-            this.aiBoardGroup.add(cardObj);
-
-            // Total Count Badge (Top-Right)
-            if (stack.count > 1) {
-                const wHalf = (100 * 0.65) / 2;
-                const hHalf = (150 * 0.65) / 2;
-                const badgeX = x + wHalf - 8;
-                const badgeY = y - hHalf + 8;
-
-                const elementColors = {
-                    fire: 0xdf1b2d,
-                    earth: 0xa67032,
-                    water: 0x1084e9,
-                    air: 0xbf8cff
-                };
-                const elementColorHex = elementColors[el] || 0xffffff;
-
-                const countBadgeG = this.add.graphics();
-                countBadgeG.fillStyle(0x261a12, 0.95);
-                countBadgeG.lineStyle(1.5, elementColorHex, 0.9);
-                countBadgeG.fillCircle(badgeX, badgeY, 11);
-                countBadgeG.strokeCircle(badgeX, badgeY, 11);
-                this.aiBoardGroup.add(countBadgeG);
-
-                const countText = this.add.text(badgeX, badgeY, `${stack.count}`, {
-                    fontFamily: '"Outfit", sans-serif',
-                    fontSize: '11px',
-                    fontWeight: '800',
-                    color: '#ffffff'
-                }).setOrigin(0.5);
-                this.aiBoardGroup.add(countText);
-            }
-        });
-    }
 
     updatePanelVisuals(isAI, spell) {
         const titleObj = isAI ? this.incomingSpellTitle : this.primedSpellTitle;
@@ -1770,12 +1635,8 @@ export class Game extends Phaser.Scene {
 
                 // Status hooks for mana play
                 if (this.player.status.manaPlayDamage > 0) {
-                    this.forceDiscardRandom('ai', 1);
-                    this.duelHistory.logMessage(`Player's mana play deals 1 damage to AI!`);
-                }
-                if (this.ai.status.oppManaPlayDamage > 0) {
-                    this.forceDiscardRandom('player', 1);
-                    this.duelHistory.logMessage(`Player takes 1 damage from playing mana due to AI Surge!`);
+                    this.forceDiscardRandom('ai', 3);
+                    this.duelHistory.logMessage(`Player's mana play deals 3 damage to AI!`);
                 }
 
                 // Check bonusManaPlays: allow a second mana play
@@ -1994,10 +1855,72 @@ export class Game extends Phaser.Scene {
 
         this.duelHistory.logMessage(`Player casts: ${spell.name}!`);
 
-        // Visual spell fire from player center to AI center
+        // Target Selection
+        const localPlayer = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const opponents = this.playerIds.filter(p => p !== localPlayer);
+        
+        const finishCast = (targetId) => {
+            this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name} targeting ${targetId.toUpperCase()}!`);
+            
+            // Simple visual from local to target
+            const w = this.scale.width;
+            const h = this.scale.height;
+            const targetPos = this.getPlayerPositionIndex(targetId);
+            let tx = w/2, ty = h/2;
+            if (targetPos === 1) { tx = 50; ty = h/2; }
+            else if (targetPos === 2) { tx = w/2; ty = 50; }
+            else if (targetPos === 3) { tx = w-50; ty = h/2; }
+            
+            this.triggerSpellVisual(spell, w / 2, h - 50, tx, ty, () => {
+                this.combat.initiateAttack(localPlayer, targetId, spell);
+            });
+        };
+
+        if (opponents.length === 1) {
+            finishCast(opponents[0]);
+        } else {
+            // Need to select an opponent
+            this.duelHistory.logMessage(`Select target for ${spell.name}...`);
+            this.showTargetSelection(opponents, finishCast);
+        }
+    }
+
+
+    showTargetSelection(opponents, onSelect) {
         const w = this.scale.width;
-        this.triggerSpellVisual(spell, w / 2 - 100, 500, w / 2 - 100, 100, () => {
-            this.combat.initiateAttack('player', 'ai', spell);
+        const h = this.scale.height;
+        
+        this.targetSelectionGroup = this.add.group();
+        
+        const bg = this.add.rectangle(w/2, h/2, w, h, 0x000000, 0.7).setInteractive();
+        this.targetSelectionGroup.add(bg);
+        
+        const title = this.add.text(w/2, h/2 - 100, 'SELECT TARGET', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '32px',
+            fontWeight: '800',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        this.targetSelectionGroup.add(title);
+        
+        opponents.forEach((oppId, i) => {
+            const btnBg = this.add.rectangle(w/2, h/2 - 30 + i * 60, 200, 50, 0x222222).setInteractive({useHandCursor: true});
+            btnBg.setStrokeStyle(2, 0xa67032);
+            
+            const btnText = this.add.text(w/2, h/2 - 30 + i * 60, `Target ${oppId.toUpperCase()}`, {
+                fontFamily: '"Outfit", sans-serif',
+                fontSize: '20px',
+                fontWeight: '700',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            btnBg.on('pointerdown', () => {
+                this.targetSelectionGroup.destroy(true);
+                onSelect(oppId);
+            });
+            
+            this.targetSelectionGroup.add(btnBg);
+            this.targetSelectionGroup.add(btnText);
         });
     }
 
