@@ -535,18 +535,22 @@ export class Game extends Phaser.Scene {
                 const discarded = char.hand.pop();
                 this.sharedDiscard.push(discarded);
             }
-            char.consecutiveDiscards++;
-            if (char.consecutiveDiscards >= 2) {
-                char.maxHand = Math.max(1, char.maxHand - 1);
-                char.consecutiveDiscards = 0;
-                this.duelHistory.logMessage(`OVERWHELMED! ${pid.toUpperCase()}'s Max Hand Size decreases by 1!`);
-                this.playSound('damage');
+            if (this.turn === pid) {
+                char.consecutiveDiscards++;
+                if (char.consecutiveDiscards >= 2) {
+                    char.maxHand = Math.max(1, char.maxHand - 1);
+                    char.consecutiveDiscards = 0;
+                    this.duelHistory.logMessage(`OVERWHELMED! ${pid.toUpperCase()}'s Max Hand Size decreases by 1!`);
+                    this.playSound('damage');
+                }
             }
             this.updatePlayerHandDisplay(pid);
             this.updatePlayerLifeDisplay(pid);
             this.updateDeckDiscardDisplay();
         } else {
-            char.consecutiveDiscards = 0;
+            if (this.turn === pid) {
+                char.consecutiveDiscards = 0;
+            }
         }
     }
 
