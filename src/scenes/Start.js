@@ -57,7 +57,21 @@ export class Start extends Phaser.Scene {
             this.scene.start(sceneName, data);
         };
 
-        document.getElementById('btn-play-ai').onclick = () => hideMenuAndStart('Game', { mode: 'ai' });
+        const viewMainButtons = document.getElementById('view-main-buttons');
+        const viewAiChoice = document.getElementById('view-ai-choice');
+
+        document.getElementById('btn-play-ai').onclick = () => {
+            viewMainButtons.style.display = 'none';
+            viewAiChoice.style.display = 'flex';
+        };
+
+        document.getElementById('btn-ai-choice-back').onclick = () => {
+            viewAiChoice.style.display = 'none';
+            viewMainButtons.style.display = 'flex';
+        };
+
+        document.getElementById('btn-ai-duel').onclick = () => hideMenuAndStart('Game', { mode: 'ai' });
+        document.getElementById('btn-ai-contest').onclick = () => hideMenuAndStart('Game', { mode: 'ai_contest' });
         document.getElementById('btn-play-online').onclick = () => hideMenuAndStart('Lobby', { action: 'create' });
         document.getElementById('btn-test-range').onclick = () => hideMenuAndStart('Game', { mode: 'test' });
 

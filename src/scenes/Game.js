@@ -5,6 +5,7 @@ import { SpellEffectsPlayer } from '../effects/SpellEffectsPlayer.js';
 import { SynergySystem } from '../systems/SynergySystem.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { AIAgent } from '../systems/AIAgent.js';
+import { ContestAIAgent } from '../systems/ContestAIAgent.js';
 import { DuelHistory } from '../ui/DuelHistory.js';
 import { GameOverScreen } from '../ui/GameOverScreen.js';
 import { SandboxDashboard } from '../ui/SandboxDashboard.js';
@@ -31,6 +32,8 @@ export class Game extends Phaser.Scene {
         // Setup Player IDs
         if (this.mode === 'online' && this.lobbyPlayers) {
             this.playerIds = Object.values(this.lobbyPlayers).map(p => p.role).sort();
+        } else if (this.mode === 'ai_contest') {
+            this.playerIds = ['player', 'ai1', 'ai2', 'ai3'];
         } else {
             this.playerIds = ['player', 'ai'];
         }
@@ -153,6 +156,7 @@ export class Game extends Phaser.Scene {
         this.synergy = new SynergySystem(this);
         this.combat = new CombatSystem(this);
         this.aiAgent = new AIAgent(this);
+        this.contestAiAgent = new ContestAIAgent(this);
         this.duelHistory = new DuelHistory(this);
         this.gameOverScreen = new GameOverScreen(this);
         this.sandboxDashboard = new SandboxDashboard(this);
@@ -425,6 +429,10 @@ export class Game extends Phaser.Scene {
             if (this.mode === 'ai') {
                 this.time.delayedCall(1200, () => {
                     this.aiAgent.runAITurn();
+                });
+            } else if (this.mode === 'ai_contest') {
+                this.time.delayedCall(1200, () => {
+                    this.contestAiAgent.runAITurn(this.turn);
                 });
             } else if (this.mode === 'test') {
                 if (this.dummyMode === 'passive') {
@@ -2139,6 +2147,8 @@ export class Game extends Phaser.Scene {
                         if (this.turn === 'player') {
                             this.phase = 'action';
                             this.enablePlayerControls(true);
+                        } else if (this.mode === 'ai_contest') {
+                            this.contestAiAgent.runAITurn(this.turn);
                         } else {
                             this.aiAgent.runAITurn();
                         }
@@ -2281,7 +2291,11 @@ export class Game extends Phaser.Scene {
                     this.duelHistory.logMessage('Waiting for opponent to discard...');
                 } else {
                     // AI automatically discards
-                    this.aiAgent.runAIDiscardAutomation(amount);
+                    if (this.mode === 'ai_contest') {
+                        this.contestAiAgent.runAIDiscardAutomation(pid, amount);
+                    } else {
+                        this.aiAgent.runAIDiscardAutomation(amount);
+                    }
                 }
             }
         } else {
@@ -2402,8 +2416,12 @@ export class Game extends Phaser.Scene {
         if (this.turn === 'player' && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
             this.phase = 'action';
             this.enablePlayerControls(true);
-        } else if (this.turn === 'ai' && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
-            this.aiAgent.runAITurn();
+        } else if (this.turn.startsWith('ai') && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
+            if (this.mode === 'ai_contest') {
+                this.contestAiAgent.runAITurn(this.turn);
+            } else {
+                this.aiAgent.runAITurn();
+            }
         } else {
             this.endTurn();
         }
