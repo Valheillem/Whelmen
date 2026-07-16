@@ -2228,7 +2228,12 @@ export class Game extends Phaser.Scene {
             } else {
                 // AI Reaction automation
                 this.time.delayedCall(1000, () => {
-                    const reactionSpell = this.aiAgent.calculateAIReaction(incomingSpell.damage);
+                    let reactionSpell;
+                    if (this.mode === 'ai_contest') {
+                        reactionSpell = this.contestAiAgent.calculateAIReaction(defender, incomingSpell.damage);
+                    } else {
+                        reactionSpell = this.aiAgent.calculateAIReaction(incomingSpell.damage);
+                    }
                     this.combat.resolveDefendingReaction(reactionSpell);
                 });
             }
