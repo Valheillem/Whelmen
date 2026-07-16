@@ -2117,8 +2117,8 @@ export class Game extends Phaser.Scene {
             if (spell.name === 'Cataclysm') { this.player.status.randomTargeting = 2; this.ai.status.randomTargeting = 2; }
         }
         
-        // Trigger reaction window if there's incoming damage and defender has active mana
-        if (finalDmg > 0 && defChar.board.length > 0) {
+        // Trigger reaction window if defender has active mana
+        if (defChar.board.length > 0) {
             this.combat.startReactionPhase(attacker, defender, { ...spell, damage: finalDmg, bypassShield: false });
         } else {
             // Direct hit
@@ -2828,7 +2828,7 @@ export class Game extends Phaser.Scene {
         const getZoneCoords = (zone, player) => {
             if (zone === 'deck') return { x: w / 2 - 180, y: h / 2 + 35 };
             if (zone === 'discard') return { x: w / 2 + 140, y: h / 2 + 35 };
-            if (zone === 'hand') return player === 'player' ? { x: w / 2, y: h - 115 } : { x: w / 2, y: 110 };
+            if (zone === 'hand') return player === 'player' ? { x: 200, y: h - 115 } : { x: 200, y: 110 };
             if (zone === 'board') return player === 'player' ? { x: w / 2, y: h / 2 + 120 } : { x: w / 2, y: h / 2 - 200 };
             return { x: w / 2, y: h / 2 };
         };
