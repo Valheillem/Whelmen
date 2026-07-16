@@ -1578,8 +1578,10 @@ export class Game extends Phaser.Scene {
         this.enablePlayerControls(false);
 
         // Calculate Start Position (from hand)
-        const startX = this.playerZone.x + 60 + index * 90;
-        const startY = this.playerZone.y + 80;
+        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const pGroup = this.playerGroups[localId];
+        const startX = pGroup.zone.x + 60 + index * 90;
+        const startY = pGroup.zone.y + 80;
 
         // Apply state changes to calculate target layout
         this.player.hand.splice(index, 1);
@@ -1589,10 +1591,8 @@ export class Game extends Phaser.Scene {
         const h = this.scale.height;
         const uniqueElements = [...new Set(this.player.board)];
         const elIndex = uniqueElements.indexOf(el);
-        const centerX = w / 2 - 20;
-        const spaceX = 75;
-        const targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
-        const targetY = h / 2 - 40 + 160;
+        const targetX = pGroup.zone.x + 60 + (this.player.board.length - 1) * 90;
+        const targetY = pGroup.zone.y - 30;
 
         // Create the phantom card sprite
         const phantom = this.add.image(startX, startY, `card_${el}`)
@@ -1600,8 +1600,8 @@ export class Game extends Phaser.Scene {
             .setDepth(100);
 
         // Hide the original card in hand immediately (if it hasn't been destroyed by render yet)
-        if (this.playerHandGroup) {
-            const handCards = this.playerHandGroup.getChildren();
+        if (pGroup.handGroup) {
+            const handCards = pGroup.handGroup.getChildren();
             if (handCards[index]) handCards[index].setVisible(false);
         }
 
@@ -2258,7 +2258,8 @@ export class Game extends Phaser.Scene {
     }
 
     discardCardFromZone(zone, index, who) {
-        if (who === 'player' && (this.phase === 'discard' || this.phase === 'discard_request_active') && this.cardsToDiscardCount > 0) {
+        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        if (who === localId && (this.phase === 'discard' || this.phase === 'discard_request_active') && this.cardsToDiscardCount > 0) {
             const char = this.player;
             let discarded;
             if (zone === 'hand') {
@@ -2764,11 +2765,17 @@ export class Game extends Phaser.Scene {
         }
         
         if (toStr === 'hand') {
-            if (who === 'player') this.playerIncomingHandCards = (this.playerIncomingHandCards || 0) + 1;
-            else this.aiIncomingHandCards = (this.aiIncomingHandCards || 0) + 1;
+            if (who === 'player') {
+                this.playerIncomingHandCards = (this.playerIncomingHandCards || 0) + 1;
+            } else {
+                this.aiIncomingHandCards = (this.aiIncomingHandCards || 0) + 1;
+            }
         } else if (toStr === 'board') {
-            if (who === 'player') this.playerIncomingBoardCards = (this.playerIncomingBoardCards || 0) + 1;
-            else this.aiIncomingBoardCards = (this.aiIncomingBoardCards || 0) + 1;
+            if (who === 'player') {
+                this.playerIncomingBoardCards = (this.playerIncomingBoardCards || 0) + 1;
+            } else {
+                this.aiIncomingBoardCards = (this.aiIncomingBoardCards || 0) + 1;
+            }
         }
         
         const w = this.scale.width;
@@ -2777,15 +2784,51 @@ export class Game extends Phaser.Scene {
         const getZoneCoords = (zone, player) => {
             if (zone === 'deck') return { x: w / 2 - 180, y: h / 2 + 35 };
             if (zone === 'discard') return { x: w / 2 + 140, y: h / 2 + 35 };
+            
+            // Map who parameter ('player' / 'ai') to a pid
+            let pid = player;
+            if (player === 'player') {
+                pid = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+            } else if (player === 'ai') {
+                pid = this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1];
+            }
+            // If they passed a direct pid (like guest1) it stays as is
+            
+            const char = this.players[pid];
+            const pGroup = this.playerGroups[pid];
+            if (!char || !pGroup || !pGroup.zone) return { x: w / 2, y: h / 2 };
+            
+            const pos = this.getPlayerPositionIndex(pid);
+            const zx = pGroup.zone.x;
+            const zy = pGroup.zone.y;
+            
             if (zone === 'hand') {
-                const char = player === 'player' ? this.player : this.ai;
                 const count = Math.max(0, char.hand.length - 1);
-                return player === 'player' ? { x: 60 + count * 90, y: h - 115 } : { x: 60 + count * 60, y: 110 };
+                let x = 0, y = 0;
+                const startX = 60;
+                const spaceX = pos === 0 ? 90 : 60;
+                if (pos === 0 || pos === 2) {
+                    x = zx + startX + count * spaceX;
+                    y = zy + (pos === 0 ? 80 : 0);
+                } else {
+                    y = zy + startX + count * spaceX;
+                    x = zx + (pos === 1 ? 0 : 0);
+                }
+                return { x, y };
             }
             if (zone === 'board') {
-                const char = player === 'player' ? this.player : this.ai;
                 const count = Math.max(0, char.board.length - 1);
-                return player === 'player' ? { x: w / 2 - 90 + count * 90, y: h / 2 + 120 } : { x: w / 2 - 90 + count * 90, y: h / 2 - 200 };
+                let x = 0, y = 0;
+                const startX = 60;
+                const spaceX = 90;
+                if (pos === 0 || pos === 2) {
+                    x = zx + startX + count * spaceX;
+                    y = zy + (pos === 0 ? -30 : 110);
+                } else {
+                    y = zy + startX + count * spaceX;
+                    x = zx + (pos === 1 ? 110 : -110);
+                }
+                return { x, y };
             }
             return { x: w / 2, y: h / 2 };
         };
