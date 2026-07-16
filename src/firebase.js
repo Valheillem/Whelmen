@@ -161,4 +161,4 @@ export async function deleteLobby(code) {
     await db.ref(`lobbies/${code}`).remove();
 }
 
-export { db, startLobbyGame };
+export { db };
