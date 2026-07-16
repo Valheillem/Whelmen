@@ -526,11 +526,11 @@ export class Game extends Phaser.Scene {
         }
     }
 
-    cleanupHandLimit(who) {
-        const char = who === 'player' ? this.player : this.ai;
+    cleanupHandLimit(pid) {
+        const char = this.players[pid];
         if (char.hand.length > char.maxHand) {
             const discardCount = char.hand.length - char.maxHand;
-            this.duelHistory.logMessage(`${who.toUpperCase()} discards ${discardCount} card(s) to match Hand Limit.`);
+            this.duelHistory.logMessage(`${pid.toUpperCase()} discards ${discardCount} card(s) to match Hand Limit.`);
             for (let i = 0; i < discardCount; i++) {
                 const discarded = char.hand.pop();
                 this.sharedDiscard.push(discarded);
@@ -539,16 +539,11 @@ export class Game extends Phaser.Scene {
             if (char.consecutiveDiscards >= 2) {
                 char.maxHand = Math.max(1, char.maxHand - 1);
                 char.consecutiveDiscards = 0;
-                this.duelHistory.logMessage(`OVERWHELMED! ${who.toUpperCase()}'s Max Hand Size decreases by 1!`);
+                this.duelHistory.logMessage(`OVERWHELMED! ${pid.toUpperCase()}'s Max Hand Size decreases by 1!`);
                 this.playSound('damage');
             }
-            if (who === 'player') {
-                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            } else {
-                this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-                this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-            }
+            this.updatePlayerHandDisplay(pid);
+            this.updatePlayerLifeDisplay(pid);
             this.updateDeckDiscardDisplay();
         } else {
             char.consecutiveDiscards = 0;
