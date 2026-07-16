@@ -1666,24 +1666,24 @@ export class Game extends Phaser.Scene {
         
         // Exact matching for curve math from hand display
         const count = this.player.hand.length; 
-        const spaceX = posIndex === 0 ? 90 : 60;
-        const totalW = Math.max(0, (count - 1) * spaceX);
+        const handSpaceX = posIndex === 0 ? 90 : 60;
+        const totalW = Math.max(0, (count - 1) * handSpaceX);
         const middle = (count - 1) / 2;
         const offset = index - middle;
         const curveOffset = Math.abs(offset) * Math.abs(offset) * 6;
         
         let relX = 0, relY = 0;
         if (posIndex === 0) {
-            relX = -totalW / 2 + index * spaceX;
+            relX = -totalW / 2 + index * handSpaceX;
             relY = -20 + curveOffset;
         } else if (posIndex === 2) {
-            relX = 150 - totalW / 2 + index * spaceX;
+            relX = 150 - totalW / 2 + index * handSpaceX;
             relY = 20 - curveOffset;
         } else if (posIndex === 1) {
-            relY = 150 - totalW / 2 + index * spaceX;
+            relY = 150 - totalW / 2 + index * handSpaceX;
             relX = -curveOffset;
         } else if (posIndex === 3) {
-            relY = 150 - totalW / 2 + index * spaceX;
+            relY = 150 - totalW / 2 + index * handSpaceX;
             relX = 80 + curveOffset;
         }
         
