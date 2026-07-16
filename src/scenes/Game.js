@@ -2120,7 +2120,7 @@ export class Game extends Phaser.Scene {
         } else {
             // Direct hit
             if (finalDrain > 0) {
-                this.forceDiscardRandom(defender, finalDrain);
+                this.forceDiscardRandom(defender, finalDrain, 'board');
             }
             
             if (finalDmg > 0) {
@@ -2234,7 +2234,7 @@ export class Game extends Phaser.Scene {
 
         // Apply deferred drain
         if (this.reactionTargetSpell.drain > 0) {
-            this.forceDiscardRandom(defender, this.reactionTargetSpell.drain);
+            this.forceDiscardRandom(defender, this.reactionTargetSpell.drain, 'board');
         }
     }
 

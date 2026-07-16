@@ -150,19 +150,20 @@ export class CombatSystem {
             this.scene.updateAIHandDisplay(); this.scene.updateAIBoardDisplay(); this.scene.updateAILifeDisplay();
         }
         
-        // Drain logic
-        if (finalDrain > 0) {
-            this.scene.forceDiscardRandom(defender, finalDrain, 'board');
-        }
+        // Drain logic deferred to after reaction phase
 
         if (isEmp) {
             this.scene.synergy.applyDeferredStatusEffects(spell.name, attChar, defChar);
         }
-        // Trigger reaction window if there's incoming damage and defender has active mana
-        if (finalDmg > 0 && defChar.board.length > 0) {
-            this.scene.startReactionPhase(attacker, defender, { ...spell, damage: finalDmg, bypassShield: false });
+        // Trigger reaction window if defender has active mana
+        if (defChar.board.length > 0) {
+            this.scene.startReactionPhase(attacker, defender, { ...spell, damage: finalDmg, bypassShield: false, drain: finalDrain });
         } else {
             // Direct hit
+            if (finalDrain > 0) {
+                this.scene.forceDiscardRandom(defender, finalDrain, 'board');
+            }
+            
             if (finalDmg > 0) {
                 if (defChar.status.retaliationDamage > 0) {
                     this.scene.forceDiscardRandom(attacker, 1);
@@ -265,6 +266,11 @@ export class CombatSystem {
         // Apply incoming damage minus final shield
         const finalDmg = this.scene.reactionTargetSpell.damage;
         this.scene.applyDamage(defender, finalDmg, this.scene.reactionTargetSpell.bypassShield || false);
+
+        // Apply deferred drain
+        if (this.scene.reactionTargetSpell.drain > 0) {
+            this.scene.forceDiscardRandom(defender, this.scene.reactionTargetSpell.drain, 'board');
+        }
     }
 
 
