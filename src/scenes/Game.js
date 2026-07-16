@@ -854,17 +854,6 @@ export class Game extends Phaser.Scene {
             char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
         } else {
             char.shieldT.setText('');
-        }
-    } else {
-                // Place above the AI hand (relative to aiZone) to mirror player layout
-                char.shieldG.fillRoundedRect(80, 0, 140, 24, 6);
-                char.shieldG.strokeRoundedRect(80, 0, 140, 24, 6);
-                char.shieldT.setPosition(90, 4);
-            }
-            char.shieldT.setText(`🛡️ SHIELD: ${char.shield}`);
-        } else {
-            char.shieldT.setText('');
-        }
     }
 
     drawDeckDiscardPiles() {
@@ -2581,12 +2570,13 @@ export class Game extends Phaser.Scene {
      * Refresh all UI elements to match current state.
      */
     refreshAllUI() {
-        this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-        this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-        this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-        this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-        this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-        this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+        this.playerIds.forEach(pid => {
+            this.updatePlayerHandDisplay(pid);
+            this.updatePlayerBoardDisplay(pid);
+            this.updatePlayerLifeDisplay(pid);
+            this.updateShieldDisplay(pid);
+        });
+        
         this.updateDeckDiscardDisplay();
         // Update cycle indicator rotation directly
         if (this.cycleContainer) {
@@ -2594,10 +2584,6 @@ export class Game extends Phaser.Scene {
             this.updateCycleDisplayColor(this.cycleElements[this.cycleIndex]);
         }
         this.updateComboPreview();
-
-        // Update shield visuals
-        this.updateShieldDisplay('player');
-        this.updateShieldDisplay('ai');
     }
 
     /**
@@ -2818,15 +2804,19 @@ export class Game extends Phaser.Scene {
             ease: 'Cubic.easeOut',
             onComplete: () => {
                 if (toStr === 'hand') {
-                    if (who === 'player') this.playerIncomingHandCards = Math.max(0, this.playerIncomingHandCards - 1);
-                    else this.aiIncomingHandCards = Math.max(0, this.aiIncomingHandCards - 1);
+                    if (who === 'player') {
+                        this.playerIncomingHandCards = Math.max(0, this.playerIncomingHandCards - 1);
+                    } else {
+                        this.aiIncomingHandCards = Math.max(0, this.aiIncomingHandCards - 1);
+                    }
                     this.updatePlayerHandDisplay(who);
-                    else this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
                 } else if (toStr === 'board') {
-                    if (who === 'player') this.playerIncomingBoardCards = Math.max(0, this.playerIncomingBoardCards - 1);
-                    else this.aiIncomingBoardCards = Math.max(0, this.aiIncomingBoardCards - 1);
-                    if (who === 'player') this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                    else this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+                    if (who === 'player') {
+                        this.playerIncomingBoardCards = Math.max(0, this.playerIncomingBoardCards - 1);
+                    } else {
+                        this.aiIncomingBoardCards = Math.max(0, this.aiIncomingBoardCards - 1);
+                    }
+                    this.updatePlayerBoardDisplay(who);
                 }
 
                 if (onComplete) onComplete();
@@ -2834,4 +2824,5 @@ export class Game extends Phaser.Scene {
             }
         });
     }
+}
 }
