@@ -742,9 +742,9 @@ export class Game extends Phaser.Scene {
             const pos = this.getPlayerPositionIndex(pid);
             
             let containerX = 0, containerY = 0;
-            if (pos === 0) { containerX = w / 2 - 40; containerY = h - 195; } // Bottom
+            if (pos === 0) { containerX = w / 2 - 20; containerY = h - 195; } // Bottom
             else if (pos === 1) { containerX = 40; containerY = h / 2 - 150; } // Left
-            else if (pos === 2) { containerX = w / 2 - 40; containerY = 30; } // Top (mirrors bottom)
+            else if (pos === 2) { containerX = w / 2 - 20; containerY = 30; } // Top (mirrors bottom)
             else if (pos === 3) { containerX = w - 195; containerY = h / 2 - 150; } // Right
 
             const zone = this.add.container(containerX, containerY);
@@ -765,12 +765,12 @@ export class Game extends Phaser.Scene {
             zone.add(char.nameHighlightG);
             
             const isLocal = pos === 0;
-            const displayName = isLocal ? 'YOU' : `PLAYER ${pid}`;
+            const displayName = isLocal ? '' : `PLAYER ${pid}`;
             let nx = 0, ny = 0;
-            if (pos === 0) { nx = -150; ny = 160; }
-            else if (pos === 1) { nx = -10; ny = -60; }
-            else if (pos === 2) { nx = -60; ny = -40; }
-            else if (pos === 3) { nx = 70; ny = -60; }
+            if (pos === 0) { nx = 0; ny = 0; }
+            else if (pos === 1) { nx = 10; ny = -180; }
+            else if (pos === 2) { nx = -160; ny = 10; }
+            else if (pos === 3) { nx = 30; ny = -180; }
 
             char.nameT = this.add.text(nx, ny, displayName, {
                 fontFamily: '"Outfit", sans-serif',
@@ -847,9 +847,9 @@ export class Game extends Phaser.Scene {
             const pos = this.getPlayerPositionIndex(pid);
             let sx = 0, sy = 0;
             if (pos === 0) { sx = 0; sy = 155; }
-            else if (pos === 1) { sx = 0; sy = -90; }
-            else if (pos === 2) { sx = -60; sy = -70; }
-            else if (pos === 3) { sx = 10; sy = -90; }
+            else if (pos === 1) { sx = 80; sy = -180; }
+            else if (pos === 2) { sx = -160; sy = 35; }
+            else if (pos === 3) { sx = 100; sy = -180; }
 
             char.shieldG.fillRoundedRect(sx, sy, 140, 24, 6);
             char.shieldG.strokeRoundedRect(sx, sy, 140, 24, 6);
@@ -1391,16 +1391,16 @@ export class Game extends Phaser.Scene {
                 angle = rotDeg;
             } else if (pos === 2) {
                 x = -totalW / 2 + index * spaceX;
-                y = 20 + curveY;
-                angle = 180 - rotDeg;
+                y = 20 - curveY;
+                angle = 180 + rotDeg;
             } else if (pos === 1) {
                 y = -totalW / 2 + index * spaceX;
-                x = 0 + curveY;
-                angle = 90 - rotDeg;
+                x = 30 + curveY;
+                angle = 90 + rotDeg;
             } else if (pos === 3) {
                 y = -totalW / 2 + index * spaceX;
-                x = 80 - curveY;
-                angle = -90 + rotDeg;
+                x = 50 - curveY;
+                angle = -90 - rotDeg;
             }
 
             const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
