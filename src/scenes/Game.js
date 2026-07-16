@@ -769,7 +769,7 @@ export class Game extends Phaser.Scene {
             let nx = 0, ny = 0;
             if (pos === 0) { nx = 0; ny = 0; }
             else if (pos === 1) { nx = 10; ny = -150; }
-            else if (pos === 2) { nx = -130; ny = 10; }
+            else if (pos === 2) { nx = -200; ny = 10; }
             else if (pos === 3) { nx = 30; ny = -150; }
 
             char.nameT = this.add.text(nx, ny, displayName, {
@@ -848,7 +848,7 @@ export class Game extends Phaser.Scene {
             let sx = 0, sy = 0;
             if (pos === 0) { sx = 0; sy = 155; }
             else if (pos === 1) { sx = 80; sy = -150; }
-            else if (pos === 2) { sx = -160; sy = 35; }
+            else if (pos === 2) { sx = -200; sy = 35; }
             else if (pos === 3) { sx = 100; sy = -150; }
 
             char.shieldG.fillRoundedRect(sx, sy, 140, 24, 6);
