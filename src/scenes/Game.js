@@ -988,7 +988,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // --- INCOMING SPELL PANEL ---
-        this.incomingSpellPanel = this.add.container(80, 200).setVisible(false);
+        this.incomingSpellPanel = this.add.container(w - 550, h - 330).setVisible(false);
         
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
