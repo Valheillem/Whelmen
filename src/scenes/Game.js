@@ -1628,6 +1628,14 @@ export class Game extends Phaser.Scene {
     updateComboPreview() {
         if (!this.primedSpellPanel) return;
 
+        // Display incoming spell if we're reacting
+        if ((this.phase === 'reaction' || this.phase === 'reaction_request_active') && this.reactionTargetSpell) {
+            this.incomingSpellPanel.setVisible(true);
+            this.updatePanelVisuals(true, this.reactionTargetSpell);
+        } else {
+            if (this.incomingSpellPanel) this.incomingSpellPanel.setVisible(false);
+        }
+
         if (this.selectedBoardMana.length === 0) {
             this.primedSpellPanel.setVisible(false);
             return;
