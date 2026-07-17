@@ -1983,8 +1983,26 @@ export class Game extends Phaser.Scene {
         const localPlayer = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
         const opponents = this.playerIds.filter(p => p !== localPlayer);
         
+        // Calculate synergy to determine if targeting is needed
+        const cycle = this.cycleElements[this.cycleIndex];
+        let isEmp = this.synergy.calculateSynergy(spell, cycle);
+        let finalDmg = spell.damage;
+        let finalDrain = spell.drain;
+        
+        if (isEmp) {
+            const overrides = this.synergy.getEmpoweredOverrides(spell.name);
+            if (overrides.damage) finalDmg = overrides.damage;
+            if (overrides.drain) finalDrain = overrides.drain;
+        }
+        
+        const requiresTarget = finalDmg > 0 || finalDrain > 0;
+        
         const finishCast = (targetId) => {
-            this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name} targeting ${targetId.toUpperCase()}!`);
+            if (requiresTarget) {
+                this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name} targeting ${targetId.toUpperCase()}!`);
+            } else {
+                this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name}!`);
+            }
             
             // Simple visual from local to target
             const w = this.scale.width;
@@ -2000,7 +2018,7 @@ export class Game extends Phaser.Scene {
             });
         };
 
-        if (opponents.length === 1) {
+        if (!requiresTarget || opponents.length === 1) {
             finishCast(opponents[0]);
         } else {
             // Need to select an opponent
