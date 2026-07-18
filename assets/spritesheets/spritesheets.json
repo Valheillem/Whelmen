@@ -1,0 +1,188 @@
+{
+    "earth_fissure": {
+        "frameWidth": 800,
+        "frameHeight": 480,
+        "frameCount": 8,
+        "originalName": "Earth Fissure"
+    },
+    "earth_spike": {
+        "frameWidth": 600,
+        "frameHeight": 480,
+        "frameCount": 12,
+        "originalName": "Earth Spike"
+    },
+    "fire_explosion": {
+        "frameWidth": 480,
+        "frameHeight": 480,
+        "frameCount": 12,
+        "originalName": "Fire Explosion"
+    },
+    "flame": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 12,
+        "originalName": "Flame"
+    },
+    "ground_hit": {
+        "frameWidth": 1200,
+        "frameHeight": 800,
+        "frameCount": 8,
+        "originalName": "Ground Hit"
+    },
+    "icons": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 6,
+        "originalName": "Icons"
+    },
+    "meteor": {
+        "frameWidth": 1024,
+        "frameHeight": 320,
+        "frameCount": 12,
+        "originalName": "Meteor"
+    },
+    "chemical_smoke": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 8,
+        "originalName": "Chemical Smoke"
+    },
+    "poisonous_smoke": {
+        "frameWidth": 640,
+        "frameHeight": 480,
+        "frameCount": 12,
+        "originalName": "Poisonous Smoke"
+    },
+    "smoke": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 10,
+        "originalName": "Smoke"
+    },
+    "smoke_blow": {
+        "frameWidth": 800,
+        "frameHeight": 240,
+        "frameCount": 12,
+        "originalName": "Smoke Blow"
+    },
+    "smoke_explosion": {
+        "frameWidth": 800,
+        "frameHeight": 800,
+        "frameCount": 16,
+        "originalName": "Smoke Explosion"
+    },
+    "smoke_spell": {
+        "frameWidth": 640,
+        "frameHeight": 320,
+        "frameCount": 10,
+        "originalName": "Smoke Spell"
+    },
+    "fire_arrow": {
+        "frameWidth": 600,
+        "frameHeight": 320,
+        "frameCount": 8,
+        "originalName": "Fire Arrow"
+    },
+    "fire_ball": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 8,
+        "originalName": "Fire Ball"
+    },
+    "fire_spell": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 8,
+        "originalName": "Fire Spell"
+    },
+    "water_arrow": {
+        "frameWidth": 480,
+        "frameHeight": 360,
+        "frameCount": 8,
+        "originalName": "Water Arrow"
+    },
+    "water_ball": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 12,
+        "originalName": "Water Ball"
+    },
+    "water_spell": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 8,
+        "originalName": "Water Spell"
+    },
+    "lightning_arrow": {
+        "frameWidth": 480,
+        "frameHeight": 360,
+        "frameCount": 12,
+        "originalName": "Lightning Arrow"
+    },
+    "lightning_spell": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 12,
+        "originalName": "Lightning Spell"
+    },
+    "lightning_strike": {
+        "frameWidth": 512,
+        "frameHeight": 640,
+        "frameCount": 12,
+        "originalName": "Lightning Strike"
+    },
+    "typhoon": {
+        "frameWidth": 800,
+        "frameHeight": 800,
+        "frameCount": 12,
+        "originalName": "Typhoon"
+    },
+    "wind_ball": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 8,
+        "originalName": "Wind Ball"
+    },
+    "wind_spell": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 12,
+        "originalName": "Wind Spell"
+    },
+    "earth_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 8,
+        "originalName": "Earth Shield"
+    },
+    "fire_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 8,
+        "originalName": "Fire Shield"
+    },
+    "leaf_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 16,
+        "originalName": "Leaf Shield"
+    },
+    "lightning_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 12,
+        "originalName": "Lightning Shield"
+    },
+    "water_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 8,
+        "originalName": "Water Shield"
+    },
+    "wind_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 4,
+        "originalName": "Wind Shield"
+    }
+}
