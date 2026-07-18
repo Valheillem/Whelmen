@@ -295,7 +295,14 @@ export class Game extends Phaser.Scene {
         
         this.updateTurnHighlights();
 
-        // Apply start of turn effects BEFORE decrementing
+        // C17 fix: decrement THIS player's status counters at the start of their own turn.
+        // Previously this happened in startRound() for ALL players at once, which was unfair
+        // (the first player's statuses lasted longer than the last player's).
+        for (let k in char.status) {
+            if (char.status[k] > 0) char.status[k]--;
+        }
+
+        // Apply start of turn effects AFTER decrementing
         if (char.status.everyoneDraw3 > 0) {
             for(let i=0;i<3;i++) { 
                 this.playerIds.forEach(pid => {
@@ -451,7 +458,7 @@ export class Game extends Phaser.Scene {
     }
 
     startRound() {
-        // Aegis: Rotate Shields
+        // Aegis: Rotate Shields (round-level event — stays here)
         if (this.playerIds.some(pid => this.players[pid].status.rotateShields > 0)) {
             // Rotate clockwise
             const firstShield = this.players[this.playerIds[0]].shield;
@@ -463,14 +470,8 @@ export class Game extends Phaser.Scene {
             this.playerIds.forEach(pid => this.players[pid].status.rotateShields = 0);
             this.duelHistory.logMessage("Aegis rotates the Shields clockwise!");
         }
-
-        // Decrease statuses at the start of a new round
-        this.playerIds.forEach(pid => {
-            const char = this.players[pid];
-            for (let k in char.status) {
-                if (char.status[k] > 0) char.status[k]--;
-            }
-        });
+        // C17 fix: per-player status decrements moved to startTurn() so each player's
+        // status expires relative to their own turn, not the global round boundary.
     }
 
     endTurn() {
@@ -2401,8 +2402,10 @@ export class Game extends Phaser.Scene {
             this.updateShieldDisplay(who);
         }
 
-        // C15 fix: clear a one-shot temporary shield using the proper flag
-        // instead of the unreliable `shield > 90` magic number heuristic
+        // C15: temporaryShield flag — reserved for future spells that grant a one-shot shield.
+        // No current spell sets this flag; the old `shield > 90` guard it replaced was dead code
+        // (max shield from any spell is 8). To use: set `char.temporaryShield = true` when
+        // granting the shield so it is cleared here after absorbing its first hit.
         if (char.temporaryShield) {
             char.shield = 0;
             char.temporaryShield = false;

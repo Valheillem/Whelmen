@@ -29,23 +29,25 @@ export class SynergySystem {
     }
 
     applyDeferredStatusEffects(spellName, attChar, defChar) {
-        if (spellName === 'Ignition') attChar.status.bonusManaPlays = 2;
-        if (spellName === 'Haze') { this.scene.playerIds.forEach(pid => this.scene.players[pid].status.loseManaOnDraw = 2); }
-        if (spellName === 'Quake') attChar.status.shieldFailChance = 2;
-        if (spellName === 'Dust') { this.scene.playerIds.forEach(pid => this.scene.players[pid].status.missChance = 2); }
-        if (spellName === 'Typhoon') attChar.status.autoPlayDraw = 2;
-        if (spellName === 'Enrich') { this.scene.playerIds.forEach(pid => this.scene.players[pid].status.everyoneDraw3 = 1); }
-        if (spellName === 'Firestorm') attChar.status.manaPlayDamage = 2;
-        if (spellName === 'Fortress') attChar.status.extraDrawIfShield = 1;
-        if (spellName === 'Quagmire') attChar.status.redrawMana = 1;
-        if (spellName === 'Surge') defChar.status.oppSpellReflect = 2;
-        if (spellName === 'Crucible') attChar.status.retaliationDamage = 1;
-        if (spellName === 'Hurricane') defChar.status.noDrawDebuff = 2;
-        if (spellName === 'Flood') defChar.status.oppDraw4 = 1;
-        if (spellName === 'Tower') defChar.status.drainFailChance = 2;
-        if (spellName === 'Mudslide') { this.scene.playerIds.forEach(pid => this.scene.players[pid].status.discardReplaceHand = 1); }
-        if (spellName === 'Tide') { this.scene.playerIds.forEach(pid => this.scene.players[pid].status.rotateHands = 1); }
-        if (spellName === 'Aegis') { this.scene.playerIds.forEach(pid => this.scene.players[pid].status.rotateShields = 1); }
-        if (spellName === 'Cataclysm') { this.scene.playerIds.forEach(pid => this.scene.players[pid].status.randomTargeting = 2); }
+        // M2 fix: use Math.max(current, newValue) so re-casting an empowered spell
+        // refreshes the status timer rather than stacking it indefinitely.
+        if (spellName === 'Ignition') attChar.status.bonusManaPlays = Math.max(attChar.status.bonusManaPlays, 2);
+        if (spellName === 'Haze') { this.scene.playerIds.forEach(pid => { this.scene.players[pid].status.loseManaOnDraw = Math.max(this.scene.players[pid].status.loseManaOnDraw, 2); }); }
+        if (spellName === 'Quake') attChar.status.shieldFailChance = Math.max(attChar.status.shieldFailChance, 2);
+        if (spellName === 'Dust') { this.scene.playerIds.forEach(pid => { this.scene.players[pid].status.missChance = Math.max(this.scene.players[pid].status.missChance, 2); }); }
+        if (spellName === 'Typhoon') attChar.status.autoPlayDraw = Math.max(attChar.status.autoPlayDraw, 2);
+        if (spellName === 'Enrich') { this.scene.playerIds.forEach(pid => { this.scene.players[pid].status.everyoneDraw3 = Math.max(this.scene.players[pid].status.everyoneDraw3, 1); }); }
+        if (spellName === 'Firestorm') attChar.status.manaPlayDamage = Math.max(attChar.status.manaPlayDamage, 2);
+        if (spellName === 'Fortress') attChar.status.extraDrawIfShield = Math.max(attChar.status.extraDrawIfShield, 1);
+        if (spellName === 'Quagmire') attChar.status.redrawMana = Math.max(attChar.status.redrawMana, 1);
+        if (spellName === 'Surge') defChar.status.oppSpellReflect = Math.max(defChar.status.oppSpellReflect, 2);
+        if (spellName === 'Crucible') attChar.status.retaliationDamage = Math.max(attChar.status.retaliationDamage, 1);
+        if (spellName === 'Hurricane') defChar.status.noDrawDebuff = Math.max(defChar.status.noDrawDebuff, 2);
+        if (spellName === 'Flood') defChar.status.oppDraw4 = Math.max(defChar.status.oppDraw4, 1);
+        if (spellName === 'Tower') defChar.status.drainFailChance = Math.max(defChar.status.drainFailChance, 2);
+        if (spellName === 'Mudslide') { this.scene.playerIds.forEach(pid => { this.scene.players[pid].status.discardReplaceHand = Math.max(this.scene.players[pid].status.discardReplaceHand, 1); }); }
+        if (spellName === 'Tide') { this.scene.playerIds.forEach(pid => { this.scene.players[pid].status.rotateHands = Math.max(this.scene.players[pid].status.rotateHands, 1); }); }
+        if (spellName === 'Aegis') { this.scene.playerIds.forEach(pid => { this.scene.players[pid].status.rotateShields = Math.max(this.scene.players[pid].status.rotateShields, 1); }); }
+        if (spellName === 'Cataclysm') { this.scene.playerIds.forEach(pid => { this.scene.players[pid].status.randomTargeting = Math.max(this.scene.players[pid].status.randomTargeting, 2); }); }
     }
 }

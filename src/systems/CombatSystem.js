@@ -17,6 +17,13 @@ export class CombatSystem {
             this.scene.manaPlacedThisTurn = false; 
             this.scene.spellCastThisTurn = false;
             this.scene.logMessage(`${this.scene.turn.toUpperCase()} gets another action!`);
+            // M3 fix: don't grant an extra action to a player who was eliminated during resolution
+            const currentActor = this.scene.players[this.scene.turn];
+            const isAlive = currentActor && (currentActor.hand.length + currentActor.board.length) > 0;
+            if (!isAlive) {
+                this.scene.checkTurnContinuation();
+                return;
+            }
             if (this.scene.turn === 'player') {
                 this.scene.phase = 'action';
                 this.scene.enablePlayerControls(true);
@@ -51,7 +58,11 @@ export class CombatSystem {
     initiateAttack(attacker, defender, spell) {
         let defChar = this.scene.players[defender];
         let attChar = this.scene.players[attacker];
+        // C18 fix: snapshot the cycle element NOW before any force_cycle spell mutates it.
+        // resolveDefendingReaction reads this snapshot so reaction synergy isn't affected
+        // by a force_cycle cast on the same turn.
         const cycle = this.scene.cycleElements[this.scene.cycleIndex];
+        this.scene.reactionCycleSnapshot = cycle;
 
         // Status: Random Targeting
         if (attChar.status.randomTargeting > 0) {
@@ -241,8 +252,9 @@ export class CombatSystem {
         if (reactionSpell) {
             this.scene.logMessage(`${defender.toUpperCase()} casts reaction: ${reactionSpell.name}!`);
 
-            // Apply synergy using the new three-way system
-            const cycle = this.scene.cycleElements[this.scene.cycleIndex];
+            // C18 fix: use the pre-force_cycle snapshot so a Tempest/Pillar/Blaze/Deluge cast
+            // this turn doesn't grant the defender an unintended empowered reaction bonus
+            const cycle = this.scene.reactionCycleSnapshot || this.scene.cycleElements[this.scene.cycleIndex];
             let isEmp = false;
             if (reactionSpell.synergyType === 'constructive' && cycle === reactionSpell.element) isEmp = true;
             else if (reactionSpell.synergyType === 'destructive' && cycle !== reactionSpell.element && reactionSpell.combo.includes(cycle)) isEmp = true;
@@ -265,6 +277,11 @@ export class CombatSystem {
                 if (defChar.status.shieldFailChance > 0 && Math.random() < 0.5) {
                     this.scene.logMessage(`${defender.toUpperCase()}'s Reaction Shield failed due to Quake!`);
                 } else {
+                    // C16 fix: apply shieldDamageDebuff to reaction shields (was missing, inconsistent with initiateAttack)
+                    if (defChar.status.shieldDamageDebuff > 0) {
+                        this.scene.forceDiscardRandom(defender, 1);
+                        this.scene.logMessage(`${defender.toUpperCase()} takes 1 damage from unstable reaction shield!`);
+                    }
                     defChar.shield += rShield;
                     this.scene.updateShieldDisplay(defender);
                     this.scene.logMessage(`${defender.toUpperCase()} gains ${rShield} Reaction Shield.`);
@@ -281,14 +298,18 @@ export class CombatSystem {
         }
 
         // Retaliaton damage: fires when defender has retaliationDamage status
-        if (defChar.status.retaliationDamage > 0) {
+        // M3 fix: only retaliate if the defender is still alive (hasn't been knocked out by counter-damage)
+        const defIsAlive = (defChar.hand.length + defChar.board.length) > 0;
+        if (defChar.status.retaliationDamage > 0 && defIsAlive) {
             this.scene.forceDiscardRandom(attacker, 3);
             this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
         }
 
         // Apply incoming damage minus final shield
         const finalDmg = this.scene.reactionTargetSpell.damage;
-        if (finalDmg > 0 && attChar.status.oppSpellReflect > 0) {
+        // M3 fix: only apply incoming damage if the attacker is still alive
+        const attIsAlive = (attChar.hand.length + attChar.board.length) > 0;
+        if (finalDmg > 0 && attChar.status.oppSpellReflect > 0 && attIsAlive) {
             this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
             this.applyDamage(attacker, finalDmg, false); // C5 fix: use this.applyDamage
         }
@@ -327,8 +348,10 @@ export class CombatSystem {
             this.scene.updateShieldDisplay(who);
         }
 
-        // C15 fix: clear a one-shot temporary shield (set by Fortress/Pillar when empowered)
-        // using the proper flag instead of the unreliable `shield > 90` heuristic
+        // C15: temporaryShield flag — reserved for future spells that grant a one-shot shield
+        // (e.g. a hypothetical 'Giant Fortress' that should vanish after absorbing one hit).
+        // No current spell sets this flag, so this block never fires today. When a future spell
+        // needs a temporary shield, set `char.temporaryShield = true` alongside the shield grant.
         if (char.temporaryShield) {
             char.shield = 0;
             char.temporaryShield = false;

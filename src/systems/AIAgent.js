@@ -290,8 +290,18 @@ export class AIAgent {
             if (this.scene.player.life <= 4) {
                 score += spell.damage * 15; // Go for the kill
             }
-            
-            score += spell.combo.length; 
+
+            // M1 fix: penalise spells that cost more board mana than necessary.
+            // Without this the AI would always prefer 3-card spells even when a 2-card
+            // spell is comparably effective, burning mana it needs for future reactions.
+            const comboCost = spell.combo ? spell.combo.length : 1;
+            score -= comboCost * 3; // 3-point penalty per mana card spent
+
+            // M2 fix: cap the total score so extreme situational multipliers don't
+            // produce absurd values that warp all other comparisons.
+            score = Math.min(score, 200);
+
+            score += spell.combo.length; // original tie-breaker (prefer longer combos if equal) — kept but now after cap
         }
         
         return score;
