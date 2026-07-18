@@ -103,6 +103,7 @@ export class SpellEffectsPlayer {
         else if (safeElement === 'air') this.scene.playSound('air');
 
         const color = ELEMENT_COLORS[element] || 0xffffff;
+        const LIFESPAN = 600;
 
         const emitter = this.scene.add.particles(0, 0, 'star', {
             x: x,
@@ -112,11 +113,16 @@ export class SpellEffectsPlayer {
             scale: { start: 0.6, end: 0 },
             tint: color,
             alpha: { start: 1, end: 0 },
-            lifespan: 600,
+            lifespan: LIFESPAN,
             gravityY: 400, // Particles fall down
             blendMode: 'ADD'
         });
         emitter.explode(15);
+
+        // C11 fix: destroy the one-shot emitter after all particles have expired
+        this.scene.time.delayedCall(LIFESPAN + 100, () => {
+            if (emitter && emitter.destroy) emitter.destroy();
+        });
     }
     
     // Stubs for future hooks

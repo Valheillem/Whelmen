@@ -614,13 +614,15 @@ export class Game extends Phaser.Scene {
                 return true;
             }
 
-            this.phase = 'gameover';
-            this.enablePlayerControls(false);
-            this.gameOverScreen.showGameOver(who === 'player' ? 'DEFEAT' : 'VICTORY');
-
-            // ONLINE: sync game over state so opponent sees result
-            if (this.mode === 'online') {
-                this.onlineManager.syncToFirebase('gameover');
+            // C3 fix: Don't immediately call showGameOver here — that was premature in FFA
+            // (ai_contest) where multiple players can still be alive. Just log elimination
+            // and return true; endTurn() already handles the final win check via
+            // `this.playerIds.length <= 1` after filtering out dead players.
+            const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+            if (who === localId) {
+                this.duelHistory.logMessage(`--- YOU HAVE BEEN ELIMINATED ---`);
+            } else {
+                this.duelHistory.logMessage(`--- ${who.toUpperCase()} HAS BEEN ELIMINATED ---`);
             }
             return true;
         }
@@ -2399,10 +2401,14 @@ export class Game extends Phaser.Scene {
             this.updateShieldDisplay(who);
         }
 
-        // Clean giant fortress temporary shield
-        
-        if (char.shield > 90) char.shield = 0;
+        // C15 fix: clear a one-shot temporary shield using the proper flag
+        // instead of the unreliable `shield > 90` magic number heuristic
+        if (char.temporaryShield) {
+            char.shield = 0;
+            char.temporaryShield = false;
+        }
         this.updateShieldDisplay(who);
+
 
         if (amount > 0) {
             this.duelHistory.logMessage(`${who.toUpperCase()} is hit for ${amount} DMG!`);
@@ -3105,5 +3111,42 @@ export class Game extends Phaser.Scene {
                 card.destroy();
             }
         });
+    }
+
+    /**
+     * C14 — Scene lifecycle cleanup.
+     * Called by Phaser automatically when this scene stops (scene.start, scene.stop, etc.).
+     * Prevents Firebase listeners, pending tweens, and particle emitters from leaking
+     * into the next scene or a fresh game session.
+     */
+    shutdown() {
+        // Stop Firebase listener so it doesn't fire into a dead scene
+        if (this.onlineManager) {
+            this.onlineManager.cleanupOnline();
+        }
+
+        // Stop all running tweens (prevents callbacks firing into destroyed objects)
+        this.tweens.killAll();
+
+        // Stop and destroy all particle emitters created for spell effects
+        if (this.spellEffects && this.spellEffects.emitters) {
+            Object.values(this.spellEffects.emitters).forEach(emitter => {
+                if (emitter && emitter.stop) emitter.stop();
+                if (emitter && emitter.destroy) emitter.destroy();
+            });
+        }
+
+        // Clean up any active target-selection group
+        if (this.targetSelectionGroup) {
+            this.targetSelectionGroup.destroy(true);
+            this.targetSelectionGroup = null;
+        }
+
+        // Restore menu overlay visibility for the Start scene
+        const menuOverlay = document.getElementById('main-menu-overlay');
+        if (menuOverlay) menuOverlay.classList.remove('hidden');
+
+        // Restore game-body class
+        document.body.classList.remove('in-game');
     }
 }

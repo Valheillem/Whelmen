@@ -327,9 +327,12 @@ export class CombatSystem {
             this.scene.updateShieldDisplay(who);
         }
 
-        // Clean giant fortress temporary shield
-        if (who === (this.scene.myRole === "host" || this.scene.mode !== "online" ? "player" : this.scene.myRole) && char.shield > 90) char.shield = 0;
-        if (who === 'ai' && char.shield > 90) char.shield = 0;
+        // C15 fix: clear a one-shot temporary shield (set by Fortress/Pillar when empowered)
+        // using the proper flag instead of the unreliable `shield > 90` heuristic
+        if (char.temporaryShield) {
+            char.shield = 0;
+            char.temporaryShield = false;
+        }
         this.scene.updateShieldDisplay(who);
 
         if (amount > 0) {

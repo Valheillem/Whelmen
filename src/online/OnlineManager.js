@@ -63,17 +63,30 @@ export class OnlineManager {
  async syncToFirebase(actionType) {
         if (this.scene.mode !== 'online' || !this.scene.lobbyCode) return;
 
-        try {
-            const state = this.serializeState();
-            const ref = firebase.database().ref(`lobbies/${this.scene.lobbyCode}`);
-            await ref.update({
-                gameState: state,
-                lastActionBy: this.scene.myRole,
-                status: this.scene.phase === 'gameover' ? 'finished' : 'playing'
-            });
-        } catch (err) {
-            console.error('[Whelmen Online] Sync error:', err);
-            this.scene.duelHistory.logMessage('⚠ Network sync error. Retrying...');
+        // M4 fix: real exponential-backoff retry (was just logging "Retrying..." with no actual retry)
+        const MAX_ATTEMPTS = 3;
+        let delay = 500; // ms
+
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                const state = this.serializeState();
+                const ref = firebase.database().ref(`lobbies/${this.scene.lobbyCode}`);
+                await ref.update({
+                    gameState: state,
+                    lastActionBy: this.scene.myRole,
+                    status: this.scene.phase === 'gameover' ? 'finished' : 'playing'
+                });
+                return; // success — exit retry loop
+            } catch (err) {
+                console.error(`[Whelmen Online] Sync error (attempt ${attempt}/${MAX_ATTEMPTS}):`, err);
+                if (attempt < MAX_ATTEMPTS) {
+                    this.scene.duelHistory.logMessage(`⚠ Network error. Retrying in ${delay / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2; // exponential backoff
+                } else {
+                    this.scene.duelHistory.logMessage('⚠ Network sync failed after 3 attempts. Check your connection.');
+                }
+            }
         }
     }
 

@@ -107,6 +107,10 @@ export async function joinLobby(code, guestId) {
         // Note: we don't set status to ready immediately, host starts the game
     });
 
+    // C13 fix: add onDisconnect hook for guest so host gets notified if guest closes tab
+    // (host already has this from createLobby; guests were missing it)
+    ref.child('status').onDisconnect().set('abandoned');
+
     return data;
 }
 
