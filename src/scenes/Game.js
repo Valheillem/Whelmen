@@ -52,9 +52,37 @@ export class Game extends Phaser.Scene {
         this.load.image('sigil', './assets/WHELMEN_sigil.png');
 
         // Preload Spell Effects Spritesheets
-        this.load.json('spritesheets_meta', 'assets/spritesheets/spritesheets.json');
-        this.load.spritesheet('fire_ball', 'assets/spritesheets/fire_ball.png', { frameWidth: 640, frameHeight: 640 });
-        this.load.spritesheet('fire_explosion', 'assets/spritesheets/fire_explosion.png', { frameWidth: 480, frameHeight: 480 });
+        this.spriteMeta = [
+            { key: 'earth_fissure', w: 800, h: 480, f: 8 },
+            { key: 'earth_spike', w: 600, h: 480, f: 12 },
+            { key: 'ground_hit', w: 1200, h: 800, f: 8 },
+            { key: 'meteor', w: 1024, h: 320, f: 12 },
+            { key: 'earth_shield', w: 720, h: 720, f: 8 },
+            { key: 'leaf_shield', w: 720, h: 720, f: 16 },
+            { key: 'fire_arrow', w: 600, h: 320, f: 8 },
+            { key: 'fire_ball', w: 640, h: 640, f: 8 },
+            { key: 'fire_spell', w: 640, h: 360, f: 8 },
+            { key: 'fire_explosion', w: 480, h: 480, f: 12 },
+            { key: 'flame', w: 640, h: 640, f: 12 },
+            { key: 'fire_shield', w: 720, h: 720, f: 8 },
+            { key: 'water_arrow', w: 480, h: 360, f: 8 },
+            { key: 'water_ball', w: 640, h: 640, f: 12 },
+            { key: 'water_spell', w: 640, h: 360, f: 8 },
+            { key: 'water_shield', w: 720, h: 720, f: 8 },
+            { key: 'wind_ball', w: 640, h: 640, f: 8 },
+            { key: 'wind_spell', w: 640, h: 360, f: 12 },
+            { key: 'typhoon', w: 800, h: 800, f: 12 },
+            { key: 'smoke_blow', w: 800, h: 240, f: 12 },
+            { key: 'smoke_explosion', w: 800, h: 800, f: 16 },
+            { key: 'chemical_smoke', w: 640, h: 360, f: 8 },
+            { key: 'poisonous_smoke', w: 640, h: 480, f: 12 },
+            { key: 'lightning_arrow', w: 480, h: 360, f: 12 },
+            { key: 'lightning_strike', w: 512, h: 640, f: 12 }
+        ];
+        
+        this.spriteMeta.forEach(meta => {
+            this.load.spritesheet(meta.key, `assets/spritesheets/${meta.key}.png`, { frameWidth: meta.w, frameHeight: meta.h });
+        });
     }
 
     createCardCanvas(key, w, h, drawFn) {
@@ -106,21 +134,18 @@ export class Game extends Phaser.Scene {
         });
 
         // Register Spell Animations
-        if (!this.anims.exists('anim_fire_ball')) {
-            this.anims.create({
-                key: 'anim_fire_ball',
-                frames: this.anims.generateFrameNumbers('fire_ball', { start: 0, end: 7 }),
-                frameRate: 15,
-                repeat: -1
-            });
-        }
-        if (!this.anims.exists('anim_fire_explosion')) {
-            this.anims.create({
-                key: 'anim_fire_explosion',
-                frames: this.anims.generateFrameNumbers('fire_explosion', { start: 0, end: 11 }),
-                frameRate: 20,
-                repeat: 0,
-                hideOnComplete: true
+        if (this.spriteMeta) {
+            this.spriteMeta.forEach(meta => {
+                if (!this.anims.exists(`anim_${meta.key}`)) {
+                    const isLooping = meta.key.includes('shield') || meta.key.includes('ball') || meta.key.includes('arrow');
+                    this.anims.create({
+                        key: `anim_${meta.key}`,
+                        frames: this.anims.generateFrameNumbers(meta.key, { start: 0, end: meta.f - 1 }),
+                        frameRate: 15,
+                        repeat: isLooping ? -1 : 0,
+                        hideOnComplete: !isLooping
+                    });
+                }
             });
         }
 
