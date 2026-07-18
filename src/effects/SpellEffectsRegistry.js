@@ -2,8 +2,8 @@ export const SPELL_EFFECTS = {
     // TIER 1 (Sprite)
     'Spark': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        projectile: { color: 0xff4400, trailParticles: 'fire', size: 12, speed: 500, shape: 'circle' },
-        impact: { screenShake: { intensity: 2, duration: 100 }, flash: 0xff2200, sparks: 10 },
+        projectile: { animKey: 'anim_fire_ball', size: 64, speed: 500, shape: 'sprite' },
+        impact: { animKey: 'anim_fire_explosion', screenShake: { intensity: 2, duration: 100 }, flash: 0xff2200, sparks: 10 },
         sound: { type: 'fire' }
     },
     'Breeze': {

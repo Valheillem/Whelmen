@@ -50,6 +50,11 @@ export class Game extends Phaser.Scene {
         this.load.image('icon_air', 'assets/icons/Air.png');
         this.load.image('game-bg', './assets/WHELMEN_background_horizontal.png');
         this.load.image('sigil', './assets/WHELMEN_sigil.png');
+
+        // Preload Spell Effects Spritesheets
+        this.load.json('spritesheets_meta', 'assets/spritesheets/spritesheets.json');
+        this.load.spritesheet('fire_ball', 'assets/spritesheets/fire_ball.png', { frameWidth: 640, frameHeight: 640 });
+        this.load.spritesheet('fire_explosion', 'assets/spritesheets/fire_explosion.png', { frameWidth: 480, frameHeight: 480 });
     }
 
     createCardCanvas(key, w, h, drawFn) {
@@ -99,6 +104,25 @@ export class Game extends Phaser.Scene {
             ctx.textBaseline = 'middle';
             ctx.fillText('✦', cardWidth / 2, cardHeight / 2);
         });
+
+        // Register Spell Animations
+        if (!this.anims.exists('anim_fire_ball')) {
+            this.anims.create({
+                key: 'anim_fire_ball',
+                frames: this.anims.generateFrameNumbers('fire_ball', { start: 0, end: 7 }),
+                frameRate: 15,
+                repeat: -1
+            });
+        }
+        if (!this.anims.exists('anim_fire_explosion')) {
+            this.anims.create({
+                key: 'anim_fire_explosion',
+                frames: this.anims.generateFrameNumbers('fire_explosion', { start: 0, end: 11 }),
+                frameRate: 20,
+                repeat: 0,
+                hideOnComplete: true
+            });
+        }
 
         // Fire Card
         this.createCardCanvas('card_fire', cardWidth, cardHeight, (ctx) => {

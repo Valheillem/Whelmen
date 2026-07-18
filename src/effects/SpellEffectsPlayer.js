@@ -48,12 +48,30 @@ export class SpellEffectsPlayer {
             this.scene.playSound(element === 'earth' ? 'shield' : element);
         }
         
-        let visual = this.scene.add.circle(startX, startY, projConfig.size || 20, projConfig.color);
-        visual.setStrokeStyle(4, 0xffffff);
+        let visual;
+        let isSprite = projConfig.shape === 'sprite' || projConfig.animKey;
+
+        if (isSprite) {
+            visual = this.scene.add.sprite(startX, startY, 'fire_ball'); // placeholder texture until play
+            visual.play(projConfig.animKey);
+            
+            // Calculate scale to fit 64x64 baseline based on the texture's original size
+            // For fire_ball it's 640x640, so scale will be 0.1
+            const baseSize = projConfig.size || 64;
+            visual.displayWidth = baseSize;
+            visual.displayHeight = baseSize;
+
+            // Rotate to face target
+            const angle = Phaser.Math.Angle.Between(startX, startY, endX, endY);
+            visual.setRotation(angle);
+        } else {
+            visual = this.scene.add.circle(startX, startY, projConfig.size || 20, projConfig.color);
+            visual.setStrokeStyle(4, 0xffffff);
+        }
 
         // Dynamic tail particle flow
         const emitter = this.emitters[element] || this.emitters['air'];
-        if (emitter) {
+        if (emitter && !isSprite) { // Avoid default tail for rich sprites for now
             emitter.startFollow(visual);
             emitter.start();
         }
@@ -66,7 +84,7 @@ export class SpellEffectsPlayer {
             ease: 'Quad.easeOut',
             onComplete: () => {
                 visual.destroy();
-                if (emitter) {
+                if (emitter && !isSprite) {
                     emitter.stop();
                     emitter.explode(25, endX, endY);
                 }
@@ -81,6 +99,20 @@ export class SpellEffectsPlayer {
         this.scene.playSound('hit');
         const impact = effect.impact;
         
+        if (impact.animKey) {
+            let impactSprite = this.scene.add.sprite(x, y, 'fire_explosion');
+            
+            // Base size for impacts can be a bit larger, e.g. 128
+            const impactSize = impact.size || 128;
+            impactSprite.displayWidth = impactSize;
+            impactSprite.displayHeight = impactSize;
+            
+            impactSprite.play(impact.animKey);
+            impactSprite.on('animationcomplete', () => {
+                impactSprite.destroy();
+            });
+        }
+
         if (impact.screenShake) {
             this.scene.cameras.main.shake(impact.screenShake.duration, impact.screenShake.intensity * 0.01);
         }
