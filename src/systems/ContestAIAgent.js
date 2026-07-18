@@ -27,6 +27,13 @@ export class ContestAIAgent {
                     this.scene.logMessage(`${aiId.toUpperCase()}'s mana play deals 3 damage to ${randomOpponent.toUpperCase()}!`);
                 }
             }
+            // C7 Surge fix: check if any opponent has oppManaPlayDamage active from Surge
+            const surgeOpponents = this.scene.playerIds.filter(id => id !== aiId && this.scene.players[id].status.oppManaPlayDamage > 0);
+            surgeOpponents.forEach(oppId => {
+                this.scene.players[oppId].status.oppManaPlayDamage = 0;
+                this.scene.forceDiscardRandom(aiId, 3);
+                this.scene.logMessage(`Surge punishes ${aiId.toUpperCase()}'s mana play for 3 damage!`);
+            });
             
             this.scene.updatePlayerHandDisplay(aiId);
             this.scene.updatePlayerBoardDisplay(aiId);
@@ -200,11 +207,14 @@ export class ContestAIAgent {
 
         for (let i = 0; i < amount; i++) {
             // Prefer discarding from board mana first if excess, then hand
+            // C10 fix: guard against popping from empty arrays (hand.pop() returns undefined if empty)
+            let burned;
             if (this.scene.players[aiId].board.length > 1) {
-                const burned = this.scene.players[aiId].board.pop();
-                this.scene.sharedDiscard.push(burned);
-            } else {
-                const burned = this.scene.players[aiId].hand.pop();
+                burned = this.scene.players[aiId].board.pop();
+            } else if (this.scene.players[aiId].hand.length > 0) {
+                burned = this.scene.players[aiId].hand.pop();
+            }
+            if (burned !== undefined) {
                 this.scene.sharedDiscard.push(burned);
             }
             this.scene.playSound('fire');

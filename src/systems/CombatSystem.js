@@ -179,13 +179,13 @@ export class CombatSystem {
             if (finalDmg > 0) {
                 if (attChar.status.oppSpellReflect > 0) {
                     this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
-                    this.applyDamage(attacker, finalDmg, false);
+                    this.applyDamage(attacker, finalDmg, false); // C5 fix: use this.applyDamage, not this.scene.applyDamage
                 }
                 if (defChar.status.retaliationDamage > 0) {
                     this.scene.forceDiscardRandom(attacker, 3);
                     this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
                 }
-                this.scene.applyDamage(defender, finalDmg, false);
+                this.applyDamage(defender, finalDmg, false); // C5 fix: use this.applyDamage
             } else {
                 // Done with spelling, auto-end turn after a slight delay
                 this.scene.time.delayedCall(800, () => this.resolvePostAction());
@@ -217,7 +217,10 @@ export class CombatSystem {
             } else {
                 // AI Reaction automation
                 this.scene.time.delayedCall(1000, () => {
-                    const reactionSpell = this.scene.calculateAIReaction(incomingSpell.damage);
+                    // C9 fix: pass defender (aiId) as first arg for ContestAIAgent.calculateAIReaction(aiId, incomingDamage)
+                    const reactionSpell = this.scene.mode === 'ai_contest'
+                        ? this.scene.contestAiAgent.calculateAIReaction(defender, incomingSpell.damage)
+                        : this.scene.aiAgent.calculateAIReaction(incomingSpell.damage);
                     this.scene.resolveDefendingReaction(reactionSpell);
                 });
             }
@@ -287,9 +290,9 @@ export class CombatSystem {
         const finalDmg = this.scene.reactionTargetSpell.damage;
         if (finalDmg > 0 && attChar.status.oppSpellReflect > 0) {
             this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
-            this.applyDamage(attacker, finalDmg, false);
+            this.applyDamage(attacker, finalDmg, false); // C5 fix: use this.applyDamage
         }
-        this.scene.applyDamage(defender, finalDmg, this.scene.reactionTargetSpell.bypassShield || false);
+        this.applyDamage(defender, finalDmg, this.scene.reactionTargetSpell.bypassShield || false); // C5 fix
 
         // Apply deferred drain
         if (this.scene.reactionTargetSpell.drain > 0) {

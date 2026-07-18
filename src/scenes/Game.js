@@ -527,7 +527,8 @@ export class Game extends Phaser.Scene {
 
         // ONLINE: sync state to Firebase AFTER transitioning to opponent's turn.
         // This ensures the opponent's newly drawn card and correct turn flag are synced.
-        if (this.mode === 'online' && this.turn === 'ai') {
+        // C2 fix: in online mode, this.turn holds 'host'/'guest' role keys, never 'ai'
+        if (this.mode === 'online' && this.turn !== this.myRole) {
             this.onlineManager.syncToFirebase('endTurn');
         }
     }
@@ -821,7 +822,7 @@ export class Game extends Phaser.Scene {
         
         btnResign.on('pointerdown', () => {
             if (this.mode === 'online') {
-                this.stopFirebaseListener();
+                this.cleanupOnline(); // C1 fix: was stopFirebaseListener() which doesn't exist
             }
             this.scene.start('Start');
         });
@@ -1770,6 +1771,14 @@ export class Game extends Phaser.Scene {
                     this.forceDiscardRandom('ai', 3);
                     this.duelHistory.logMessage(`Player's mana play deals 3 damage to AI!`);
                 }
+                // C7 Surge fix: check if opponent's oppManaPlayDamage is active (opponent played Surge)
+                const localId2 = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+                const oppId2 = this.playerIds.find(p => p !== localId2) || this.playerIds[1];
+                if (this.players[oppId2] && this.players[oppId2].status.oppManaPlayDamage > 0) {
+                    this.players[oppId2].status.oppManaPlayDamage = 0;
+                    this.forceDiscardRandom(localId2, 3);
+                    this.duelHistory.logMessage(`Surge punishes Player's mana play for 3 damage!`);
+                }
 
                 // Check bonusManaPlays: allow a second mana play
                 this.time.delayedCall(450, () => {
@@ -2174,13 +2183,18 @@ export class Game extends Phaser.Scene {
 
         // Apply self buffs immediately (like shields)
         if (finalShield > 0) {
-            if (attChar.status.shieldDamageDebuff > 0) {
-                this.forceDiscardRandom(attacker, 1);
-                this.duelHistory.logMessage(`${attacker.toUpperCase()} takes 1 damage from unstable shield!`);
+            // C6 fix: apply shieldFailChance check (Quake effect) matching CombatSystem.initiateAttack
+            if (attChar.status.shieldFailChance > 0 && Math.random() < 0.5) {
+                this.duelHistory.logMessage(`${attacker.toUpperCase()}'s Shield application failed due to Quake!`);
+            } else {
+                if (attChar.status.shieldDamageDebuff > 0) {
+                    this.forceDiscardRandom(attacker, 1);
+                    this.duelHistory.logMessage(`${attacker.toUpperCase()} takes 1 damage from unstable shield!`);
+                }
+                attChar.shield += finalShield;
+                this.updateShieldDisplay(attacker);
+                this.duelHistory.logMessage(`${attacker.toUpperCase()} gains ${finalShield} Shield.`);
             }
-            attChar.shield += finalShield;
-            this.updateShieldDisplay(attacker);
-            this.duelHistory.logMessage(`${attacker.toUpperCase()} gains ${finalShield} Shield.`);
         }
 
         // Draw logic
@@ -2331,9 +2345,14 @@ export class Game extends Phaser.Scene {
 
             // Apply reaction shield
             if (rShield > 0) {
-                defChar.shield += rShield;
-                this.updateShieldDisplay(defender);
-                this.duelHistory.logMessage(`${defender.toUpperCase()} gains ${rShield} Reaction Shield.`);
+                // C6 fix: apply shieldFailChance check on reaction shields (matching CombatSystem.resolveDefendingReaction)
+                if (defChar.status.shieldFailChance > 0 && Math.random() < 0.5) {
+                    this.duelHistory.logMessage(`${defender.toUpperCase()}'s Reaction Shield failed due to Quake!`);
+                } else {
+                    defChar.shield += rShield;
+                    this.updateShieldDisplay(defender);
+                    this.duelHistory.logMessage(`${defender.toUpperCase()} gains ${rShield} Reaction Shield.`);
+                }
             }
 
             // Counter damage check

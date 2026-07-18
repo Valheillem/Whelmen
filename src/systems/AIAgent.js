@@ -27,6 +27,12 @@ export class AIAgent {
                 this.scene.forceDiscardRandom('player', 3);
                 this.scene.logMessage(`AI's mana play deals 3 damage to Player!`);
             }
+            // C7 Surge fix: check if player has oppManaPlayDamage active from Surge
+            if (this.scene.player.status.oppManaPlayDamage > 0) {
+                this.scene.player.status.oppManaPlayDamage = 0;
+                this.scene.forceDiscardRandom('ai', 3);
+                this.scene.logMessage(`Surge punishes AI's mana play for 3 damage!`);
+            }
             
             this.scene.updatePlayerHandDisplay('ai');
             this.scene.updatePlayerBoardDisplay('ai');
@@ -191,11 +197,14 @@ export class AIAgent {
 
         for (let i = 0; i < amount; i++) {
             // Prefer discarding from board mana first if excess, then hand
+            // C10 fix: guard against popping from empty arrays (hand.pop() returns undefined if empty)
+            let burned;
             if (this.scene.ai.board.length > 1) {
-                const burned = this.scene.ai.board.pop();
-                this.scene.sharedDiscard.push(burned);
-            } else {
-                const burned = this.scene.ai.hand.pop();
+                burned = this.scene.ai.board.pop();
+            } else if (this.scene.ai.hand.length > 0) {
+                burned = this.scene.ai.hand.pop();
+            }
+            if (burned !== undefined) {
                 this.scene.sharedDiscard.push(burned);
             }
             this.scene.playSound('fire');
