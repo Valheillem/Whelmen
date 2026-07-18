@@ -375,6 +375,8 @@ export class CombatSystem {
                     this.scene.discardTargetCount = amount;
                     this.scene.syncToFirebase('discard_request');
                     this.scene.logMessage('Waiting for opponent to discard...');
+                } else if (this.scene.mode === 'ai_contest') {
+                    this.scene.contestAiAgent.runAIDiscardAutomation(who, amount);
                 } else {
                     // AI automatically discards
                     this.scene.aiAgent.runAIDiscardAutomation(amount);
