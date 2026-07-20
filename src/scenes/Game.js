@@ -61,7 +61,7 @@ export class Game extends Phaser.Scene {
             { key: 'fire_arrow', w: 600, h: 320, f: 8 },
             { key: 'explosion_vector_sprite_effects_3', w: 496, h: 496, f: 8 },
             { key: 'earth_shield', w: 720, h: 720, f: 8 },
-            { key: 'water1', w: 1280, h: 720, f: 48 },
+            { key: 'water1', w: 320, h: 180, f: 48 },
             { key: 'slash_sprite_cartoon_effects_2', w: 496, h: 496, f: 5 }
         ];
         
