@@ -121,7 +121,7 @@ export class SpellEffectsPlayer {
             const scaleFactor = impactSize / Math.max(frameW, frameH);
             impactSprite.setScale(scaleFactor);
             if (impact.timeScale) {
-                impactSprite.timeScale = impact.timeScale;
+                impactSprite.anims.timeScale = impact.timeScale;
             }
             impactSprite.play(impact.animKey);
             
