@@ -13,12 +13,12 @@ export const SPELL_EFFECTS = {
     },
     'Stream': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        impact: { animKey: 'anim_free_water_effects_sprite_pack_water1', targetOverride: 'center' },
+        impact: { animKey: 'anim_water1', targetOverride: 'center' },
         sound: { type: 'water' }
     },
     'Breeze': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        impact: { animKey: 'anim_free_slash_sprite_cartoon_effects_2' },
+        impact: { animKey: 'anim_slash_sprite_cartoon_effects_2' },
         sound: { type: 'air' }
     }
 };
