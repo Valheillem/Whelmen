@@ -191,7 +191,12 @@ export class SpellEffectsPlayer {
         
         // Play the specific sprite impact for this spell, if configured
         if (effect.impact) {
-            this.playImpact(spell, effect, x, y);
+            let cx = x, cy = y;
+            if (effect.impact.targetOverride === 'center') {
+                cx = this.scene.scale.width / 2;
+                cy = this.scene.scale.height / 2;
+            }
+            this.playImpact(spell, effect, cx, cy);
         }
 
         // Expanding ring effect

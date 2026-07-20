@@ -59,7 +59,10 @@ export class Game extends Phaser.Scene {
         // Preload Spell Effects Spritesheets (cleared — new assets will be added individually)
         this.spriteMeta = [
             { key: 'fire_arrow', w: 600, h: 320, f: 8 },
-            { key: 'explosion_vector_sprite_effects_3', w: 496, h: 496, f: 8 }
+            { key: 'explosion_vector_sprite_effects_3', w: 496, h: 496, f: 8 },
+            { key: 'earth_shield', w: 720, h: 720, f: 8 },
+            { key: 'free_water_effects_sprite_pack_water1', w: 512, h: 512, f: 8 },
+            { key: 'free_slash_sprite_cartoon_effects_2', w: 512, h: 512, f: 12 }
         ];
         
         this.spriteMeta.forEach(meta => {
@@ -2119,6 +2122,17 @@ export class Game extends Phaser.Scene {
                 if (targetPos === 1) { tx = 50; ty = h/2; }
                 else if (targetPos === 2) { tx = w/2; ty = 50; }
                 else if (targetPos === 3) { tx = w-50; ty = h/2; }
+
+                // Override for Breeze to target opponent's board card
+                if (spell.name === 'Breeze') {
+                    const oppGroup = this.playerGroups[targetId];
+                    if (oppGroup && oppGroup.boardGroup && oppGroup.boardGroup.getChildren().length > 0) {
+                        const children = oppGroup.boardGroup.getChildren();
+                        const randomCard = children[Math.floor(Math.random() * children.length)];
+                        tx = randomCard.x;
+                        ty = randomCard.y;
+                    }
+                }
                 
                 this.triggerSpellVisual(spell, w / 2, h - 50, tx, ty, () => {
                     this.combat.initiateAttack(localPlayer, targetId, spell);
