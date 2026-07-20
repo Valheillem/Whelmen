@@ -796,7 +796,7 @@ export class Game extends Phaser.Scene {
             const pos = this.getPlayerPositionIndex(pid);
             
             let containerX = 0, containerY = 0;
-            if (pos === 0) { containerX = w / 2 - 20; containerY = h - 150; } // Bottom
+            if (pos === 0) { containerX = w / 2 - 20; containerY = h - 250; } // Bottom
             else if (pos === 1) { containerX = 40; containerY = h / 2 - 50; } // Left
             else if (pos === 2) { containerX = w / 2 - 20; containerY = 30; } // Top (mirrors bottom)
             else if (pos === 3) { containerX = w - 195; containerY = h / 2 - 50; } // Right
