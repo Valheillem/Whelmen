@@ -26,6 +26,9 @@ const config = {
     dom: {
         createContainer: true
     },
+    input: {
+        keyboard: false
+    }
 }
 
 const game = new Phaser.Game(config);

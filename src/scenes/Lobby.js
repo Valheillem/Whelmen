@@ -163,6 +163,10 @@ export class Lobby extends Phaser.Scene {
     }
 
     startGame(role, players) {
+        if (document.activeElement && document.activeElement.blur) {
+            document.activeElement.blur();
+        }
+
         this.cleanup();
         this.scene.start('Game', {
             mode: 'online',
