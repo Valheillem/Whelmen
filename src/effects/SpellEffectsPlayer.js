@@ -52,11 +52,11 @@ export class SpellEffectsPlayer {
         let isSprite = projConfig.shape === 'sprite' || projConfig.animKey;
 
         if (isSprite) {
-            visual = this.scene.add.sprite(startX, startY, 'fire_ball'); // placeholder texture until play
+            let textureKey = projConfig.animKey ? projConfig.animKey.replace('anim_', '') : 'fire_ball';
+            visual = this.scene.add.sprite(startX, startY, textureKey);
             visual.play(projConfig.animKey);
             
             // Calculate scale to fit 64x64 baseline based on the texture's original size
-            // For fire_ball it's 640x640, so scale will be 0.1
             const baseSize = projConfig.size || 64;
             visual.displayWidth = baseSize;
             visual.displayHeight = baseSize;
@@ -100,7 +100,8 @@ export class SpellEffectsPlayer {
         const impact = effect.impact;
         
         if (impact.animKey) {
-            let impactSprite = this.scene.add.sprite(x, y, 'fire_explosion');
+            let textureKey = impact.animKey.replace('anim_', '');
+            let impactSprite = this.scene.add.sprite(x, y, textureKey);
             
             // Base size for impacts can be a bit larger, e.g. 128
             const impactSize = impact.size || 128;
@@ -158,6 +159,7 @@ export class SpellEffectsPlayer {
     }
     
     playSelfCastEffect(spell, x, y, onComplete) {
+        const effect = getSpellEffect(spell.name);
         const element = spell.element === 'n/a' ? 'air' : spell.element;
         const color = ELEMENT_COLORS[element] || 0xffffff;
 
@@ -166,6 +168,11 @@ export class SpellEffectsPlayer {
             this.scene.playSound('shield');
         } else {
             this.scene.playSound(element);
+        }
+        
+        // Play the specific sprite impact for this spell, if configured
+        if (effect.impact) {
+            this.playImpact(spell, effect, x, y);
         }
 
         // Expanding ring effect
