@@ -18,7 +18,7 @@ export const SPELL_EFFECTS = {
     },
     'Breeze': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        projectile: { animKey: 'anim_free_slash_sprite_cartoon_effects_2', size: 80, speed: 600, shape: 'sprite' },
+        impact: { animKey: 'anim_free_slash_sprite_cartoon_effects_2' },
         sound: { type: 'air' }
     }
 };
