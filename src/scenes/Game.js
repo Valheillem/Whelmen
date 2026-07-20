@@ -137,7 +137,8 @@ export class Game extends Phaser.Scene {
         if (this.spriteMeta) {
             this.spriteMeta.forEach(meta => {
                 if (!this.anims.exists(`anim_${meta.key}`)) {
-                    const isLooping = meta.key.includes('shield') || meta.key.includes('ball') || meta.key.includes('arrow');
+                    // Only projectiles that travel across the screen should loop infinitely
+                    const isLooping = meta.key.includes('ball') || meta.key.includes('arrow');
                     this.anims.create({
                         key: `anim_${meta.key}`,
                         frames: this.anims.generateFrameNumbers(meta.key, { start: 0, end: meta.f - 1 }),
