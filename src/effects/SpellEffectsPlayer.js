@@ -107,7 +107,7 @@ export class SpellEffectsPlayer {
         this.scene.playSound('hit');
         const impact = effect.impact;
         
-        if (impact.animKey) {
+        if (impact && impact.animKey) {
             let textureKey = impact.animKey.replace('anim_', '');
             
             const finalX = x + (impact.offsetX || 0);
