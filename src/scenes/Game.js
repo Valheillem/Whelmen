@@ -1485,7 +1485,9 @@ export class Game extends Phaser.Scene {
                         const h = this.scale.height;
                         const sigilX = w / 2 - 20;
                         const sigilY = h / 2 - 40;
-                        const dist = Phaser.Math.Distance.Between(cardObj.x, cardObj.y, sigilX, sigilY);
+                        
+                        // Use pointer.x and pointer.y (world coordinates) instead of cardObj.x/y (local container coordinates)
+                        const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, sigilX, sigilY);
                         
                         if (dist < 180) {
                             this.playHandCardToBoard(index);
