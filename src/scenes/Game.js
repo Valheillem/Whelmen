@@ -20,10 +20,7 @@ export class Game extends Phaser.Scene {
         document.body.classList.add('in-game');
         // Attempt to lock orientation to landscape for the game board
         try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
-
-    getLocalPlayerId() {
-        return this.mode === 'online' ? this.myRole : 'player';
-    }
+        
         // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
         this.mode = data?.mode || 'ai';
         this.lobbyCode = data?.lobbyCode || null;
@@ -45,6 +42,10 @@ export class Game extends Phaser.Scene {
         if (this.mode === 'test') {
             this.dummyMode = 'passive'; // 'passive' or 'active'
         }
+    }
+
+    getLocalPlayerId() {
+        return this.mode === 'online' ? this.myRole : 'player';
     }
 
     preload() {
