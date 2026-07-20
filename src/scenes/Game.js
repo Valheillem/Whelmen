@@ -56,33 +56,10 @@ export class Game extends Phaser.Scene {
         this.load.image('game-bg', './assets/WHELMEN_background_horizontal.png');
         this.load.image('sigil', './assets/WHELMEN_sigil.png');
 
-        // Preload Spell Effects Spritesheets
+        // Preload Spell Effects Spritesheets (cleared — new assets will be added individually)
         this.spriteMeta = [
-            { key: 'earth_fissure', w: 800, h: 480, f: 8 },
-            { key: 'earth_spike', w: 600, h: 480, f: 12 },
-            { key: 'ground_hit', w: 1200, h: 800, f: 8 },
-            { key: 'meteor', w: 1024, h: 320, f: 12 },
-            { key: 'earth_shield', w: 720, h: 720, f: 8 },
-            { key: 'leaf_shield', w: 720, h: 720, f: 16 },
             { key: 'fire_arrow', w: 600, h: 320, f: 8 },
-            { key: 'fire_ball', w: 640, h: 640, f: 8 },
-            { key: 'fire_spell', w: 640, h: 360, f: 8 },
-            { key: 'fire_explosion', w: 480, h: 480, f: 12 },
-            { key: 'flame', w: 640, h: 640, f: 12 },
-            { key: 'fire_shield', w: 720, h: 720, f: 8 },
-            { key: 'water_arrow', w: 480, h: 360, f: 8 },
-            { key: 'water_ball', w: 640, h: 640, f: 12 },
-            { key: 'water_spell', w: 640, h: 360, f: 8 },
-            { key: 'water_shield', w: 720, h: 720, f: 8 },
-            { key: 'wind_ball', w: 640, h: 640, f: 8 },
-            { key: 'wind_spell', w: 640, h: 360, f: 12 },
-            { key: 'typhoon', w: 800, h: 800, f: 12 },
-            { key: 'smoke_blow', w: 800, h: 240, f: 12 },
-            { key: 'smoke_explosion', w: 800, h: 800, f: 16 },
-            { key: 'chemical_smoke', w: 640, h: 360, f: 8 },
-            { key: 'poisonous_smoke', w: 640, h: 480, f: 12 },
-            { key: 'lightning_arrow', w: 480, h: 360, f: 12 },
-            { key: 'lightning_strike', w: 512, h: 640, f: 12 }
+            { key: 'explosion_vector_sprite_effects_3', w: 496, h: 496, f: 8 }
         ];
         
         this.spriteMeta.forEach(meta => {
@@ -1470,7 +1447,7 @@ export class Game extends Phaser.Scene {
             const cardObj = this.add.image(x, y, tex).setScale(scaleAmt).setAngle(angle);
 
             if (isLocal) {
-                cardObj.setInteractive({ useHandCursor: true });
+                cardObj.setInteractive({ useHandCursor: true, draggable: true });
                 const incoming = this.playerIncomingHandCards || 0;
                 if (index >= char.hand.length - incoming) {
                     cardObj.setAlpha(0);
@@ -1479,12 +1456,57 @@ export class Game extends Phaser.Scene {
                 cardObj.on('pointerdown', () => {
                     if (this.phase === 'discard' || this.phase === 'discard_request_active') {
                         this.discardCardFromZone('hand', index, pid);
-                    } else if (this.phase === 'action' && !this.manaPlacedThisTurn && this.turn === pid) {
-                        this.playHandCardToBoard(index);
+                    }
+                });
+
+                cardObj.on('dragstart', (pointer, dragX, dragY) => {
+                    if (this.phase === 'action' && !this.manaPlacedThisTurn && this.turn === pid) {
+                        cardObj.setData('isDragging', true);
+                        cardObj.setData('origX', cardObj.x);
+                        cardObj.setData('origY', cardObj.y);
+                        cardObj.setData('origAngle', cardObj.angle);
+                        cardObj.setData('origDepth', cardObj.depth);
+                        cardObj.setDepth(100);
+                        cardObj.setAngle(0);
+                    }
+                });
+
+                cardObj.on('drag', (pointer, dragX, dragY) => {
+                    if (cardObj.getData('isDragging')) {
+                        cardObj.x = dragX;
+                        cardObj.y = dragY;
+                    }
+                });
+
+                cardObj.on('dragend', (pointer, dragX, dragY) => {
+                    if (cardObj.getData('isDragging')) {
+                        cardObj.setData('isDragging', false);
+                        const w = this.scale.width;
+                        const h = this.scale.height;
+                        const sigilX = w / 2 - 20;
+                        const sigilY = h / 2 - 40;
+                        const dist = Phaser.Math.Distance.Between(cardObj.x, cardObj.y, sigilX, sigilY);
+                        
+                        if (dist < 180) {
+                            this.playHandCardToBoard(index);
+                        } else {
+                            cardObj.setDepth(cardObj.getData('origDepth'));
+                            this.tweens.add({
+                                targets: cardObj,
+                                x: cardObj.getData('origX'),
+                                y: cardObj.getData('origY'),
+                                angle: cardObj.getData('origAngle'),
+                                scaleX: 0.8,
+                                scaleY: 0.8,
+                                duration: 250,
+                                ease: 'Back.easeOut'
+                            });
+                        }
                     }
                 });
 
                 cardObj.on('pointerover', () => {
+                    if (cardObj.getData('isDragging')) return;
                     this.playSound('click');
                     this.tweens.add({
                         targets: cardObj,
@@ -1497,6 +1519,7 @@ export class Game extends Phaser.Scene {
                 });
 
                 cardObj.on('pointerout', () => {
+                    if (cardObj.getData('isDragging')) return;
                     this.tweens.add({
                         targets: cardObj,
                         y: y,
