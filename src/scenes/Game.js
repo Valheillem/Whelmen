@@ -827,7 +827,7 @@ export class Game extends Phaser.Scene {
             const displayName = isLocal ? '' : `PLAYER ${pid}`;
             let nx = 0, ny = 0;
             if (pos === 0) { nx = 0; ny = 0; }
-            else if (pos === 1) { nx = 10; ny = -150; }
+            else if (pos === 1) { nx = -20; ny = -150; }
             else if (pos === 2) { nx = -200; ny = 10; }
             else if (pos === 3) { nx = 30; ny = -150; }
 
@@ -849,7 +849,8 @@ export class Game extends Phaser.Scene {
             const char = this.players[pid];
             const pos = this.getPlayerPositionIndex(pid);
             char.nameHighlightG.clear();
-            if (this.turn === pid) {
+            // Don't draw the highlight for the local player, as they don't have a visible name text
+            if (this.turn === pid && pos !== 0) {
                 char.nameHighlightG.fillStyle(0xd4af37, 0.4);
                 char.nameHighlightG.fillRoundedRect(char.nameT.x - 10, char.nameT.y - 10, char.nameT.width + 20, char.nameT.height + 20, 6);
             }
