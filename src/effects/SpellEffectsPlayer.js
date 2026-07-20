@@ -120,7 +120,9 @@ export class SpellEffectsPlayer {
             const frameH = impactSprite.height;
             const scaleFactor = impactSize / Math.max(frameW, frameH);
             impactSprite.setScale(scaleFactor);
-            
+            if (impact.timeScale) {
+                impactSprite.timeScale = impact.timeScale;
+            }
             impactSprite.play(impact.animKey);
             
             // Destroy on animation complete for non-looping anims
