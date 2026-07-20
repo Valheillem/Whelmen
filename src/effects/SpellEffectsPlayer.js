@@ -63,6 +63,9 @@ export class SpellEffectsPlayer {
             const scaleFactor = baseSize / Math.max(frameW, frameH);
             visual.setScale(scaleFactor);
 
+            if (projConfig.flipX) visual.setFlipX(true);
+            if (projConfig.flipY) visual.setFlipY(true);
+
             // Only rotate directional sprites (arrows and beam-like spells)
             const isDirectional = textureKey.includes('arrow') || textureKey.includes('spell');
             if (isDirectional) {
