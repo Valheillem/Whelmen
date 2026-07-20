@@ -127,7 +127,7 @@ export class Game extends Phaser.Scene {
             this.spriteMeta.forEach(meta => {
                 if (!this.anims.exists(`anim_${meta.key}`)) {
                     // Only projectiles that travel across the screen should loop infinitely
-                    const isLooping = meta.key.includes('ball') || meta.key.includes('arrow');
+                    const isLooping = meta.key.includes('ball') || meta.key.includes('arrow') || meta.key.includes('spell') || meta.key.includes('shield');
                     this.anims.create({
                         key: `anim_${meta.key}`,
                         frames: this.anims.generateFrameNumbers(meta.key, { start: 0, end: meta.f - 1 }),
@@ -711,11 +711,15 @@ export class Game extends Phaser.Scene {
                 });
             } else {
                 expected++;
+                let sx = attPos.x;
+                let sy = attPos.y;
                 if (attackerSpell.damage === 0 && attackerSpell.drain === 0 && attackerSpell.name !== 'Scour' && attackerSpell.name !== 'Hurricane') {
                     tx = attPos.avatarX;
                     ty = attPos.avatarY;
+                    sx = tx;
+                    sy = ty;
                 }
-                this.spellEffects.playProjectileAndImpact(attackerSpell, attPos.x, attPos.y, tx, ty, checkDone);
+                this.spellEffects.playProjectileAndImpact(attackerSpell, sx, sy, tx, ty, checkDone);
             }
         }
 
@@ -723,11 +727,15 @@ export class Game extends Phaser.Scene {
             expected++;
             let tx = attPos.avatarX;
             let ty = attPos.avatarY;
+            let sx = defPos.x;
+            let sy = defPos.y;
             if (defenderSpell.damage === 0 && defenderSpell.drain === 0 && defenderSpell.name !== 'Scour' && defenderSpell.name !== 'Hurricane') {
                 tx = defPos.avatarX;
                 ty = defPos.avatarY;
+                sx = tx;
+                sy = ty;
             }
-            this.spellEffects.playProjectileAndImpact(defenderSpell, defPos.x, defPos.y, tx, ty, checkDone);
+            this.spellEffects.playProjectileAndImpact(defenderSpell, sx, sy, tx, ty, checkDone);
         }
 
         if (expected === 0 && onComplete) onComplete();
