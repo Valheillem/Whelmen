@@ -3,7 +3,7 @@ export const SPELL_EFFECTS = {
     'Spark': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
         projectile: { animKey: 'anim_fire_arrow', size: 64, speed: 500, shape: 'sprite', flipX: true },
-        impact: { animKey: 'anim_explosion_vector_sprite_effects_3', screenShake: { intensity: 2, duration: 100 }, flash: 0xff2200 },
+        impact: { animKey: 'anim_explosion_3', screenShake: { intensity: 2, duration: 100 }, flash: 0xff2200 },
         sound: { type: 'fire' }
     },
     'Shell': {
@@ -24,7 +24,7 @@ export const SPELL_EFFECTS = {
     'Blast': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
         projectile: { animKey: 'anim_fire_spell', size: 80, speed: 500, shape: 'sprite', flipX: true },
-        impact: { animKey: 'anim_explosion_vector_sprite_effects_3', screenShake: { intensity: 3, duration: 150 }, flash: 0xff4400 },
+        impact: { animKey: 'anim_explosion_3', screenShake: { intensity: 3, duration: 150 }, flash: 0xff4400 },
         sound: { type: 'fire' }
     },
     'Carapace': {
