@@ -92,9 +92,18 @@ export class AIAgent {
                 this.scene.logMessage(`AI casts: ${bestSpell.name}!`);
 
                 const w = this.scene.scale.width;
-                this.scene.triggerSpellVisual(bestSpell, w / 2 + 100, 200, w / 2 + 100, 500, () => {
-                    this.scene.combat.initiateAttack('ai', 'player', bestSpell);
-                });
+                const requiresTarget = bestSpell.damage > 0 || bestSpell.drain > 0;
+                
+                if (!requiresTarget) {
+                    // Self-cast: shield/draw only, no opponent involved
+                    this.scene.spellEffects.playSelfCastEffect(bestSpell, w / 2 + 100, 200, () => {
+                        this.scene.combat.resolveSelfCast('ai', bestSpell);
+                    });
+                } else {
+                    this.scene.triggerSpellVisual(bestSpell, w / 2 + 100, 200, w / 2 + 100, 500, () => {
+                        this.scene.combat.initiateAttack('ai', 'player', bestSpell);
+                    });
+                }
                 return;
             }
         }

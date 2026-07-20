@@ -157,6 +157,84 @@ export class SpellEffectsPlayer {
         });
     }
     
+    playSelfCastEffect(spell, x, y, onComplete) {
+        const element = spell.element === 'n/a' ? 'air' : spell.element;
+        const color = ELEMENT_COLORS[element] || 0xffffff;
+
+        // Play element-appropriate sound
+        if (spell.shield > 0) {
+            this.scene.playSound('shield');
+        } else {
+            this.scene.playSound(element);
+        }
+
+        // Expanding ring effect
+        const ring = this.scene.add.circle(x, y, 10, 0x000000, 0);
+        ring.setStrokeStyle(4, color, 1);
+        this.scene.tweens.add({
+            targets: ring,
+            radius: 80,
+            alpha: 0,
+            duration: 600,
+            ease: 'Quad.easeOut',
+            onUpdate: () => {
+                ring.setStrokeStyle(4, color, ring.alpha);
+            },
+            onComplete: () => ring.destroy()
+        });
+
+        // Second ring with slight delay
+        this.scene.time.delayedCall(150, () => {
+            const ring2 = this.scene.add.circle(x, y, 10, 0x000000, 0);
+            ring2.setStrokeStyle(3, 0xffffff, 0.7);
+            this.scene.tweens.add({
+                targets: ring2,
+                radius: 60,
+                alpha: 0,
+                duration: 500,
+                ease: 'Quad.easeOut',
+                onUpdate: () => {
+                    ring2.setStrokeStyle(3, 0xffffff, ring2.alpha);
+                },
+                onComplete: () => ring2.destroy()
+            });
+        });
+
+        // Radial particle burst
+        const LIFESPAN = 600;
+        const emitter = this.scene.add.particles(0, 0, 'star', {
+            x: x,
+            y: y,
+            speed: { min: 30, max: 120 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0 },
+            tint: color,
+            alpha: { start: 0.9, end: 0 },
+            lifespan: LIFESPAN,
+            blendMode: 'ADD'
+        });
+        emitter.explode(20);
+
+        this.scene.time.delayedCall(LIFESPAN + 100, () => {
+            if (emitter && emitter.destroy) emitter.destroy();
+        });
+
+        // Brief flash tint on the caster's area
+        this.scene.cameras.main.flash(150,
+            (color >> 16) & 255,
+            (color >> 8) & 255,
+            color & 255,
+            false,
+            null,
+            null
+        );
+
+        // Callback after visual settles
+        this.scene.time.delayedCall(500, () => {
+            if (onComplete) onComplete();
+        });
+    }
+
     // Stubs for future hooks
     playStatusApply(statusName, target) {}
     playSynergyActivation(synergyType, position) {}

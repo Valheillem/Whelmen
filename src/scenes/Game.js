@@ -2065,34 +2065,41 @@ export class Game extends Phaser.Scene {
         }
         
         const requiresTarget = finalDmg > 0 || finalDrain > 0;
-        
-        const finishCast = (targetId) => {
-            if (requiresTarget) {
-                this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name} targeting ${targetId.toUpperCase()}!`);
-            } else {
-                this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name}!`);
-            }
-            
-            // Simple visual from local to target
+
+        if (!requiresTarget) {
+            // Self-cast path: shield/draw only spells target the caster, no opponent involved
+            this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name}!`);
             const w = this.scale.width;
             const h = this.scale.height;
-            const targetPos = this.getPlayerPositionIndex(targetId);
-            let tx = w/2, ty = h/2;
-            if (targetPos === 1) { tx = 50; ty = h/2; }
-            else if (targetPos === 2) { tx = w/2; ty = 50; }
-            else if (targetPos === 3) { tx = w-50; ty = h/2; }
-            
-            this.triggerSpellVisual(spell, w / 2, h - 50, tx, ty, () => {
-                this.combat.initiateAttack(localPlayer, targetId, spell);
+            this.spellEffects.playSelfCastEffect(spell, w / 2, h - 50, () => {
+                this.combat.resolveSelfCast(localPlayer, spell);
             });
-        };
-
-        if (!requiresTarget || opponents.length === 1) {
-            finishCast(opponents[0]);
         } else {
-            // Need to select an opponent
-            this.duelHistory.logMessage(`Select target for ${spell.name}...`);
-            this.enableTapTargeting(opponents, finishCast);
+            // Offensive spell: needs an opponent target
+            const finishCast = (targetId) => {
+                this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name} targeting ${targetId.toUpperCase()}!`);
+                
+                // Simple visual from local to target
+                const w = this.scale.width;
+                const h = this.scale.height;
+                const targetPos = this.getPlayerPositionIndex(targetId);
+                let tx = w/2, ty = h/2;
+                if (targetPos === 1) { tx = 50; ty = h/2; }
+                else if (targetPos === 2) { tx = w/2; ty = 50; }
+                else if (targetPos === 3) { tx = w-50; ty = h/2; }
+                
+                this.triggerSpellVisual(spell, w / 2, h - 50, tx, ty, () => {
+                    this.combat.initiateAttack(localPlayer, targetId, spell);
+                });
+            };
+
+            if (opponents.length === 1) {
+                finishCast(opponents[0]);
+            } else {
+                // Need to select an opponent
+                this.duelHistory.logMessage(`Select target for ${spell.name}...`);
+                this.enableTapTargeting(opponents, finishCast);
+            }
         }
     }
 
@@ -2158,6 +2165,117 @@ export class Game extends Phaser.Scene {
     }
 
     // --- COMBAT RESOLUTION & REACTION WINDOW ---
+    resolveSelfCast(caster, spell) {
+        const attChar = this.players[caster];
+        const cycle = this.cycleElements[this.cycleIndex];
+
+        // Status: Spell Fail Chance
+        if (attChar.status.spellFailChance > 0) {
+            if (Math.random() < 0.5) {
+                this.duelHistory.logMessage(`${caster.toUpperCase()}'s spell fizzled out!`);
+                this.time.delayedCall(800, () => {
+                    if (this.pendingExtraAction) {
+                        this.pendingExtraAction = false;
+                        this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
+                        this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
+                        if (this.turn === 'player') { this.phase = 'action'; this.enablePlayerControls(true); }
+                        else if (this.mode === 'ai_contest') { this.contestAiAgent.runAITurn(this.turn); }
+                        else { this.aiAgent.runAITurn(); }
+                    } else {
+                        this.checkTurnContinuation();
+                    }
+                });
+                return;
+            }
+        }
+
+        // Synergy logic
+        let isEmp = this.synergy.calculateSynergy(spell, cycle);
+
+        let finalShield = spell.shield;
+        let finalDraw = spell.draw;
+
+        if (isEmp) {
+            const overrides = this.synergy.getEmpoweredOverrides(spell.name);
+            if (overrides.shield) finalShield = overrides.shield;
+            if (overrides.draw) finalDraw = overrides.draw;
+        }
+
+        // Force Cycle always triggers (not gated by isEmp)
+        if (spell.synergyType === 'force_cycle') {
+            const fcMap = { 'Tempest': 'air', 'Pillar': 'earth', 'Blaze': 'fire', 'Deluge': 'water' };
+            const fcEl = fcMap[spell.name];
+            if (fcEl) {
+                this.cycleIndex = this.cycleElements.indexOf(fcEl);
+                this.duelHistory.logMessage(`The Cycle is forced to ${fcEl.toUpperCase()}!`);
+                this.cycleCenterText.setText(fcEl.toUpperCase());
+                this.triggerCycleParticles(fcEl);
+            }
+        }
+
+        // Apply shield to caster
+        if (finalShield > 0) {
+            if (attChar.status.shieldFailChance > 0 && Math.random() < 0.5) {
+                this.duelHistory.logMessage(`${caster.toUpperCase()}'s Shield application failed due to Quake!`);
+            } else {
+                if (attChar.status.shieldDamageDebuff > 0) {
+                    this.forceDiscardRandom(caster, 1);
+                    this.duelHistory.logMessage(`${caster.toUpperCase()} takes 1 damage from unstable shield!`);
+                }
+                attChar.shield += finalShield;
+                this.updateShieldDisplay(caster);
+                this.duelHistory.logMessage(`${caster.toUpperCase()} gains ${finalShield} Shield.`);
+            }
+        }
+
+        // Draw logic
+        if (finalDraw > 0) {
+            for (let i = 0; i < finalDraw; i++) {
+                const drawn = this.drawCard();
+                if (drawn) {
+                    if (attChar.status.autoPlayDraw > 0 && attChar.board.length < 3) {
+                        attChar.board.push(drawn);
+                        this.duelHistory.logMessage(`Auto-played drawn mana!`);
+                    } else {
+                        attChar.hand.push(drawn);
+                    }
+                    if (attChar.status.loseManaOnDraw > 0 && attChar.board.length > 0) {
+                        this.sharedDiscard.push(attChar.board.pop());
+                        this.duelHistory.logMessage(`${caster.toUpperCase()} lost a board mana from drawing!`);
+                    }
+                }
+            }
+            this.playerIds.forEach(pid => { this.updatePlayerHandDisplay(pid); this.updatePlayerBoardDisplay(pid); this.updatePlayerLifeDisplay(pid); });
+        }
+
+        // Deferred status effects (self-cast spells that have them)
+        if (isEmp) {
+            // Self-cast empowered spells only apply self/global statuses, never defender-targeted ones.
+            if (spell.name === 'Enrich') { this.playerIds.forEach(p => this.players[p].status.everyoneDraw3 = 1); }
+            if (spell.name === 'Fortress') attChar.status.extraDrawIfShield = 1;
+            if (spell.name === 'Quagmire') attChar.status.redrawMana = 1;
+        }
+
+        // Done — resolve post action
+        this.time.delayedCall(800, () => {
+            if (this.pendingExtraAction) {
+                this.pendingExtraAction = false;
+                this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
+                this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
+                if (this.turn === 'player') {
+                    this.phase = 'action';
+                    this.enablePlayerControls(true);
+                } else if (this.mode === 'ai_contest') {
+                    this.contestAiAgent.runAITurn(this.turn);
+                } else {
+                    this.aiAgent.runAITurn();
+                }
+            } else {
+                this.checkTurnContinuation();
+            }
+        });
+    }
+
     initiateAttack(attacker, defender, spell) {
         let defChar = this.players[defender];
         let attChar = this.players[attacker];

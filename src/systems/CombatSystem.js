@@ -53,6 +53,82 @@ export class CombatSystem {
     }
 
 
+    resolveSelfCast(caster, spell) {
+        const attChar = this.scene.players[caster];
+        const cycle = this.scene.cycleElements[this.scene.cycleIndex];
+
+        // Status: Spell Fail Chance
+        if (attChar.status.spellFailChance > 0) {
+            if (Math.random() < 0.5) {
+                this.scene.logMessage(`${caster.toUpperCase()}'s spell fizzled out!`);
+                this.scene.time.delayedCall(800, () => this.resolvePostAction());
+                return;
+            }
+        }
+
+        // Synergy logic
+        let isEmp = this.scene.synergy.calculateSynergy(spell, cycle);
+
+        let finalShield = spell.shield;
+        let finalDraw = spell.draw;
+
+        if (isEmp) {
+            const overrides = this.scene.synergy.getEmpoweredOverrides(spell.name);
+            if (overrides.shield) finalShield = overrides.shield;
+            if (overrides.draw) finalDraw = overrides.draw;
+        }
+
+        // Force Cycle always triggers (not gated by isEmp)
+        if (spell.synergyType === 'force_cycle') {
+            const fcMap = { 'Tempest': 'air', 'Pillar': 'earth', 'Blaze': 'fire', 'Deluge': 'water' };
+            const fcEl = fcMap[spell.name];
+            if (fcEl) {
+                this.scene.cycleIndex = this.scene.cycleElements.indexOf(fcEl);
+                this.scene.logMessage(`The Cycle is forced to ${fcEl.toUpperCase()}!`);
+                this.scene.cycleCenterText.setText(fcEl.toUpperCase());
+                this.scene.triggerCycleParticles(fcEl);
+            }
+        }
+
+        // Apply shield to caster
+        if (finalShield > 0) {
+            if (attChar.status.shieldFailChance > 0 && Math.random() < 0.5) {
+                finalShield = 0;
+                this.scene.logMessage(`${caster.toUpperCase()}'s Shield application failed due to Quake!`);
+            } else {
+                if (attChar.status.shieldDamageDebuff > 0) {
+                    this.scene.forceDiscardRandom(caster, 1);
+                    this.scene.logMessage(`${caster.toUpperCase()} takes 1 damage from unstable shield!`);
+                }
+                attChar.shield += finalShield;
+                this.scene.updateShieldDisplay(caster);
+                this.scene.logMessage(`${caster.toUpperCase()} gains ${finalShield} Shield.`);
+            }
+        }
+
+        // Draw logic
+        if (finalDraw > 0) {
+            for (let i = 0; i < finalDraw; i++) {
+                this.drawCardWithStatusEffects(caster);
+            }
+            this.scene.playerIds.forEach(p => {
+                this.scene.updatePlayerHandDisplay(p);
+                this.scene.updatePlayerBoardDisplay(p);
+                this.scene.updatePlayerLifeDisplay(p);
+            });
+        }
+
+        // Deferred status effects (self-cast spells that have them)
+        if (isEmp) {
+            // Self-cast empowered spells only apply self/global statuses, never defender-targeted ones.
+            // Pass attChar as both attacker and defender since there is no defender.
+            this.scene.synergy.applyDeferredStatusEffects(spell.name, attChar, attChar);
+        }
+
+        // Done — resolve post action (extra action check, then turn continuation)
+        this.scene.time.delayedCall(800, () => this.resolvePostAction());
+    }
+
 
 
     initiateAttack(attacker, defender, spell) {
