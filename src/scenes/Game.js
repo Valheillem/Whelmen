@@ -2744,6 +2744,9 @@ export class Game extends Phaser.Scene {
             this.updatePlayerBoardDisplay(this.getLocalPlayerId());
             this.updatePlayerLifeDisplay(this.getLocalPlayerId());
             this.checkDefeatCondition('player');
+            this.time.delayedCall(1200, () => {
+                this.checkTurnContinuation();
+            });
             return;
         }
 

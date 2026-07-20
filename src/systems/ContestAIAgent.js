@@ -209,6 +209,9 @@ export class ContestAIAgent {
             this.scene.updatePlayerBoardDisplay(aiId);
             this.scene.updatePlayerLifeDisplay(aiId);
             this.scene.checkDefeatCondition(aiId);
+            this.scene.time.delayedCall(1200, () => {
+                this.scene.checkTurnContinuation();
+            });
             return;
         }
 

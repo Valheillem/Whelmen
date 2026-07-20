@@ -199,6 +199,9 @@ export class AIAgent {
             this.scene.updatePlayerBoardDisplay('ai');
             this.scene.updatePlayerLifeDisplay('ai');
             this.scene.checkDefeatCondition('ai');
+            this.scene.time.delayedCall(1200, () => {
+                this.scene.checkTurnContinuation();
+            });
             return;
         }
 
