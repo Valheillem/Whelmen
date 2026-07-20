@@ -255,28 +255,50 @@ export class CombatSystem {
             this.scene.startReactionPhase(attacker, defender, { ...spell, damage: finalDmg, bypassShield: false, drain: finalDrain });
         } else {
             // Direct hit
+            let drainTargets = [];
+            let finalDrainRemaining = 0;
             if (finalDrain > 0) {
                 if (attChar.status.drainFailChance > 0 && Math.random() < 0.5) {
                     this.scene.logMessage(`${attacker.toUpperCase()}'s Drain missed due to Tower!`);
                 } else {
-                    this.scene.forceDiscardRandom(defender, finalDrain, 'board');
+                    finalDrainRemaining = this.absorbDrain(defender, finalDrain);
+                    const boardCopy = [...defChar.board];
+                    for (let i = boardCopy.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [boardCopy[i], boardCopy[j]] = [boardCopy[j], boardCopy[i]];
+                    }
+                    drainTargets = boardCopy.slice(0, finalDrainRemaining);
                 }
             }
             
-            if (finalDmg > 0) {
-                if (attChar.status.oppSpellReflect > 0) {
-                    this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
-                    this.applyDamage(attacker, finalDmg, false); // C5 fix: use this.applyDamage, not this.scene.applyDamage
+            this.scene.fireSpellProjectiles(attacker, defender, spell, null, drainTargets, () => {
+                if (finalDmg > 0) {
+                    if (attChar.status.oppSpellReflect > 0) {
+                        this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
+                        this.applyDamage(attacker, finalDmg, false);
+                    }
+                    if (defChar.status.retaliationDamage > 0) {
+                        this.scene.forceDiscardRandom(attacker, 3);
+                        this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
+                    }
+                    this.applyDamage(defender, finalDmg, false);
                 }
-                if (defChar.status.retaliationDamage > 0) {
-                    this.scene.forceDiscardRandom(attacker, 3);
-                    this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
+                
+                if (drainTargets.length > 0) {
+                    drainTargets.forEach(cardToDiscard => {
+                        const idx = defChar.board.findIndex(c => c === cardToDiscard);
+                        if (idx !== -1) {
+                            const removed = defChar.board.splice(idx, 1)[0];
+                            this.scene.sharedDiscard.push(removed);
+                        }
+                    });
+                    this.scene.updatePlayerBoardDisplay(defender);
                 }
-                this.applyDamage(defender, finalDmg, false); // C5 fix: use this.applyDamage
-            } else {
-                // Done with spelling, auto-end turn after a slight delay
-                this.scene.time.delayedCall(800, () => this.resolvePostAction());
-            }
+                
+                if (finalDmg === 0) {
+                    this.scene.time.delayedCall(800, () => this.resolvePostAction());
+                }
+            });
         }
     }
 
@@ -364,46 +386,134 @@ export class CombatSystem {
                 }
             }
 
-            // Counter damage check
-            if (rDmg > 0) {
-                this.scene.logMessage(`Reaction deals ${rDmg} counter damage back!`);
-                this.scene.applyDamage(attacker, rDmg);
+            // Prepare drain targets
+            let drainTargets = [];
+            let finalDrainRemaining = 0;
+            if (this.scene.reactionTargetSpell.drain > 0) {
+                if (attChar.status.drainFailChance > 0 && Math.random() < 0.5) {
+                    this.scene.logMessage(`${attacker.toUpperCase()}'s Drain missed due to Tower!`);
+                } else {
+                    finalDrainRemaining = this.absorbDrain(defender, this.scene.reactionTargetSpell.drain);
+                    const boardCopy = [...defChar.board];
+                    for (let i = boardCopy.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [boardCopy[i], boardCopy[j]] = [boardCopy[j], boardCopy[i]];
+                    }
+                    drainTargets = boardCopy.slice(0, finalDrainRemaining);
+                }
             }
+
+            this.scene.fireSpellProjectiles(attacker, defender, this.scene.reactionTargetSpell, reactionSpell, drainTargets, () => {
+                // Counter damage check
+                if (rDmg > 0) {
+                    this.scene.logMessage(`Reaction deals ${rDmg} counter damage back!`);
+                    this.scene.applyDamage(attacker, rDmg);
+                }
+
+                // Retaliaton damage
+                const defIsAlive = (defChar.hand.length + defChar.board.length) > 0;
+                if (defChar.status.retaliationDamage > 0 && defIsAlive) {
+                    this.scene.forceDiscardRandom(attacker, 3);
+                    this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
+                }
+
+                // Apply incoming damage minus final shield
+                const finalDmg = this.scene.reactionTargetSpell.damage;
+                const attIsAlive = (attChar.hand.length + attChar.board.length) > 0;
+                if (finalDmg > 0 && attChar.status.oppSpellReflect > 0 && attIsAlive) {
+                    this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
+                    this.applyDamage(attacker, finalDmg, false);
+                }
+                this.applyDamage(defender, finalDmg, this.scene.reactionTargetSpell.bypassShield || false);
+
+                // Apply deferred drain physically
+                if (drainTargets.length > 0) {
+                    drainTargets.forEach(cardToDiscard => {
+                        const idx = defChar.board.findIndex(c => c === cardToDiscard);
+                        if (idx !== -1) {
+                            const removed = defChar.board.splice(idx, 1)[0];
+                            this.scene.sharedDiscard.push(removed);
+                        }
+                    });
+                    this.scene.updatePlayerBoardDisplay(defender);
+                }
+            });
         } else {
             this.scene.logMessage(`${defender.toUpperCase()} takes the direct hit.`);
-        }
-
-        // Retaliaton damage: fires when defender has retaliationDamage status
-        // M3 fix: only retaliate if the defender is still alive (hasn't been knocked out by counter-damage)
-        const defIsAlive = (defChar.hand.length + defChar.board.length) > 0;
-        if (defChar.status.retaliationDamage > 0 && defIsAlive) {
-            this.scene.forceDiscardRandom(attacker, 3);
-            this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
-        }
-
-        // Apply incoming damage minus final shield
-        const finalDmg = this.scene.reactionTargetSpell.damage;
-        // M3 fix: only apply incoming damage if the attacker is still alive
-        const attIsAlive = (attChar.hand.length + attChar.board.length) > 0;
-        if (finalDmg > 0 && attChar.status.oppSpellReflect > 0 && attIsAlive) {
-            this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
-            this.applyDamage(attacker, finalDmg, false); // C5 fix: use this.applyDamage
-        }
-        this.applyDamage(defender, finalDmg, this.scene.reactionTargetSpell.bypassShield || false); // C5 fix
-
-        // Apply deferred drain
-        if (this.scene.reactionTargetSpell.drain > 0) {
-            if (attChar.status.drainFailChance > 0 && Math.random() < 0.5) {
-                this.scene.logMessage(`${attacker.toUpperCase()}'s Drain missed due to Tower!`);
-            } else {
-                this.scene.forceDiscardRandom(defender, this.scene.reactionTargetSpell.drain, 'board');
+            
+            let drainTargets = [];
+            let finalDrainRemaining = 0;
+            if (this.scene.reactionTargetSpell.drain > 0) {
+                if (attChar.status.drainFailChance > 0 && Math.random() < 0.5) {
+                    this.scene.logMessage(`${attacker.toUpperCase()}'s Drain missed due to Tower!`);
+                } else {
+                    finalDrainRemaining = this.absorbDrain(defender, this.scene.reactionTargetSpell.drain);
+                    const boardCopy = [...defChar.board];
+                    for (let i = boardCopy.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [boardCopy[i], boardCopy[j]] = [boardCopy[j], boardCopy[i]];
+                    }
+                    drainTargets = boardCopy.slice(0, finalDrainRemaining);
+                }
             }
+
+            this.scene.fireSpellProjectiles(attacker, defender, this.scene.reactionTargetSpell, null, drainTargets, () => {
+                const defIsAlive = (defChar.hand.length + defChar.board.length) > 0;
+                if (defChar.status.retaliationDamage > 0 && defIsAlive) {
+                    this.scene.forceDiscardRandom(attacker, 3);
+                    this.scene.logMessage(`${defender.toUpperCase()} retaliates for 3 damage!`);
+                }
+
+                const finalDmg = this.scene.reactionTargetSpell.damage;
+                const attIsAlive = (attChar.hand.length + attChar.board.length) > 0;
+                if (finalDmg > 0 && attChar.status.oppSpellReflect > 0 && attIsAlive) {
+                    this.scene.logMessage(`Surge reflects ${finalDmg} damage back to ${attacker.toUpperCase()}!`);
+                    this.applyDamage(attacker, finalDmg, false);
+                }
+                this.applyDamage(defender, finalDmg, this.scene.reactionTargetSpell.bypassShield || false);
+
+                if (drainTargets.length > 0) {
+                    drainTargets.forEach(cardToDiscard => {
+                        const idx = defChar.board.findIndex(c => c === cardToDiscard);
+                        if (idx !== -1) {
+                            const removed = defChar.board.splice(idx, 1)[0];
+                            this.scene.sharedDiscard.push(removed);
+                        }
+                    });
+                    this.scene.updatePlayerBoardDisplay(defender);
+                }
+            });
         }
     }
 
 
 
 
+
+    absorbDrain(defenderId, drainAmount) {
+        let defChar = this.scene.players[defenderId];
+        let blockedDrain = 0;
+        
+        for (let i = 0; i < drainAmount; i++) {
+            let cost = 3;
+            if (i === 1) cost = 2; // 2nd drain point brings total to 5
+            if (i === 2) cost = 3; // 3rd drain point brings total to 8
+            
+            if (defChar.shield >= cost) {
+                defChar.shield -= cost;
+                blockedDrain++;
+                this.scene.logMessage(`${defenderId.toUpperCase()}'s shield absorbed 1 DRAIN! (-${cost} Shield)`);
+            } else {
+                if (defChar.shield > 0) {
+                    this.scene.logMessage(`${defenderId.toUpperCase()}'s shield was shattered by DRAIN! (-${defChar.shield} Shield)`);
+                    defChar.shield = 0;
+                }
+                break;
+            }
+        }
+        this.scene.updateShieldDisplay(defenderId);
+        return drainAmount - blockedDrain;
+    }
 
     applyDamage(who, amount, bypassShield = false) {
         const char = this.scene.players[who];

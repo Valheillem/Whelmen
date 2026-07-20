@@ -100,7 +100,7 @@ export class AIAgent {
                     });
                 } else {
                     this.scene.logMessage(`AI casts: ${bestSpell.name} targeting PLAYER!`);
-                    this.scene.triggerSpellVisual(bestSpell, w / 2 + 100, 200, w / 2 + 100, 500, () => {
+                    this.scene.triggerSpellCastAnimation(bestSpell, w / 2 + 100, 200, () => {
                         this.scene.combat.initiateAttack('ai', 'player', bestSpell);
                     });
                 }

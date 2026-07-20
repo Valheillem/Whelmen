@@ -38,9 +38,9 @@ export const SPELL_EFFECTS = {
         projectile: { animKey: 'anim_wind_spell', size: 128, speed: 600, shape: 'sprite', flipX: true },
         sound: { type: 'air' }
     },
-    'Rain': {
+    'Splash': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        impact: { animKey: 'anim_water6', targetOverride: 'center', size: 300 },
+        impact: { animKey: 'anim_water6', targetOverride: 'center', size: 300, offsetX: -30, offsetY: -60 },
         sound: { type: 'water' }
     }
 };

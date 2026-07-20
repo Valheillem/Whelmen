@@ -21,6 +21,38 @@ export class SpellEffectsPlayer {
         });
     }
 
+    playCastAnimation(spell, startX, startY, onComplete) {
+        let effect = this.registry[spell.name] || this.registry['DEFAULT_SPELL_EFFECT'];
+        if (effect.castAnim) {
+            let castSprite = this.scene.add.sprite(startX, startY, 'magic_circle').setDepth(100);
+            
+            // Simple generic aura pulse
+            this.scene.tweens.add({
+                targets: castSprite,
+                scale: effect.castAnim.scale || 1.5,
+                alpha: 0,
+                duration: effect.castAnim.duration || 300,
+                onComplete: () => {
+                    castSprite.destroy();
+                    if (onComplete) onComplete();
+                }
+            });
+        } else {
+            if (onComplete) onComplete();
+        }
+    }
+
+    playProjectileAndImpact(spell, startX, startY, endX, endY, onComplete) {
+        let effect = this.registry[spell.name] || this.registry['DEFAULT_SPELL_EFFECT'];
+        
+        if (effect.projectile) {
+            this.playProjectile(spell, effect, startX, startY, endX, endY, onComplete);
+        } else {
+            this.playImpact(spell, effect, endX, endY);
+            if (onComplete) onComplete();
+        }
+    }
+
     playSpellCast(spell, startX, startY, endX, endY, onComplete) {
         const effect = getSpellEffect(spell.name);
         
@@ -53,7 +85,7 @@ export class SpellEffectsPlayer {
 
         if (isSprite) {
             let textureKey = projConfig.animKey ? projConfig.animKey.replace('anim_', '') : 'fire_ball';
-            visual = this.scene.add.sprite(startX, startY, textureKey);
+            visual = this.scene.add.sprite(startX, startY, textureKey).setDepth(100);
             visual.play(projConfig.animKey);
             
             // Scale to fit the configured size while preserving aspect ratio
@@ -73,7 +105,7 @@ export class SpellEffectsPlayer {
                 visual.setRotation(angle);
             }
         } else {
-            visual = this.scene.add.circle(startX, startY, projConfig.size || 20, projConfig.color);
+            visual = this.scene.add.circle(startX, startY, projConfig.size || 20, projConfig.color).setDepth(100);
             visual.setStrokeStyle(4, 0xffffff);
         }
 
@@ -112,7 +144,7 @@ export class SpellEffectsPlayer {
             
             const finalX = x + (impact.offsetX || 0);
             const finalY = y + (impact.offsetY || 0);
-            let impactSprite = this.scene.add.sprite(finalX, finalY, textureKey);
+            let impactSprite = this.scene.add.sprite(finalX, finalY, textureKey).setDepth(100);
             
             // Scale to fit the configured size while preserving aspect ratio
             const impactSize = impact.size || 128;

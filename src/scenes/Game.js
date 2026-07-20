@@ -610,7 +610,6 @@ export class Game extends Phaser.Scene {
         }
         
         const el = this.cycleElements[this.cycleIndex];
-        this.duelHistory.logMessage(`The Cycle rotates to: [${el.toUpperCase()}]`);
 
         // Rotate graphic dial
         this.tweens.add({
@@ -674,8 +673,64 @@ export class Game extends Phaser.Scene {
         this.spellEffects.setupParticles();
     }
 
-    triggerSpellVisual(spell, startX, startY, endX, endY, onComplete) {
-        this.spellEffects.playSpellCast(spell, startX, startY, endX, endY, onComplete);
+    triggerSpellCastAnimation(spell, startX, startY, onComplete) {
+        this.spellEffects.playCastAnimation(spell, startX, startY, onComplete);
+    }
+
+    fireSpellProjectiles(attackerId, defenderId, attackerSpell, defenderSpell, drainTargets, onComplete) {
+        const w = this.scale.width;
+        const h = this.scale.height;
+
+        let completed = 0;
+        let expected = 0;
+
+        const checkDone = () => {
+            completed++;
+            if (completed >= expected && onComplete) onComplete();
+        };
+
+        const getPos = (id) => {
+            if (id === this.getLocalPlayerId()) return { x: w / 2, y: h - 50, avatarX: w / 2, avatarY: h - 150 };
+            const targetPos = this.getPlayerPositionIndex(id);
+            if (targetPos === 1) return { x: 50, y: h / 2, avatarX: 100, avatarY: h / 2 };
+            if (targetPos === 2) return { x: w / 2, y: 50, avatarX: w / 2, avatarY: 150 };
+            if (targetPos === 3) return { x: w - 50, y: h / 2, avatarX: w - 100, avatarY: h / 2 };
+            return { x: w / 2, y: h / 2, avatarX: w / 2, avatarY: h / 2 }; 
+        };
+
+        const attPos = getPos(attackerId);
+        const defPos = getPos(defenderId);
+
+        if (attackerSpell) {
+            let tx = defPos.avatarX;
+            let ty = defPos.avatarY;
+            if (drainTargets && drainTargets.length > 0) {
+                expected += drainTargets.length;
+                drainTargets.forEach(card => {
+                    this.spellEffects.playProjectileAndImpact(attackerSpell, attPos.x, attPos.y, card.x, card.y, checkDone);
+                });
+            } else {
+                expected++;
+                if (attackerSpell.damage === 0 && attackerSpell.drain === 0 && attackerSpell.name !== 'Scour' && attackerSpell.name !== 'Hurricane') {
+                    tx = attPos.avatarX;
+                    ty = attPos.avatarY;
+                }
+                this.spellEffects.playProjectileAndImpact(attackerSpell, attPos.x, attPos.y, tx, ty, checkDone);
+            }
+        }
+
+        if (defenderSpell) {
+            expected++;
+            let tx = attPos.avatarX;
+            let ty = attPos.avatarY;
+            if (defenderSpell.damage === 0 && defenderSpell.drain === 0 && defenderSpell.name !== 'Scour' && defenderSpell.name !== 'Hurricane') {
+                tx = defPos.avatarX;
+                ty = defPos.avatarY;
+            }
+            this.spellEffects.playProjectileAndImpact(defenderSpell, defPos.x, defPos.y, tx, ty, checkDone);
+        }
+
+        if (expected === 0 && onComplete) onComplete();
     }
 
     drawCycleIndicator() {
@@ -2139,7 +2194,7 @@ export class Game extends Phaser.Scene {
                     }
                 }
                 
-                this.triggerSpellVisual(spell, w / 2, h - 50, tx, ty, () => {
+                this.triggerSpellCastAnimation(spell, w / 2, h - 50, () => {
                     this.combat.initiateAttack(localPlayer, targetId, spell);
                 });
             };
