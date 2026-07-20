@@ -56,14 +56,19 @@ export class SpellEffectsPlayer {
             visual = this.scene.add.sprite(startX, startY, textureKey);
             visual.play(projConfig.animKey);
             
-            // Calculate scale to fit 64x64 baseline based on the texture's original size
+            // Scale to fit the configured size while preserving aspect ratio
             const baseSize = projConfig.size || 64;
-            visual.displayWidth = baseSize;
-            visual.displayHeight = baseSize;
+            const frameW = visual.width;
+            const frameH = visual.height;
+            const scaleFactor = baseSize / Math.max(frameW, frameH);
+            visual.setScale(scaleFactor);
 
-            // Rotate to face target
-            const angle = Phaser.Math.Angle.Between(startX, startY, endX, endY);
-            visual.setRotation(angle);
+            // Only rotate directional sprites (arrows and beam-like spells)
+            const isDirectional = textureKey.includes('arrow') || textureKey.includes('spell');
+            if (isDirectional) {
+                const angle = Phaser.Math.Angle.Between(startX, startY, endX, endY);
+                visual.setRotation(angle);
+            }
         } else {
             visual = this.scene.add.circle(startX, startY, projConfig.size || 20, projConfig.color);
             visual.setStrokeStyle(4, 0xffffff);
@@ -103,14 +108,25 @@ export class SpellEffectsPlayer {
             let textureKey = impact.animKey.replace('anim_', '');
             let impactSprite = this.scene.add.sprite(x, y, textureKey);
             
-            // Base size for impacts can be a bit larger, e.g. 128
+            // Scale to fit the configured size while preserving aspect ratio
             const impactSize = impact.size || 128;
-            impactSprite.displayWidth = impactSize;
-            impactSprite.displayHeight = impactSize;
+            const frameW = impactSprite.width;
+            const frameH = impactSprite.height;
+            const scaleFactor = impactSize / Math.max(frameW, frameH);
+            impactSprite.setScale(scaleFactor);
             
             impactSprite.play(impact.animKey);
+            
+            // Destroy on animation complete for non-looping anims
             impactSprite.on('animationcomplete', () => {
                 impactSprite.destroy();
+            });
+            
+            // Fallback: always destroy after a timeout in case animation loops forever
+            this.scene.time.delayedCall(1500, () => {
+                if (impactSprite && impactSprite.active) {
+                    impactSprite.destroy();
+                }
             });
         }
 
