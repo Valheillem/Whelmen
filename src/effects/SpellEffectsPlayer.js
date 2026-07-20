@@ -109,7 +109,10 @@ export class SpellEffectsPlayer {
         
         if (impact.animKey) {
             let textureKey = impact.animKey.replace('anim_', '');
-            let impactSprite = this.scene.add.sprite(x, y, textureKey);
+            
+            const finalX = x + (impact.offsetX || 0);
+            const finalY = y + (impact.offsetY || 0);
+            let impactSprite = this.scene.add.sprite(finalX, finalY, textureKey);
             
             // Scale to fit the configured size while preserving aspect ratio
             const impactSize = impact.size || 128;
