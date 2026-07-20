@@ -2758,7 +2758,7 @@ export class Game extends Phaser.Scene {
             this.onlineManager.syncToFirebase('init');
 
             // Host goes first
-            this.startTurn('player');
+            this.startTurn(this.myRole);
         }
 
         // Both host and guest listen for state changes

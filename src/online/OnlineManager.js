@@ -17,7 +17,7 @@ export class OnlineManager {
             this.syncToFirebase('init');
 
             // Host goes first
-            this.scene.startTurn('player');
+            this.scene.startTurn(this.scene.myRole);
         }
 
         // Both host and guest listen for state changes
