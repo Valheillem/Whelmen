@@ -1426,6 +1426,7 @@ export class Game extends Phaser.Scene {
 
             let x = 0, y = 0, angle = 0;
             if (pos === 0) {
+                const startX = 30;
                 x = startX - totalW / 2 + index * spaceX;
                 y = 90 + curveY;
                 angle = rotDeg;
@@ -1779,7 +1780,7 @@ export class Game extends Phaser.Scene {
         
         let relX = 0, relY = 0;
         if (posIndex === 0) {
-            relX = 60 - totalW / 2 + index * handSpaceX;
+            relX = 30 - totalW / 2 + index * handSpaceX;
             relY = -20 + curveOffset;
         } else if (posIndex === 2) {
             relX = 150 - totalW / 2 + index * handSpaceX;
