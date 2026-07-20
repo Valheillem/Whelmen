@@ -22,7 +22,7 @@ export class SpellEffectsPlayer {
     }
 
     playCastAnimation(spell, startX, startY, onComplete) {
-        let effect = this.registry[spell.name] || this.registry['DEFAULT_SPELL_EFFECT'];
+        let effect = getSpellEffect(spell.name);
         if (effect.castAnim) {
             let castSprite = this.scene.add.sprite(startX, startY, 'magic_circle').setDepth(100);
             
@@ -43,7 +43,7 @@ export class SpellEffectsPlayer {
     }
 
     playProjectileAndImpact(spell, startX, startY, endX, endY, onComplete) {
-        let effect = this.registry[spell.name] || this.registry['DEFAULT_SPELL_EFFECT'];
+        let effect = getSpellEffect(spell.name);
         
         if (effect.projectile) {
             this.playProjectile(spell, effect, startX, startY, endX, endY, onComplete);
