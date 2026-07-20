@@ -62,7 +62,11 @@ export class Game extends Phaser.Scene {
             { key: 'explosion_vector_sprite_effects_3', w: 496, h: 496, f: 8 },
             { key: 'earth_shield', w: 720, h: 720, f: 8 },
             { key: 'water1', w: 320, h: 180, f: 48 },
-            { key: 'slash_sprite_cartoon_effects_2', w: 496, h: 496, f: 5 }
+            { key: 'slash_sprite_cartoon_effects_2', w: 496, h: 496, f: 5 },
+            { key: 'fire_spell', w: 640, h: 360, f: 8 },
+            { key: 'earth_fissure', w: 800, h: 480, f: 8 },
+            { key: 'wind_spell', w: 640, h: 360, f: 12 },
+            { key: 'water6', w: 450, h: 300, f: 12 }
         ];
         
         this.spriteMeta.forEach(meta => {
