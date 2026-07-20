@@ -99,17 +99,17 @@ export class ContestAIAgent {
                 this.scene.updatePlayerLifeDisplay(aiId);
                 this.scene.updateDeckDiscardDisplay();
 
-                this.scene.logMessage(`${aiId.toUpperCase()} casts: ${bestSpell.name}!`);
-
                 const w = this.scene.scale.width;
                 const requiresTarget = bestSpell.damage > 0 || bestSpell.drain > 0;
                 
                 if (!requiresTarget) {
+                    this.scene.logMessage(`${aiId.toUpperCase()} casts: ${bestSpell.name}!`);
                     // Self-cast: shield/draw only, no opponent involved
                     this.scene.spellEffects.playSelfCastEffect(bestSpell, w / 2 + 100, 200, () => {
                         this.scene.combat.resolveSelfCast(aiId, bestSpell);
                     });
                 } else {
+                    this.scene.logMessage(`${aiId.toUpperCase()} casts: ${bestSpell.name} targeting ${bestTargetId.toUpperCase()}!`);
                     this.scene.triggerSpellVisual(bestSpell, w / 2 + 100, 200, w / 2 + 100, 500, () => {
                         this.scene.combat.initiateAttack(aiId, bestTargetId, bestSpell);
                     });

@@ -14,7 +14,7 @@ export class DuelHistory {
     drawActionLog() {
         const w = this.scene.scale.width;
         const h = this.scene.scale.height;
-        this.titleText = this.scene.add.text(60, h - 225, 'DUEL HISTORY:', {
+        this.titleText = this.scene.add.text(10, h - 225, 'DUEL HISTORY:', {
             fontFamily: '"Inter", sans-serif',
             fontSize: '13px',
             fontWeight: '600',
@@ -23,7 +23,7 @@ export class DuelHistory {
         });
 
         this.scene.allLogTextLines = [];
-        this.scene.logContainer = this.scene.add.container(60, h - 200);
+        this.scene.logContainer = this.scene.add.container(0, h - 200);
 
         // Drawer backing
         const logBg = this.scene.add.graphics();
@@ -41,7 +41,7 @@ export class DuelHistory {
         // Viewport bounds: X = 60 + 8, Y = h - 200 + 10, Width = 224, Height = 180
         const maskShape = this.scene.make.graphics();
         maskShape.fillStyle(0xffffff);
-        maskShape.fillRoundedRect(68, h - 190, 344, 180, 8);
+        maskShape.fillRoundedRect(8, h - 190, 344, 180, 8);
         const mask = maskShape.createGeometryMask();
         this.scene.logScrollContainer.setMask(mask);
 
