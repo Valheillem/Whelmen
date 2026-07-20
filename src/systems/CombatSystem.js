@@ -24,7 +24,7 @@ export class CombatSystem {
                 this.scene.checkTurnContinuation();
                 return;
             }
-            if (this.scene.turn === 'player') {
+            if (this.scene.turn === this.scene.getLocalPlayerId()) {
                 this.scene.phase = 'action';
                 this.scene.enablePlayerControls(true);
             } else {
@@ -292,7 +292,7 @@ export class CombatSystem {
 
         this.scene.logMessage(`Reaction window triggers for ${defender.toUpperCase()}!`);
 
-        if (defender === 'player') {
+        if (defender === this.scene.getLocalPlayerId()) {
             this.scene.selectedBoardMana = [];
             this.scene.updateComboPreview();
             this.scene.enablePlayerControls(true);
@@ -442,7 +442,7 @@ export class CombatSystem {
             this.scene.phase = 'discard';
             this.scene.enablePlayerControls(false);
 
-            if (who === (this.scene.myRole === "host" || this.scene.mode !== "online" ? "player" : this.scene.myRole)) {
+            if (who === (this.scene.getLocalPlayerId())) {
                 this.scene.cardsToDiscardCount = amount;
                 this.scene.promptDiscardSelection();
             } else {
@@ -465,7 +465,7 @@ export class CombatSystem {
                     this.scene.pendingExtraAction = false;
                     this.scene.manaPlacedThisTurn = false; this.scene.spellCastThisTurn = false;
                     this.scene.logMessage(`${this.scene.turn.toUpperCase()} gets another action!`);
-                    if (this.scene.turn === 'player') {
+                    if (this.scene.turn === this.scene.getLocalPlayerId()) {
                         this.scene.phase = 'action';
                         this.scene.enablePlayerControls(true);
                     } else {

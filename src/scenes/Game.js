@@ -20,6 +20,10 @@ export class Game extends Phaser.Scene {
         document.body.classList.add('in-game');
         // Attempt to lock orientation to landscape for the game board
         try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
+
+    getLocalPlayerId() {
+        return this.mode === 'online' ? this.myRole : 'player';
+    }
         // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
         this.mode = data?.mode || 'ai';
         this.lobbyCode = data?.lobbyCode || null;
@@ -249,8 +253,8 @@ export class Game extends Phaser.Scene {
         }
         
         // For backwards compatibility in other modules until refactored:
-        Object.defineProperty(this, 'player', { configurable: true, get: () => this.players[this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole] || this.players[this.playerIds[0]] });
-        Object.defineProperty(this, 'ai', { configurable: true, get: () => this.players[this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole))] || this.players[this.playerIds[1]] });
+        Object.defineProperty(this, 'player', { configurable: true, get: () => this.players[this.getLocalPlayerId()] });
+        Object.defineProperty(this, 'ai', { configurable: true, get: () => { const local = this.getLocalPlayerId(); const oppId = this.playerIds.find(p => p !== local) || this.playerIds[1]; return this.players[oppId]; }});
 
         // Spells Selected by player for casting
         this.selectedBoardMana = [];
@@ -430,7 +434,7 @@ export class Game extends Phaser.Scene {
         this.selectedBoardMana = [];
         this.updateComboPreview();
 
-        const isLocal = who === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        const isLocal = who === this.getLocalPlayerId();
         const displayName = (this.mode === 'online' && isLocal) ? 'YOUR' : who.toUpperCase() + "'S";
         this.duelHistory.logMessage(`--- ${displayName} TURN ---`);
 
@@ -462,19 +466,19 @@ export class Game extends Phaser.Scene {
                 this.duelHistory.logMessage(`${who.toUpperCase()} lost a hand mana from drawing!`);
             }
 
-            if (who === 'player') {
-                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            if (who === this.getLocalPlayerId()) {
+                this.updatePlayerHandDisplay(this.getLocalPlayerId());
+                this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+                this.updatePlayerLifeDisplay(this.getLocalPlayerId());
             } else {
-                this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-                this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-                this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+                this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
+                this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
+                this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
             }
         }
 
         // Toggle action controls
-        if (who === 'player') {
+        if (who === this.getLocalPlayerId()) {
             this.enablePlayerControls(true);
             if (this.mode === 'online') {
                 this.duelHistory.logMessage('It is your turn. Choose an action.');
@@ -550,7 +554,7 @@ export class Game extends Phaser.Scene {
             this.enablePlayerControls(false);
             if (this.playerIds.length === 1) {
                 const winner = this.playerIds[0];
-                this.gameOverScreen.showGameOver(winner === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole) ? 'VICTORY' : 'DEFEAT');
+                this.gameOverScreen.showGameOver(winner === (this.getLocalPlayerId()) ? 'VICTORY' : 'DEFEAT');
             } else {
                 this.gameOverScreen.showGameOver('DEFEAT'); // Draw/All dead
             }
@@ -669,7 +673,7 @@ export class Game extends Phaser.Scene {
             // (ai_contest) where multiple players can still be alive. Just log elimination
             // and return true; endTurn() already handles the final win check via
             // `this.playerIds.length <= 1` after filtering out dead players.
-            const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+            const localId = this.getLocalPlayerId();
             if (who === localId) {
                 this.duelHistory.logMessage(`--- YOU HAVE BEEN ELIMINATED ---`);
             } else {
@@ -773,7 +777,7 @@ export class Game extends Phaser.Scene {
 
 
     getPlayerPositionIndex(pid) {
-        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const localId = this.getLocalPlayerId();
         if (pid === localId) return 0;
         
         let localIdx = this.playerIds.indexOf(localId);
@@ -1457,7 +1461,7 @@ export class Game extends Phaser.Scene {
                 angle = -90 - rotDeg;
             }
 
-            const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            const isLocal = pid === (this.getLocalPlayerId());
             const tex = isLocal ? `card_${el}` : 'card_back';
             const scaleAmt = isLocal ? 0.8 : 0.55;
 
@@ -1571,7 +1575,7 @@ export class Game extends Phaser.Scene {
                 }).setOrigin(0.5).setDepth(11);
             }
 
-            const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            const isLocal = pid === (this.getLocalPlayerId());
             if (isLocal) {
                 cardObj.setInteractive({ useHandCursor: true });
                 const selectedCount = indicesForEl.filter(i => this.selectedBoardMana.includes(i)).length;
@@ -1731,7 +1735,7 @@ export class Game extends Phaser.Scene {
         this.enablePlayerControls(false);
 
         // Calculate Start Position (from hand)
-        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const localId = this.getLocalPlayerId();
         const pGroup = this.playerGroups[localId];
         const posIndex = this.getPlayerPositionIndex(localId);
         
@@ -1813,9 +1817,9 @@ export class Game extends Phaser.Scene {
             ease: 'Power2',
             onComplete: () => {
                 phantom.destroy();
-                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerHandDisplay(this.getLocalPlayerId());
+                this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+                this.updatePlayerLifeDisplay(this.getLocalPlayerId());
                 
                 this.playElementalBurst(targetX, targetY, el);
 
@@ -1825,7 +1829,7 @@ export class Game extends Phaser.Scene {
                     this.duelHistory.logMessage(`Player's mana play deals 3 damage to AI!`);
                 }
                 // C7 Surge fix: check if opponent's oppManaPlayDamage is active (opponent played Surge)
-                const localId2 = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+                const localId2 = this.getLocalPlayerId();
                 const oppId2 = this.playerIds.find(p => p !== localId2) || this.playerIds[1];
                 if (this.players[oppId2] && this.players[oppId2].status.oppManaPlayDamage > 0) {
                     this.players[oppId2].status.oppManaPlayDamage = 0;
@@ -1918,18 +1922,18 @@ export class Game extends Phaser.Scene {
             this.sharedDiscard.push(discarded);
         }
         
-        if (who === 'player') {
-            if (source === 'hand') this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            else this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        if (who === this.getLocalPlayerId()) {
+            if (source === 'hand') this.updatePlayerHandDisplay(this.getLocalPlayerId());
+            else this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
         } else {
-            if (source === 'hand') this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-            else this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-            this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+            if (source === 'hand') this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
+            else this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
+            this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
         }
         this.updateDeckDiscardDisplay();
         
-        if (who === 'player' && source === 'board') {
+        if (who === this.getLocalPlayerId() && source === 'board') {
             this.selectedBoardMana = [];
             this.updateComboPreview();
         }
@@ -1981,9 +1985,9 @@ export class Game extends Phaser.Scene {
                 this.duelHistory.logMessage(`Player lost a hand mana from drawing!`);
             }
 
-            this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerHandDisplay(this.getLocalPlayerId());
+            this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
         }
 
         this.enablePlayerControls(false);
@@ -2010,9 +2014,9 @@ export class Game extends Phaser.Scene {
                 this.animateCardMovement(consumed, 'board', 'discard', 'player');
                 this.sharedDiscard.push(consumed);
             });
-            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerBoardDisplay(this.getLocalPlayerId());
             this.updateDeckDiscardDisplay();
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
 
             if (this.phase === 'reaction_request_active') {
                 this.phase = 'reaction_response';
@@ -2040,8 +2044,8 @@ export class Game extends Phaser.Scene {
             this.sharedDiscard.push(consumed);
         });
 
-        this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-        this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+        this.updatePlayerLifeDisplay(this.getLocalPlayerId());
         this.updateDeckDiscardDisplay();
 
         this.selectedBoardMana = [];
@@ -2050,7 +2054,7 @@ export class Game extends Phaser.Scene {
         this.duelHistory.logMessage(`Player casts: ${spell.name}!`);
 
         // Target Selection
-        const localPlayer = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const localPlayer = this.getLocalPlayerId();
         const opponents = this.playerIds.filter(p => p !== localPlayer);
         
         // Calculate synergy to determine if targeting is needed
@@ -2179,7 +2183,7 @@ export class Game extends Phaser.Scene {
                         this.pendingExtraAction = false;
                         this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                         this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
-                        if (this.turn === 'player') { this.phase = 'action'; this.enablePlayerControls(true); }
+                        if (this.turn === this.getLocalPlayerId()) { this.phase = 'action'; this.enablePlayerControls(true); }
                         else if (this.mode === 'ai_contest') { this.contestAiAgent.runAITurn(this.turn); }
                         else { this.aiAgent.runAITurn(); }
                     } else {
@@ -2263,7 +2267,7 @@ export class Game extends Phaser.Scene {
                 this.pendingExtraAction = false;
                 this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                 this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
-                if (this.turn === 'player') {
+                if (this.turn === this.getLocalPlayerId()) {
                     this.phase = 'action';
                     this.enablePlayerControls(true);
                 } else if (this.mode === 'ai_contest') {
@@ -2437,7 +2441,7 @@ export class Game extends Phaser.Scene {
                         this.pendingExtraAction = false;
                         this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                         this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
-                        if (this.turn === 'player') {
+                        if (this.turn === this.getLocalPlayerId()) {
                             this.phase = 'action';
                             this.enablePlayerControls(true);
                         } else if (this.mode === 'ai_contest') {
@@ -2461,7 +2465,7 @@ export class Game extends Phaser.Scene {
 
         this.duelHistory.logMessage(`Reaction window triggers for ${defender.toUpperCase()}!`);
 
-        if (defender === 'player') {
+        if (defender === this.getLocalPlayerId()) {
             this.selectedBoardMana = [];
             this.updateComboPreview();
             this.enablePlayerControls(true);
@@ -2589,7 +2593,7 @@ export class Game extends Phaser.Scene {
             this.phase = 'discard';
             this.enablePlayerControls(false);
 
-            if (who === 'player') {
+            if (who === this.getLocalPlayerId()) {
                 this.cardsToDiscardCount = amount;
                 this.promptDiscardSelection();
             } else {
@@ -2614,7 +2618,7 @@ export class Game extends Phaser.Scene {
                     this.pendingExtraAction = false;
                     this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                     this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
-                    if (this.turn === 'player') {
+                    if (this.turn === this.getLocalPlayerId()) {
                         this.phase = 'action';
                         this.enablePlayerControls(true);
                     } else {
@@ -2635,9 +2639,9 @@ export class Game extends Phaser.Scene {
             this.duelHistory.logMessage("Player is out of cards!");
             this.player.hand = [];
             this.player.board = [];
-            this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerHandDisplay(this.getLocalPlayerId());
+            this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
             this.checkDefeatCondition('player');
             return;
         }
@@ -2647,22 +2651,22 @@ export class Game extends Phaser.Scene {
     }
 
     discardCardFromZone(zone, index, who) {
-        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const localId = this.getLocalPlayerId();
         if (who === localId && (this.phase === 'discard' || this.phase === 'discard_request_active') && this.cardsToDiscardCount > 0) {
             const char = this.player;
             let discarded;
             if (zone === 'hand') {
                 discarded = char.hand.splice(index, 1)[0];
-                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerHandDisplay(this.getLocalPlayerId());
             } else {
                 discarded = char.board.splice(index, 1)[0];
-                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerBoardDisplay(this.getLocalPlayerId());
             }
 
             this.animateCardMovement(discarded, zone, 'discard', 'player');
             this.sharedDiscard.push(discarded);
             this.updateDeckDiscardDisplay();
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
 
             this.cardsToDiscardCount--;
             this.playSound('fire');
@@ -2722,7 +2726,7 @@ export class Game extends Phaser.Scene {
 
 
     checkTurnContinuation() {
-        if (this.turn === 'player' && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
+        if (this.turn === this.getLocalPlayerId() && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
             this.phase = 'action';
             this.enablePlayerControls(true);
         } else if (this.turn.startsWith('ai') && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
@@ -2777,7 +2781,7 @@ export class Game extends Phaser.Scene {
             discard: this.sharedDiscard.slice(),
             cycleIndex: this.cycleIndex,
             firstCycleIndex: this.firstCycleIndex,
-            turn: this.turn === 'player' ? myKey : oppKey,
+            turn: this.turn === this.getLocalPlayerId() ? myKey : oppKey,
             phase: this.phase,
             actionUsed: this.actionUsedThisTurn || false,
             manaPlacedThisTurn: this.manaPlacedThisTurn || false,
@@ -3158,13 +3162,13 @@ export class Game extends Phaser.Scene {
         }
         
         if (toStr === 'hand') {
-            if (who === 'player') {
+            if (who === this.getLocalPlayerId()) {
                 this.playerIncomingHandCards = (this.playerIncomingHandCards || 0) + 1;
             } else {
                 this.aiIncomingHandCards = (this.aiIncomingHandCards || 0) + 1;
             }
         } else if (toStr === 'board') {
-            if (who === 'player') {
+            if (who === this.getLocalPlayerId()) {
                 this.playerIncomingBoardCards = (this.playerIncomingBoardCards || 0) + 1;
             } else {
                 this.aiIncomingBoardCards = (this.aiIncomingBoardCards || 0) + 1;
@@ -3180,10 +3184,10 @@ export class Game extends Phaser.Scene {
             
             // Map who parameter ('player' / 'ai') to a pid
             let pid = player;
-            if (player === 'player') {
-                pid = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+            if (player === this.getLocalPlayerId()) {
+                pid = this.getLocalPlayerId();
             } else if (player === 'ai') {
-                pid = this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1];
+                pid = this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1];
             }
             // If they passed a direct pid (like guest1) it stays as is
             
@@ -3245,7 +3249,7 @@ export class Game extends Phaser.Scene {
         const start = getZoneCoords(fromStr, who);
         const end = getZoneCoords(toStr, who);
         
-        const isLocal = who === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        const isLocal = who === this.getLocalPlayerId();
         let tex = `card_${element}`;
         if (!isLocal && toStr === 'hand' && fromStr === 'deck') {
             tex = 'card_back';
@@ -3263,14 +3267,14 @@ export class Game extends Phaser.Scene {
             ease: 'Cubic.easeOut',
             onComplete: () => {
                 if (toStr === 'hand') {
-                    if (who === 'player') {
+                    if (who === this.getLocalPlayerId()) {
                         this.playerIncomingHandCards = Math.max(0, this.playerIncomingHandCards - 1);
                     } else {
                         this.aiIncomingHandCards = Math.max(0, this.aiIncomingHandCards - 1);
                     }
                     this.updatePlayerHandDisplay(who);
                 } else if (toStr === 'board') {
-                    if (who === 'player') {
+                    if (who === this.getLocalPlayerId()) {
                         this.playerIncomingBoardCards = Math.max(0, this.playerIncomingBoardCards - 1);
                     } else {
                         this.aiIncomingBoardCards = Math.max(0, this.aiIncomingBoardCards - 1);
