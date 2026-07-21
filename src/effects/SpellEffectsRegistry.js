@@ -47,7 +47,7 @@ export const SPELL_EFFECTS = {
     },
     'Ignition': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        impact: { animKey: 'anim_flame4', targetOverride: 'center', size: 800 },
+        impact: { animKey: 'anim_flame', targetOverride: 'center', size: 800 },
         sound: { type: 'fire' }
     },
     'Haze': {

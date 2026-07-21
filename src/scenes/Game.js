@@ -80,7 +80,7 @@ export class Game extends Phaser.Scene {
             { key: 'earth_fissure', w: 800, h: 480, f: 8 },
             { key: 'wind_spell', w: 640, h: 360, f: 12 },
             { key: 'water6', w: 450, h: 300, f: 12 },
-            { key: 'flame4', w: 339, h: 404, f: 53 },
+            { key: 'flame', w: 640, h: 640, f: 12 },
             { key: 'magic2', w: 496, h: 496, f: 6 },
             { key: 'slash_7', w: 496, h: 496, f: 10 },
             { key: 'water_shield', w: 720, h: 720, f: 8 },
