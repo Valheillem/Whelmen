@@ -818,10 +818,10 @@ export class Game extends Phaser.Scene {
 
         // 4 Elements around the circle
         const ringPositions = [
-            { x: 0, y: -50, color: 0xdf1b2d, icon: 'icon_fire', label: 'FIRE' },
-            { x: 50, y: 0, color: 0xa67032, icon: 'icon_earth', label: 'EARTH' },
-            { x: 0, y: 50, color: 0xbf8cff, icon: 'icon_air', label: 'AIR' },
-            { x: -50, y: 0, color: 0x1084e9, icon: 'icon_water', label: 'WATER' }
+            { x: 0, y: -60, color: 0xdf1b2d, icon: 'icon_fire', label: 'FIRE' },
+            { x: 60, y: 0, color: 0xa67032, icon: 'icon_earth', label: 'EARTH' },
+            { x: 0, y: 60, color: 0xbf8cff, icon: 'icon_air', label: 'AIR' },
+            { x: -60, y: 0, color: 0x1084e9, icon: 'icon_water', label: 'WATER' }
         ];
 
         ringPositions.forEach((pos) => {
