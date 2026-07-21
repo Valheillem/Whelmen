@@ -63,7 +63,7 @@ export const SPELL_EFFECTS = {
     },
     'Quake': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        impact: { animKey: 'anim_ground_hit', targetOverride: 'center', size: 800 },
+        impact: { animKey: 'anim_ground_hit', targetOverride: 'center', size: 800, timeScale: 0.5, screenShake: { intensity: 4, duration: 250 } },
         sound: { type: 'earth' }
     },
     'Dust': {
@@ -80,7 +80,7 @@ export const SPELL_EFFECTS = {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
         impact: [
             { animKey: 'anim_leaf_shield', targetOverride: 'center', size: 440, repeat: 0 },
-            { animKey: 'anim_water_shield', targetOverride: 'center', size: 440, repeat: 0 }
+            { animKey: 'anim_water_shield', targetOverride: 'center', size: 440, repeat: 0, timeScale: 0.5 }
         ],
         sound: { type: 'water' }
     }
