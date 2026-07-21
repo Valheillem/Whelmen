@@ -82,8 +82,8 @@ export class Game extends Phaser.Scene {
             { key: 'water6', w: 450, h: 300, f: 12 },
             { key: 'flame4', w: 339, h: 404, f: 53 },
             { key: 'magic2', w: 496, h: 496, f: 6 },
-            { key: 'slash_7', w: 1280, h: 720, f: 6 },
-            { key: 'water4', w: 1800, h: 1200, f: 16 },
+            { key: 'slash_7', w: 496, h: 496, f: 10 },
+            { key: 'water_shield', w: 720, h: 720, f: 8 },
             { key: 'typhoon', w: 800, h: 800, f: 12 },
             { key: 'ground_hit', w: 1200, h: 800, f: 8 },
             { key: 'leaf_shield', w: 720, h: 720, f: 16 }

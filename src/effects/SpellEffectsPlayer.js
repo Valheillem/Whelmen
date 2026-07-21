@@ -144,8 +144,14 @@ export class SpellEffectsPlayer {
             if (impact && impact.animKey) {
             let textureKey = impact.animKey.replace('anim_', '');
             
-            const finalX = x + (impact.offsetX || 0);
-            const finalY = y + (impact.offsetY || 0);
+            let finalX = x + (impact.offsetX || 0);
+            let finalY = y + (impact.offsetY || 0);
+            
+            if (impact.targetOverride === 'center') {
+                finalX = this.scene.scale.width / 2 - 20 + (impact.offsetX || 0);
+                finalY = this.scene.scale.height / 2 - 40 + (impact.offsetY || 0);
+            }
+            
             let impactSprite = this.scene.add.sprite(finalX, finalY, textureKey).setDepth(100);
             
             if (impact.alpha !== undefined) impactSprite.setAlpha(impact.alpha);
