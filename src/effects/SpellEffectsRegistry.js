@@ -68,7 +68,7 @@ export const SPELL_EFFECTS = {
     },
     'Dust': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        impact: { animKey: 'anim_slash_7', targetOverride: 'center', size: 1000 },
+        impact: { animKey: 'anim_slash_7', targetOverride: 'center', size: 500, offsetY: -100 },
         sound: { type: 'earth' }
     },
     'Typhoon': {
