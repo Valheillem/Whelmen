@@ -836,15 +836,15 @@ export class Game extends Phaser.Scene {
         });
 
         // Center round indicator (roman numeral)
-        this.cycleRoundText = this.add.text(0, 0, this.toRoman(this.round), {
+        this.cycleRoundText = this.add.text(w / 2 - 20, h / 2 - 40, this.toRoman(this.round), {
             fontFamily: '"Cinzel", serif',
             fontSize: '48px',
             fontWeight: '800',
             color: '#1a1a1a',
             stroke: '#d4af37',
             strokeThickness: 2
-        }).setOrigin(0.5);
-        this.cycleContainer.add(this.cycleRoundText);
+        }).setOrigin(0.5).setDepth(20);
+        // (Not added to cycleContainer so it doesn't spin)
 
         this.updateCycleDisplayColor(this.cycleElements[this.cycleIndex]);
     }
@@ -856,8 +856,7 @@ export class Game extends Phaser.Scene {
                       element === 'water' ? 0x257ee4 :
                       element === 'earth' ? 0x4db15b :
                       element === 'air' ? 0x9247d5 : 0x4a4a4a; // neutral fallback
-
-        this.bgSigil.setTint(color);
+        this.bgSigil.setTintFill(color);
     }
 
     triggerCycleParticles(element) {
@@ -940,14 +939,45 @@ export class Game extends Phaser.Scene {
     }
 
     updateTurnHighlights() {
+        if (!this.turnIndicatorG) {
+            this.turnIndicatorG = this.add.graphics();
+            this.turnIndicatorG.setDepth(15);
+        }
+        this.turnIndicatorG.clear();
+
         this.playerIds.forEach(pid => {
             const char = this.players[pid];
             const pos = this.getPlayerPositionIndex(pid);
             char.nameHighlightG.clear();
-            // Don't draw the highlight for the local player, as they don't have a visible name text
-            if (this.turn === pid && pos !== 0) {
-                char.nameHighlightG.fillStyle(0xd4af37, 0.4);
-                char.nameHighlightG.fillRoundedRect(char.nameT.x - 10, char.nameT.y - 10, char.nameT.width + 20, char.nameT.height + 20, 6);
+            
+            if (this.turn === pid) {
+                // Don't draw the highlight box for the local player, as they don't have a visible name text
+                if (pos !== 0) {
+                    char.nameHighlightG.fillStyle(0xd4af37, 0.4);
+                    char.nameHighlightG.fillRoundedRect(char.nameT.x - 10, char.nameT.y - 10, char.nameT.width + 20, char.nameT.height + 20, 6);
+                }
+
+                // Draw cardinal direction indicator pointing to the active player
+                const cx = this.scale.width / 2 - 20;
+                const cy = this.scale.height / 2 - 40;
+                let angle = 0;
+                if (pos === 0) angle = Math.PI / 2; // South
+                else if (pos === 1) angle = -Math.PI / 2; // North
+                else if (pos === 2) angle = Math.PI; // West
+                else if (pos === 3) angle = 0; // East
+
+                this.turnIndicatorG.fillStyle(0xd4af37, 0.9);
+                const radius = 95; // Just outside the element ring
+                const tx = cx + Math.cos(angle) * radius;
+                const ty = cy + Math.sin(angle) * radius;
+                
+                const back = radius - 18;
+                const bx = cx + Math.cos(angle) * back;
+                const by = cy + Math.sin(angle) * back;
+                const perpX = Math.cos(angle + Math.PI/2) * 12;
+                const perpY = Math.sin(angle + Math.PI/2) * 12;
+                
+                this.turnIndicatorG.fillTriangle(tx, ty, bx + perpX, by + perpY, bx - perpX, by - perpY);
             }
         });
     }
