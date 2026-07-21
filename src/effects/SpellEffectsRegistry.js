@@ -44,6 +44,39 @@ export const SPELL_EFFECTS = {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
         impact: { animKey: 'anim_water6', targetOverride: 'center', size: 300, offsetX: -30, offsetY: -60 },
         sound: { type: 'water' }
+    },
+    'Ignition': {
+        castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
+        impact: { animKey: 'anim_flame4', targetOverride: 'center', size: 800 },
+        sound: { type: 'fire' }
+    },
+    'Haze': {
+        castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
+        impact: { animKey: 'anim_magic2', targetOverride: 'center', size: 1000, alpha: 0.8 },
+        sound: { type: 'air' }
+    },
+    'Quake': {
+        castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
+        impact: { animKey: 'anim_ground_hit', targetOverride: 'center', size: 800 },
+        sound: { type: 'earth' }
+    },
+    'Dust': {
+        castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
+        impact: { animKey: 'anim_slash_7', targetOverride: 'center', size: 1000 },
+        sound: { type: 'earth' }
+    },
+    'Typhoon': {
+        castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
+        impact: { animKey: 'anim_typhoon', targetOverride: 'center', size: 800, growAndShrink: true, duration: 3000, repeat: -1 },
+        sound: { type: 'air' }
+    },
+    'Enrich': {
+        castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
+        impact: [
+            { animKey: 'anim_leaf_shield', targetOverride: 'center', size: 440, repeat: 0 },
+            { animKey: 'anim_water4', targetOverride: 'center', size: 440, repeat: 0 }
+        ],
+        sound: { type: 'water' }
     }
 };
 

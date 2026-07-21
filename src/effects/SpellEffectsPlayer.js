@@ -148,12 +148,31 @@ export class SpellEffectsPlayer {
             const finalY = y + (impact.offsetY || 0);
             let impactSprite = this.scene.add.sprite(finalX, finalY, textureKey).setDepth(100);
             
+            if (impact.alpha !== undefined) impactSprite.setAlpha(impact.alpha);
+            
             // Scale to fit the configured size while preserving aspect ratio
             const impactSize = impact.size || 128;
             const frameW = impactSprite.width;
             const frameH = impactSprite.height;
             const scaleFactor = impactSize / Math.max(frameW, frameH);
-            impactSprite.setScale(scaleFactor);
+            
+            if (impact.growAndShrink) {
+                impactSprite.setScale(0.1);
+                this.scene.tweens.add({
+                    targets: impactSprite,
+                    scaleX: scaleFactor,
+                    scaleY: scaleFactor,
+                    duration: impact.duration ? impact.duration / 2 : 750,
+                    ease: 'Sine.easeInOut',
+                    yoyo: true,
+                    onComplete: () => {
+                        if (impactSprite && impactSprite.active) impactSprite.destroy();
+                    }
+                });
+            } else {
+                impactSprite.setScale(scaleFactor);
+            }
+
             if (impact.timeScale) {
                 impactSprite.anims.timeScale = impact.timeScale;
             }
@@ -164,19 +183,21 @@ export class SpellEffectsPlayer {
             }
             
             // Destroy on animation complete for non-looping anims
-            impactSprite.on('animationcomplete', () => {
-                impactSprite.destroy();
-            });
-            impactSprite.on('animationrepeat', () => {
-                if (impact.repeat === 0) impactSprite.destroy();
-            });
-            
-            // Fallback: always destroy after a timeout in case animation loops forever
-            this.scene.time.delayedCall(1500, () => {
-                if (impactSprite && impactSprite.active) {
+            if (!impact.growAndShrink) {
+                impactSprite.on('animationcomplete', () => {
                     impactSprite.destroy();
-                }
-            });
+                });
+                impactSprite.on('animationrepeat', () => {
+                    if (impact.repeat === 0) impactSprite.destroy();
+                });
+                
+                // Fallback: always destroy after a timeout in case animation loops forever
+                this.scene.time.delayedCall(impact.duration || 1500, () => {
+                    if (impactSprite && impactSprite.active) {
+                        impactSprite.destroy();
+                    }
+                });
+            }
         }
 
         if (impact && impact.screenShake) {

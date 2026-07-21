@@ -79,7 +79,14 @@ export class Game extends Phaser.Scene {
             { key: 'fire_spell', w: 640, h: 360, f: 8 },
             { key: 'earth_fissure', w: 800, h: 480, f: 8 },
             { key: 'wind_spell', w: 640, h: 360, f: 12 },
-            { key: 'water6', w: 450, h: 300, f: 12 }
+            { key: 'water6', w: 450, h: 300, f: 12 },
+            { key: 'flame4', w: 339, h: 404, f: 53 },
+            { key: 'magic2', w: 496, h: 496, f: 6 },
+            { key: 'slash_7', w: 1280, h: 720, f: 6 },
+            { key: 'water4', w: 1800, h: 1200, f: 16 },
+            { key: 'typhoon', w: 800, h: 800, f: 12 },
+            { key: 'ground_hit', w: 1200, h: 800, f: 8 },
+            { key: 'leaf_shield', w: 720, h: 720, f: 16 }
         ];
         
         this.spriteMeta.forEach(meta => {
@@ -140,7 +147,7 @@ export class Game extends Phaser.Scene {
             this.spriteMeta.forEach(meta => {
                 if (!this.anims.exists(`anim_${meta.key}`)) {
                     // Only projectiles that travel across the screen should loop infinitely
-                    const isLooping = meta.key.includes('ball') || meta.key.includes('arrow') || meta.key.includes('spell') || meta.key.includes('shield');
+                    const isLooping = meta.key.includes('ball') || meta.key.includes('arrow') || meta.key.includes('spell') || meta.key.includes('shield') || meta.key === 'typhoon';
                     this.anims.create({
                         key: `anim_${meta.key}`,
                         frames: this.anims.generateFrameNumbers(meta.key, { start: 0, end: meta.f - 1 }),
