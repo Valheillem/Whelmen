@@ -706,8 +706,36 @@ export class Game extends Phaser.Scene {
             let ty = defPos.avatarY;
             if (drainTargets && drainTargets.length > 0) {
                 expected += drainTargets.length;
-                drainTargets.forEach(card => {
-                    this.spellEffects.playProjectileAndImpact(attackerSpell, attPos.x, attPos.y, card.x, card.y, checkDone);
+                drainTargets.forEach(elementStr => {
+                    let targetX = defPos.x;
+                    let targetY = defPos.y;
+                    
+                    const defChar = this.players[defenderId];
+                    if (defChar) {
+                        const uniqueElements = [...new Set(defChar.board)];
+                        const elIndex = uniqueElements.indexOf(elementStr);
+                        if (elIndex !== -1) {
+                            const centerX = w / 2 - 20;
+                            const centerY = h / 2 - 40;
+                            const spaceX = 75;
+                            const pos = this.getPlayerPositionIndex(defenderId);
+                            
+                            if (pos === 0) {
+                                targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                                targetY = centerY + 180;
+                            } else if (pos === 1) {
+                                targetX = centerX - 250;
+                                targetY = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                            } else if (pos === 2) {
+                                targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                                targetY = centerY - 180;
+                            } else if (pos === 3) {
+                                targetX = centerX + 250;
+                                targetY = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                            }
+                        }
+                    }
+                    this.spellEffects.playProjectileAndImpact(attackerSpell, attPos.x, attPos.y, targetX, targetY, checkDone);
                 });
             } else {
                 expected++;
