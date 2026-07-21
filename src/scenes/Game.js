@@ -497,16 +497,18 @@ export class Game extends Phaser.Scene {
     }
 
     startRound() {
+        const alivePlayers = this.playerIds.filter(pid => this.players[pid].hand.length > 0 || this.players[pid].board.length > 0);
+
         // Aegis: Rotate Shields (round-level event — stays here)
-        if (this.playerIds.some(pid => this.players[pid].status.rotateShields > 0)) {
+        if (alivePlayers.some(pid => this.players[pid].status.rotateShields > 0)) {
             // Rotate clockwise
-            const firstShield = this.players[this.playerIds[0]].shield;
-            for (let i = 0; i < this.playerIds.length - 1; i++) {
-                this.players[this.playerIds[i]].shield = this.players[this.playerIds[i+1]].shield;
+            const firstShield = this.players[alivePlayers[0]].shield;
+            for (let i = 0; i < alivePlayers.length - 1; i++) {
+                this.players[alivePlayers[i]].shield = this.players[alivePlayers[i+1]].shield;
             }
-            this.players[this.playerIds[this.playerIds.length - 1]].shield = firstShield;
+            this.players[alivePlayers[alivePlayers.length - 1]].shield = firstShield;
             
-            this.playerIds.forEach(pid => this.players[pid].status.rotateShields = 0);
+            alivePlayers.forEach(pid => this.players[pid].status.rotateShields = 0);
             this.duelHistory.logMessage("Aegis rotates the Shields clockwise!");
         }
         // C17 fix: per-player status decrements moved to startTurn() so each player's
@@ -517,7 +519,7 @@ export class Game extends Phaser.Scene {
         // Rotate Cycle
         this.rotateCycle();
 
-        // Enforce hand limit cleanup
+        // Enforce hand limit cleanup (can still loop over playerIds since it just caps arrays)
         this.playerIds.forEach(pid => {
             this.cleanupHandLimit(pid);
         });
@@ -525,20 +527,17 @@ export class Game extends Phaser.Scene {
         // Check defeat
         this.playerIds.forEach(pid => {
             if (this.checkDefeatCondition(pid)) {
-                // If this is FFA and someone dies, maybe they should be removed from turn order?
-                // But wait, the existing logic just calls checkDefeatCondition which might return and transition to gameover.
-                // In FFA, game over happens when 1 player is left. We need to implement this.
+                // Logged inside checkDefeatCondition
             }
         });
         
-        // Remove dead players from turn order
-        this.playerIds = this.playerIds.filter(pid => this.players[pid].hand.length > 0 || this.players[pid].board.length > 0);
+        const alivePlayers = this.playerIds.filter(pid => this.players[pid].hand.length > 0 || this.players[pid].board.length > 0);
         
-        if (this.playerIds.length <= 1) {
+        if (alivePlayers.length <= 1) {
             this.phase = 'gameover';
             this.enablePlayerControls(false);
-            if (this.playerIds.length === 1) {
-                const winner = this.playerIds[0];
+            if (alivePlayers.length === 1) {
+                const winner = alivePlayers[0];
                 this.gameOverScreen.showGameOver(winner === (this.getLocalPlayerId()) ? 'VICTORY' : 'DEFEAT');
             } else {
                 this.gameOverScreen.showGameOver('DEFEAT'); // Draw/All dead
@@ -549,17 +548,24 @@ export class Game extends Phaser.Scene {
             return;
         }
 
-        // Toggle turn
+        // Toggle turn (skipping dead players)
         let currentIndex = this.playerIds.indexOf(this.turn);
         let nextIndex = currentIndex + 1;
 
-        // Check for round increment
-        if (nextIndex >= this.playerIds.length) {
-            nextIndex = 0;
-            this.round++;
-            if (this.roundText) this.roundText.setText(`ROUND ${this.round}`);
-            this.duelHistory.logMessage(`=== ROUND ${this.round} ===`);
-            this.startRound();
+        while (true) {
+            if (nextIndex >= this.playerIds.length) {
+                nextIndex = 0;
+                this.round++;
+                if (this.roundText) this.roundText.setText(`ROUND ${this.round}`);
+                this.duelHistory.logMessage(`=== ROUND ${this.round} ===`);
+                this.startRound();
+            }
+            const nextTurn = this.playerIds[nextIndex];
+            const char = this.players[nextTurn];
+            if ((char.hand.length + char.board.length) > 0) {
+                break; // Found the next alive player
+            }
+            nextIndex++;
         }
 
         const nextTurn = this.playerIds[nextIndex];
