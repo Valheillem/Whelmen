@@ -961,10 +961,10 @@ export class Game extends Phaser.Scene {
                 const cx = this.scale.width / 2 - 20;
                 const cy = this.scale.height / 2 - 40;
                 let angle = 0;
-                if (pos === 0) angle = Math.PI / 2; // South
-                else if (pos === 1) angle = -Math.PI / 2; // North
-                else if (pos === 2) angle = Math.PI; // West
-                else if (pos === 3) angle = 0; // East
+                if (pos === 0) angle = Math.PI / 2; // Bottom (South)
+                else if (pos === 1) angle = Math.PI; // Left (West)
+                else if (pos === 2) angle = -Math.PI / 2; // Top (North)
+                else if (pos === 3) angle = 0; // Right (East)
 
                 this.turnIndicatorG.fillStyle(0xd4af37, 0.9);
                 const radius = 95; // Just outside the element ring

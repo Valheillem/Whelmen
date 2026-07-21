@@ -183,13 +183,13 @@ export class SpellEffectsPlayer {
             this.scene.cameras.main.shake(impact.screenShake.duration, impact.screenShake.intensity * 0.01);
         }
         
-            if (impact.flash) {
-                this.scene.cameras.main.flash(200, 
-                    (impact.flash >> 16) & 255, 
-                    (impact.flash >> 8) & 255, 
-                    impact.flash & 255
-                );
-            }
+        if (impact && impact.flash) {
+            this.scene.cameras.main.flash(200, 
+                (impact.flash >> 16) & 255, 
+                (impact.flash >> 8) & 255, 
+                impact.flash & 255
+            );
+        }
         });
     }
 
