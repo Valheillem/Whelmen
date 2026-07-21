@@ -1,6 +1,6 @@
-import { Start } from './scenes/Start.js?v=1.2.50';
-import { Lobby } from './scenes/Lobby.js?v=1.2.50';
-import { Game } from './scenes/Game.js?v=1.2.50';
+import { Start } from './scenes/Start.js?v=1.2.51';
+import { Lobby } from './scenes/Lobby.js?v=1.2.51';
+import { Game } from './scenes/Game.js?v=1.2.51';
 
 const config = {
     type: Phaser.AUTO,

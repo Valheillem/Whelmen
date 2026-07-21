@@ -8,7 +8,7 @@ export const SPELL_EFFECTS = {
     },
     'Shell': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        impact: { animKey: 'anim_earth_shield' },
+        impact: { animKey: 'anim_earth_shield', repeat: 0, size: 250 },
         sound: { type: 'shield' }
     },
     'Stream': {
@@ -29,8 +29,10 @@ export const SPELL_EFFECTS = {
     },
     'Carapace': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
-        projectile: { animKey: 'anim_earth_shield', size: 128, speed: 400, shape: 'sprite' },
-        impact: { animKey: 'anim_earth_fissure', size: 200 },
+        impact: [
+            { animKey: 'anim_earth_shield', repeat: 0, size: 250 },
+            { animKey: 'anim_earth_fissure', size: 200 }
+        ],
         sound: { type: 'earth' }
     },
     'Gust': {

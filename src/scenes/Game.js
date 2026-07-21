@@ -48,6 +48,19 @@ export class Game extends Phaser.Scene {
         return this.mode === 'online' ? this.myRole : 'player';
     }
 
+    toRoman(num) {
+        if (num <= 0) return '';
+        const lookup = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+        let roman = '';
+        for (let i in lookup) {
+            while (num >= lookup[i]) {
+                roman += i;
+                num -= lookup[i];
+            }
+        }
+        return roman;
+    }
+
     preload() {
         this.load.image('icon_fire', 'assets/icons/Fire.png');
         this.load.image('icon_earth', 'assets/icons/Earth.png');
@@ -421,7 +434,7 @@ export class Game extends Phaser.Scene {
 
         const isLocal = who === this.getLocalPlayerId();
         const displayName = (this.mode === 'online' && isLocal) ? 'YOUR' : who.toUpperCase() + "'S";
-        this.duelHistory.logMessage(`--- ${displayName} TURN ---`);
+        // Turn announcement removed per request
 
         // Draw phase
         
@@ -555,10 +568,13 @@ export class Game extends Phaser.Scene {
         while (true) {
             if (nextIndex >= this.playerIds.length) {
                 nextIndex = 0;
+                this.time.delayedCall(400, () => {
                 this.round++;
                 if (this.roundText) this.roundText.setText(`ROUND ${this.round}`);
+                if (this.cycleRoundText) this.cycleRoundText.setText(this.toRoman(this.round));
                 this.duelHistory.logMessage(`=== ROUND ${this.round} ===`);
                 this.startRound();
+            });
             }
             const nextTurn = this.playerIds[nextIndex];
             const char = this.players[nextTurn];
@@ -631,6 +647,8 @@ export class Game extends Phaser.Scene {
 
     checkDefeatCondition(who) {
         const char = this.players[who];
+        if (char.isEliminated) return true;
+
         const totalCards = char.hand.length + char.board.length;
         if (totalCards === 0) {
             if (this.mode === 'test') {
@@ -663,6 +681,7 @@ export class Game extends Phaser.Scene {
             // (ai_contest) where multiple players can still be alive. Just log elimination
             // and return true; endTurn() already handles the final win check via
             // `this.playerIds.length <= 1` after filtering out dead players.
+            char.isEliminated = true;
             const localId = this.getLocalPlayerId();
             if (who === localId) {
                 this.duelHistory.logMessage(`--- YOU HAVE BEEN ELIMINATED ---`);
@@ -816,34 +835,29 @@ export class Game extends Phaser.Scene {
             this.cycleLabels.push(label);
         });
 
-        // Center wheel indicator
-        this.cycleCenterText = this.add.text(0, 0, 'CYCLE', {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '15px',
+        // Center round indicator (roman numeral)
+        this.cycleRoundText = this.add.text(0, 0, this.toRoman(this.round), {
+            fontFamily: '"Cinzel", serif',
+            fontSize: '48px',
             fontWeight: '800',
-            color: '#1a1a1a'
+            color: '#1a1a1a',
+            stroke: '#d4af37',
+            strokeThickness: 2
         }).setOrigin(0.5);
-        this.cycleContainer.add(this.cycleCenterText);
+        this.cycleContainer.add(this.cycleRoundText);
 
         this.updateCycleDisplayColor(this.cycleElements[this.cycleIndex]);
     }
 
     updateCycleDisplayColor(element) {
-        if (!this.cycleCenterText) return;
+        if (!this.bgSigil) return;
 
         const color = element === 'fire' ? 0xdf1b2d :
                       element === 'water' ? 0x257ee4 :
                       element === 'earth' ? 0x4db15b :
                       element === 'air' ? 0x9247d5 : 0x4a4a4a; // neutral fallback
 
-        const hexColor = element === 'fire' ? '#df1b2d' :
-                         element === 'water' ? '#257ee4' :
-                         element === 'earth' ? '#4db15b' :
-                         element === 'air' ? '#9247d5' : '#1a1a1a';
-
-        // Update center text
-        this.cycleCenterText.setText(element.toUpperCase());
-        this.cycleCenterText.setColor(hexColor);
+        this.bgSigil.setTint(color);
     }
 
     triggerCycleParticles(element) {
@@ -909,7 +923,7 @@ export class Game extends Phaser.Scene {
             let nx = 0, ny = 0;
             if (pos === 0) { nx = 0; ny = 0; }
             else if (pos === 1) { nx = -20; ny = -150; }
-            else if (pos === 2) { nx = -200; ny = 10; }
+            else if (pos === 2) { nx = -230; ny = 10; }
             else if (pos === 3) { nx = 30; ny = -150; }
 
             char.nameT = this.add.text(nx, ny, displayName, {
@@ -3099,7 +3113,7 @@ export class Game extends Phaser.Scene {
 
         // Normal Turn Logic
         if (isMyTurn) {
-            this.duelHistory.logMessage("--- YOUR TURN ---");
+        // Turn announcement removed per request
             this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
             this.selectedBoardMana = [];
             this.updateComboPreview();

@@ -213,7 +213,7 @@ export class OnlineManager {
 
         // Normal Turn Logic
         if (isMyTurn) {
-            this.scene.duelHistory.logMessage("--- YOUR TURN ---");
+            // Turn announcement removed per request
             if (state.phase !== 'action') {
                 this.scene.manaPlacedThisTurn = false; this.scene.spellCastThisTurn = false;
             }

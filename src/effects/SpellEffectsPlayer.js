@@ -137,9 +137,11 @@ export class SpellEffectsPlayer {
 
     playImpact(spell, effect, x, y) {
         this.scene.playSound('hit');
-        const impact = effect.impact;
         
-        if (impact && impact.animKey) {
+        const impacts = Array.isArray(effect.impact) ? effect.impact : [effect.impact];
+        
+        impacts.forEach(impact => {
+            if (impact && impact.animKey) {
             let textureKey = impact.animKey.replace('anim_', '');
             
             const finalX = x + (impact.offsetX || 0);
@@ -155,11 +157,18 @@ export class SpellEffectsPlayer {
             if (impact.timeScale) {
                 impactSprite.anims.timeScale = impact.timeScale;
             }
-            impactSprite.play(impact.animKey);
+            if (impact.repeat !== undefined) {
+                impactSprite.play({ key: impact.animKey, repeat: impact.repeat });
+            } else {
+                impactSprite.play(impact.animKey);
+            }
             
             // Destroy on animation complete for non-looping anims
             impactSprite.on('animationcomplete', () => {
                 impactSprite.destroy();
+            });
+            impactSprite.on('animationrepeat', () => {
+                if (impact.repeat === 0) impactSprite.destroy();
             });
             
             // Fallback: always destroy after a timeout in case animation loops forever
@@ -174,13 +183,14 @@ export class SpellEffectsPlayer {
             this.scene.cameras.main.shake(impact.screenShake.duration, impact.screenShake.intensity * 0.01);
         }
         
-        if (impact && impact.flash) {
-            this.scene.cameras.main.flash(200, 
-                (impact.flash >> 16) & 255, 
-                (impact.flash >> 8) & 255, 
-                impact.flash & 255
-            );
-        }
+            if (impact.flash) {
+                this.scene.cameras.main.flash(200, 
+                    (impact.flash >> 16) & 255, 
+                    (impact.flash >> 8) & 255, 
+                    impact.flash & 255
+                );
+            }
+        });
     }
 
     playElementalBurst(x, y, element) {
