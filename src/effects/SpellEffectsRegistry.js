@@ -4,7 +4,7 @@ export const SPELL_EFFECTS = {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },
         projectile: { animKey: 'anim_fire_arrow', size: 64, speed: 500, shape: 'sprite', flipX: true },
         impact: { animKey: 'anim_explosion_3', screenShake: { intensity: 2, duration: 100 }, flash: 0xff2200 },
-        sound: { type: 'fire' }
+        sound: { type: 'magic_spell_fire_01' }
     },
     'Shell': {
         castAnim: { type: 'pulse', scale: 1.2, duration: 200 },

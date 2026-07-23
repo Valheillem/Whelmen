@@ -67,7 +67,8 @@ export class Game extends Phaser.Scene {
         this.load.image('icon_water', 'assets/icons/Water.png');
         this.load.image('icon_air', 'assets/icons/Air.png');
         this.load.image('game-bg', './assets/WHELMEN_background_horizontal.png');
-        this.load.image('sigil', './assets/WHELMEN_sigil.png');
+        // Preload Audio SFX
+        this.load.audio('magic_spell_fire_01', 'assets/SFX/magic_spell_fire_01.wav');
 
         // Preload Spell Effects Spritesheets (cleared — new assets will be added individually)
         this.spriteMeta = [
@@ -294,7 +295,11 @@ export class Game extends Phaser.Scene {
 
     // --- SOUND ENGINE ---
     playSound(type) {
-        this.synth.play(type);
+        if (this.cache.audio.exists(type)) {
+            this.sound.play(type);
+        } else {
+            this.synth.play(type);
+        }
     }
 
     // --- GAME ENGINE SETUP ---
