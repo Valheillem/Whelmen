@@ -67,6 +67,7 @@ export class Game extends Phaser.Scene {
         this.load.image('icon_water', 'assets/icons/Water.png');
         this.load.image('icon_air', 'assets/icons/Air.png');
         this.load.image('game-bg', './assets/WHELMEN_background_horizontal.png');
+        this.load.image('sigil', './assets/WHELMEN_sigil.png');
         // Preload Audio SFX
         this.load.audio('magic_spell_fire_01', 'assets/SFX/magic_spell_fire_01.wav');
 
