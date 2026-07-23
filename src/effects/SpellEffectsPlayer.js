@@ -75,7 +75,7 @@ export class SpellEffectsPlayer {
         const element = spell.element === 'n/a' ? 'air' : spell.element;
         
         if (effect.sound) {
-            this.scene.playSound(effect.sound.type);
+            this.scene.playSound(effect.sound.type, effect.sound.volume);
         } else {
             this.scene.playSound(element === 'earth' ? 'shield' : element);
         }

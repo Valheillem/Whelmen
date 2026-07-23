@@ -294,9 +294,10 @@ export class Game extends Phaser.Scene {
     }
 
     // --- SOUND ENGINE ---
-    playSound(type) {
+    playSound(type, volume = 0.25) {
         if (this.cache.audio.exists(type)) {
-            this.sound.play(type);
+            const vol = (volume !== null && volume !== undefined) ? volume : 0.25;
+            this.sound.play(type, { volume: vol });
         } else {
             this.synth.play(type);
         }
