@@ -33,6 +33,28 @@ const config = {
 
 const game = new Phaser.Game(config);
 
+// Detect and log the device's WebGL max texture size for VFX diagnostics
+game.events.once('ready', () => {
+    try {
+        const renderer = game.renderer;
+        if (renderer && renderer.gl) {
+            const gl = renderer.gl;
+            const maxSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+            console.log(`[Whelmen] WebGL max texture size: ${maxSize}px`);
+            if (maxSize < 4096) {
+                console.warn(`[Whelmen] WARNING: Device max texture size (${maxSize}px) is below 4096px. Some VFX may not render correctly.`);
+            }
+            // Store on game object for runtime queries
+            game.maxTextureSize = maxSize;
+        } else {
+            console.log('[Whelmen] Running in Canvas mode (no WebGL). Texture size limits do not apply.');
+            game.maxTextureSize = Infinity;
+        }
+    } catch (e) {
+        console.warn('[Whelmen] Could not detect max texture size:', e);
+    }
+});
+
 // Lock scroll, update CSS custom prop, and force Phaser to recalculate canvas scaling
 let resizeTimeout;
 const resetViewport = () => {
