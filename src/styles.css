@@ -328,6 +328,20 @@ html, body {
     text-align: left;
 }
 
+/* In-game tutorial: push to top and use full available height */
+#tutorial-overlay-ingame {
+    align-items: flex-start;
+    padding-top: 10px;
+}
+
+#tutorial-overlay-ingame .tutorial-modal-card {
+    max-height: 95dvh;
+}
+
+#tutorial-overlay-ingame .tutorial-content {
+    max-height: calc(95dvh - 100px);
+}
+
 .tutorial-modal-card .tutorial-content {
     max-height: calc(85vh - 120px);
     overflow-y: auto;
