@@ -1260,7 +1260,7 @@ export class Game extends Phaser.Scene {
             color: '#ffffff',
             backgroundColor: 'rgba(13,11,28,0.85)',
             padding: { x: 12, y: 6 }
-        }).setOrigin(0, 0);
+        }).setOrigin(1, 0).setDepth(2000);
         this.btnSpellBook.setInteractive({ useHandCursor: true });
         this.btnSpellBook.on('pointerover', () => this.btnSpellBook.setColor('#1084e9'));
         this.btnSpellBook.on('pointerout', () => this.btnSpellBook.setColor('#ffffff'));
@@ -1286,7 +1286,14 @@ export class Game extends Phaser.Scene {
             useHandCursor: true
         });
         this.primedSpellPanel.on('pointerdown', () => {
-            if (this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3 && !this.spellCastThisTurn) {
+            let canCast = false;
+            if (this.phase === 'reaction' || this.phase === 'reaction_request_active') {
+                canCast = (this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
+            } else if (this.phase === 'action') {
+                canCast = (!this.spellCastThisTurn && this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
+            }
+            
+            if (canCast) {
                 this.handleCastSpellOption();
             }
         });
