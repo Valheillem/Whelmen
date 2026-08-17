@@ -1609,6 +1609,18 @@ export class Game extends Phaser.Scene {
 
             const cardObj = this.add.image(x, y, tex).setScale(scaleAmt).setAngle(angle);
 
+            // Warning glow if at risk of being Overwhelmed
+            if (char.consecutiveDiscards === 1) {
+                const glow = cardObj.postFX.addGlow(0x4aa5ff, 4, 0, false, 0.1, 24);
+                this.tweens.add({
+                    targets: glow,
+                    outerStrength: 8,
+                    yoyo: true,
+                    repeat: -1,
+                    duration: 800
+                });
+            }
+
             if (isLocal) {
                 cardObj.setInteractive({ useHandCursor: true, draggable: true });
                 const incoming = this.playerIncomingHandCards || 0;
