@@ -1280,17 +1280,15 @@ export class Game extends Phaser.Scene {
         this.btnPassDraw = this.createActionButton(480, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
 
         // Make primedSpellPanel clickable to replace CAST SPELL
-        this.primedSpellPanel.setInteractive(new Phaser.Geom.Rectangle(0, 0, 264, 132), Phaser.Geom.Rectangle.Contains);
+        this.primedSpellPanel.setInteractive({
+            hitArea: new Phaser.Geom.Rectangle(0, 0, 264, 132),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+            useHandCursor: true
+        });
         this.primedSpellPanel.on('pointerdown', () => {
             if (this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3 && !this.spellCastThisTurn) {
                 this.handleCastSpellOption();
             }
-        });
-        this.primedSpellPanel.on('pointerover', () => {
-            this.input.setDefaultCursor('pointer');
-        });
-        this.primedSpellPanel.on('pointerout', () => {
-            this.input.setDefaultCursor('default');
         });
 
         // Select Discard prompt overlay container
