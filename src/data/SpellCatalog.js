@@ -4,7 +4,7 @@ export const SPELLS = {
     'fire': { name: 'Spark', element: 'fire', combo: ['fire'], damage: 1, shield: 0, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 3 damage', desc: '1 DMG. Constructive: 3 damage' },
     'earth': { name: 'Shell', element: 'earth', combo: ['earth'], damage: 0, shield: 3, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 5 shield', desc: '+3 Shield. Constructive: 5 shield' },
     'air,air': { name: 'Gust', element: 'air', combo: ['air', 'air'], damage: 0, shield: 0, draw: 0, drain: 2, synergyType: 'constructive', synergyText: 'Constructive: 3 drain', desc: 'Drain 2. Constructive: 3 drain' },
-    'water,water': { name: 'Rain', element: 'water', combo: ['water', 'water'], damage: 0, shield: 0, draw: 2, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 3 draw', desc: 'Draw 2. Constructive: 3 draw' },
+    'water,water': { name: 'Splash', element: 'water', combo: ['water', 'water'], damage: 0, shield: 0, draw: 2, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 3 draw', desc: 'Draw 2. Constructive: 3 draw' },
     'fire,fire': { name: 'Blast', element: 'fire', combo: ['fire', 'fire'], damage: 3, shield: 0, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 5 damage', desc: '3 DMG. Constructive: 5 damage' },
     'earth,earth': { name: 'Carapace', element: 'earth', combo: ['earth', 'earth'], damage: 0, shield: 5, draw: 0, drain: 0, synergyType: 'constructive', synergyText: 'Constructive: 8 shield', desc: '+5 Shield. Constructive: 8 shield' },
     'air,fire': { name: 'Ignition', element: 'n/a', combo: ['air', 'fire'], damage: 1, shield: 0, draw: 0, drain: 1, synergyType: 'prestructive', synergyText: 'Prestructive: Next round, 2 mana can be played', desc: '1 DMG, Drain 1. Prestructive: Next round, 2 mana can be played' },
@@ -46,10 +46,11 @@ export function getSpellFromCombo(combo) {
 }
 
 export function findSpellInMessage(msg) {
-    const lowerMsg = msg.toLowerCase();
     const sortedSpells = Object.values(SPELLS).sort((a, b) => b.name.length - a.name.length);
     for (const spell of sortedSpells) {
-        if (lowerMsg.includes(spell.name.toLowerCase())) {
+        // Use word boundaries \b to avoid partial matches (e.g., "drain" triggering "Rain")
+        const regex = new RegExp(`\\b${spell.name}\\b`, 'i');
+        if (regex.test(msg)) {
             return spell;
         }
     }

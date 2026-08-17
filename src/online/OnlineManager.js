@@ -17,7 +17,7 @@ export class OnlineManager {
             this.syncToFirebase('init');
 
             // Host goes first
-            this.scene.startTurn('player');
+            this.scene.startTurn(this.scene.myRole);
         }
 
         // Both host and guest listen for state changes
@@ -154,10 +154,7 @@ export class OnlineManager {
         this.scene.turn = state.turn || this.scene.playerIds[0];
 
         // Determine whose turn it is locally
-        const myKey = this.scene.myRole === 'host' || this.scene.mode !== 'online' ? 'player' : this.scene.myRole;
-        // Map local backward compatible alias turn check if needed:
-        const mappedMyKey = this.scene.myRole === 'host' && this.scene.playerIds.includes('host') ? 'host' : myKey;
-        const isMyTurn = (state.turn === mappedMyKey) || (state.turn === this.scene.myRole);
+        const isMyTurn = (state.turn === this.scene.getLocalPlayerId());
 
         // Refresh all UI
         this.refreshAllUI();
@@ -216,7 +213,7 @@ export class OnlineManager {
 
         // Normal Turn Logic
         if (isMyTurn) {
-            this.scene.duelHistory.logMessage("--- YOUR TURN ---");
+            // Turn announcement removed per request
             if (state.phase !== 'action') {
                 this.scene.manaPlacedThisTurn = false; this.scene.spellCastThisTurn = false;
             }

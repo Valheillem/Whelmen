@@ -328,18 +328,26 @@ html, body {
     text-align: left;
 }
 
-/* In-game tutorial: push to top and use full available height */
+/* Tutorial overlays: push to top and use full available height */
+#tutorial-overlay,
 #tutorial-overlay-ingame {
     align-items: flex-start;
-    padding-top: 10px;
+    padding: 0;
 }
 
+#tutorial-overlay .tutorial-modal-card,
 #tutorial-overlay-ingame .tutorial-modal-card {
-    max-height: 95dvh;
+    max-height: 100dvh;
+    height: 100dvh;
+    width: 100%;
+    max-width: 100%;
+    padding-top: 15px;
+    border-radius: 0;
 }
 
+#tutorial-overlay .tutorial-content,
 #tutorial-overlay-ingame .tutorial-content {
-    max-height: calc(95dvh - 100px);
+    max-height: calc(100dvh - 60px);
 }
 
 .tutorial-modal-card .tutorial-content {
@@ -897,6 +905,22 @@ html, body {
     max-width: 95%;
 }
 
+/* Spellbook overlay: full-bleed, flush to top */
+#spellbook-overlay {
+    align-items: flex-start;
+    padding: 0;
+}
+
+#spellbook-overlay .spellbook-modal {
+    max-height: 100dvh;
+    height: 100dvh;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    padding-top: 15px;
+    border-radius: 0;
+}
+
 .spellbook-title {
     color: #000000;
     background: none;
@@ -921,7 +945,7 @@ html, body {
     overflow-y: auto;
     padding-right: 15px;
     text-align: left;
-    max-height: calc(85vh - 100px);
+    max-height: calc(100dvh - 80px);
 }
 
 .spellbook-content::-webkit-scrollbar {
@@ -1092,6 +1116,22 @@ html, body {
     max-width: 95%;
 }
 
+/* Spellbook overlay: full-bleed, flush to top */
+#spellbook-overlay {
+    align-items: flex-start;
+    padding: 0;
+}
+
+#spellbook-overlay .spellbook-modal {
+    max-height: 100dvh;
+    height: 100dvh;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    padding-top: 15px;
+    border-radius: 0;
+}
+
 .spellbook-title {
     color: #000000;
     background: none;
@@ -1116,7 +1156,7 @@ html, body {
     overflow-y: auto;
     padding-right: 15px;
     text-align: left;
-    max-height: calc(85vh - 100px);
+    max-height: calc(100dvh - 80px);
 }
 
 .spellbook-content::-webkit-scrollbar {

@@ -20,6 +20,7 @@ export class Game extends Phaser.Scene {
         document.body.classList.add('in-game');
         // Attempt to lock orientation to landscape for the game board
         try { screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
+        
         // Mode: 'ai' (default, single-player), 'online' (multiplayer via Firebase), or 'test' (Sandbox Test Range)
         this.mode = data?.mode || 'ai';
         this.lobbyCode = data?.lobbyCode || null;
@@ -43,6 +44,23 @@ export class Game extends Phaser.Scene {
         }
     }
 
+    getLocalPlayerId() {
+        return this.mode === 'online' ? this.myRole : 'player';
+    }
+
+    toRoman(num) {
+        if (num <= 0) return '';
+        const lookup = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+        let roman = '';
+        for (let i in lookup) {
+            while (num >= lookup[i]) {
+                roman += i;
+                num -= lookup[i];
+            }
+        }
+        return roman;
+    }
+
     preload() {
         this.load.image('icon_fire', 'assets/icons/Fire.png');
         this.load.image('icon_earth', 'assets/icons/Earth.png');
@@ -50,6 +68,32 @@ export class Game extends Phaser.Scene {
         this.load.image('icon_air', 'assets/icons/Air.png');
         this.load.image('game-bg', './assets/WHELMEN_background_horizontal.png');
         this.load.image('sigil', './assets/WHELMEN_sigil.png');
+        // Preload Audio SFX
+        this.load.audio('magic_spell_fire_01', 'assets/SFX/magic_spell_fire_01.wav');
+
+        // Preload Spell Effects Spritesheets (cleared — new assets will be added individually)
+        this.spriteMeta = [
+            { key: 'fire_arrow', w: 600, h: 320, f: 8 },
+            { key: 'explosion_3', w: 496, h: 496, f: 8 },
+            { key: 'earth_shield', w: 720, h: 720, f: 8 },
+            { key: 'water1', w: 320, h: 180, f: 48 },
+            { key: 'slash_2', w: 496, h: 496, f: 5 },
+            { key: 'fire_spell', w: 640, h: 360, f: 8 },
+            { key: 'earth_fissure', w: 800, h: 480, f: 8 },
+            { key: 'wind_spell', w: 640, h: 360, f: 12 },
+            { key: 'water6', w: 450, h: 300, f: 12 },
+            { key: 'flame', w: 640, h: 640, f: 12 },
+            { key: 'magic2', w: 496, h: 496, f: 6 },
+            { key: 'slash_7', w: 496, h: 496, f: 10 },
+            { key: 'water_shield', w: 720, h: 720, f: 8 },
+            { key: 'typhoon', w: 800, h: 800, f: 12 },
+            { key: 'ground_hit', w: 1200, h: 800, f: 8 },
+            { key: 'leaf_shield', w: 720, h: 720, f: 16 }
+        ];
+        
+        this.spriteMeta.forEach(meta => {
+            this.load.spritesheet(meta.key, `assets/spritesheets/${meta.key}.png`, { frameWidth: meta.w, frameHeight: meta.h });
+        });
     }
 
     createCardCanvas(key, w, h, drawFn) {
@@ -99,6 +143,23 @@ export class Game extends Phaser.Scene {
             ctx.textBaseline = 'middle';
             ctx.fillText('✦', cardWidth / 2, cardHeight / 2);
         });
+
+        // Register Spell Animations
+        if (this.spriteMeta) {
+            this.spriteMeta.forEach(meta => {
+                if (!this.anims.exists(`anim_${meta.key}`)) {
+                    // Only projectiles that travel across the screen should loop infinitely
+                    const isLooping = meta.key.includes('ball') || meta.key.includes('arrow') || meta.key.includes('spell') || meta.key.includes('shield') || meta.key === 'typhoon';
+                    this.anims.create({
+                        key: `anim_${meta.key}`,
+                        frames: this.anims.generateFrameNumbers(meta.key, { start: 0, end: meta.f - 1 }),
+                        frameRate: 15,
+                        repeat: isLooping ? -1 : 0,
+                        hideOnComplete: !isLooping
+                    });
+                }
+            });
+        }
 
         // Fire Card
         this.createCardCanvas('card_fire', cardWidth, cardHeight, (ctx) => {
@@ -199,8 +260,8 @@ export class Game extends Phaser.Scene {
         }
         
         // For backwards compatibility in other modules until refactored:
-        Object.defineProperty(this, 'player', { configurable: true, get: () => this.players[this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole] || this.players[this.playerIds[0]] });
-        Object.defineProperty(this, 'ai', { configurable: true, get: () => this.players[this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole))] || this.players[this.playerIds[1]] });
+        Object.defineProperty(this, 'player', { configurable: true, get: () => this.players[this.getLocalPlayerId()] });
+        Object.defineProperty(this, 'ai', { configurable: true, get: () => { const local = this.getLocalPlayerId(); const oppId = this.playerIds.find(p => p !== local) || this.playerIds[1]; return this.players[oppId]; }});
 
         // Spells Selected by player for casting
         this.selectedBoardMana = [];
@@ -234,8 +295,13 @@ export class Game extends Phaser.Scene {
     }
 
     // --- SOUND ENGINE ---
-    playSound(type) {
-        this.synth.play(type);
+    playSound(type, volume = 0.25) {
+        if (this.cache.audio.exists(type)) {
+            const vol = (volume !== null && volume !== undefined) ? volume : 0.25;
+            this.sound.play(type, { volume: vol });
+        } else {
+            this.synth.play(type);
+        }
     }
 
     // --- GAME ENGINE SETUP ---
@@ -380,9 +446,9 @@ export class Game extends Phaser.Scene {
         this.selectedBoardMana = [];
         this.updateComboPreview();
 
-        const isLocal = who === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        const isLocal = who === this.getLocalPlayerId();
         const displayName = (this.mode === 'online' && isLocal) ? 'YOUR' : who.toUpperCase() + "'S";
-        this.duelHistory.logMessage(`--- ${displayName} TURN ---`);
+        // Turn announcement removed per request
 
         // Draw phase
         
@@ -412,19 +478,19 @@ export class Game extends Phaser.Scene {
                 this.duelHistory.logMessage(`${who.toUpperCase()} lost a hand mana from drawing!`);
             }
 
-            if (who === 'player') {
-                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            if (who === this.getLocalPlayerId()) {
+                this.updatePlayerHandDisplay(this.getLocalPlayerId());
+                this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+                this.updatePlayerLifeDisplay(this.getLocalPlayerId());
             } else {
-                this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-                this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-                this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+                this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
+                this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
+                this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
             }
         }
 
         // Toggle action controls
-        if (who === 'player') {
+        if (who === this.getLocalPlayerId()) {
             this.enablePlayerControls(true);
             if (this.mode === 'online') {
                 this.duelHistory.logMessage('It is your turn. Choose an action.');
@@ -458,16 +524,18 @@ export class Game extends Phaser.Scene {
     }
 
     startRound() {
+        const alivePlayers = this.playerIds.filter(pid => this.players[pid].hand.length > 0 || this.players[pid].board.length > 0);
+
         // Aegis: Rotate Shields (round-level event — stays here)
-        if (this.playerIds.some(pid => this.players[pid].status.rotateShields > 0)) {
+        if (alivePlayers.some(pid => this.players[pid].status.rotateShields > 0)) {
             // Rotate clockwise
-            const firstShield = this.players[this.playerIds[0]].shield;
-            for (let i = 0; i < this.playerIds.length - 1; i++) {
-                this.players[this.playerIds[i]].shield = this.players[this.playerIds[i+1]].shield;
+            const firstShield = this.players[alivePlayers[0]].shield;
+            for (let i = 0; i < alivePlayers.length - 1; i++) {
+                this.players[alivePlayers[i]].shield = this.players[alivePlayers[i+1]].shield;
             }
-            this.players[this.playerIds[this.playerIds.length - 1]].shield = firstShield;
+            this.players[alivePlayers[alivePlayers.length - 1]].shield = firstShield;
             
-            this.playerIds.forEach(pid => this.players[pid].status.rotateShields = 0);
+            alivePlayers.forEach(pid => this.players[pid].status.rotateShields = 0);
             this.duelHistory.logMessage("Aegis rotates the Shields clockwise!");
         }
         // C17 fix: per-player status decrements moved to startTurn() so each player's
@@ -478,7 +546,7 @@ export class Game extends Phaser.Scene {
         // Rotate Cycle
         this.rotateCycle();
 
-        // Enforce hand limit cleanup
+        // Enforce hand limit cleanup (can still loop over playerIds since it just caps arrays)
         this.playerIds.forEach(pid => {
             this.cleanupHandLimit(pid);
         });
@@ -486,21 +554,18 @@ export class Game extends Phaser.Scene {
         // Check defeat
         this.playerIds.forEach(pid => {
             if (this.checkDefeatCondition(pid)) {
-                // If this is FFA and someone dies, maybe they should be removed from turn order?
-                // But wait, the existing logic just calls checkDefeatCondition which might return and transition to gameover.
-                // In FFA, game over happens when 1 player is left. We need to implement this.
+                // Logged inside checkDefeatCondition
             }
         });
         
-        // Remove dead players from turn order
-        this.playerIds = this.playerIds.filter(pid => this.players[pid].hand.length > 0 || this.players[pid].board.length > 0);
+        const alivePlayers = this.playerIds.filter(pid => this.players[pid].hand.length > 0 || this.players[pid].board.length > 0);
         
-        if (this.playerIds.length <= 1) {
+        if (alivePlayers.length <= 1) {
             this.phase = 'gameover';
             this.enablePlayerControls(false);
-            if (this.playerIds.length === 1) {
-                const winner = this.playerIds[0];
-                this.gameOverScreen.showGameOver(winner === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole) ? 'VICTORY' : 'DEFEAT');
+            if (alivePlayers.length === 1) {
+                const winner = alivePlayers[0];
+                this.gameOverScreen.showGameOver(winner === (this.getLocalPlayerId()) ? 'VICTORY' : 'DEFEAT');
             } else {
                 this.gameOverScreen.showGameOver('DEFEAT'); // Draw/All dead
             }
@@ -510,17 +575,27 @@ export class Game extends Phaser.Scene {
             return;
         }
 
-        // Toggle turn
+        // Toggle turn (skipping dead players)
         let currentIndex = this.playerIds.indexOf(this.turn);
         let nextIndex = currentIndex + 1;
 
-        // Check for round increment
-        if (nextIndex >= this.playerIds.length) {
-            nextIndex = 0;
-            this.round++;
-            if (this.roundText) this.roundText.setText(`ROUND ${this.round}`);
-            this.duelHistory.logMessage(`=== ROUND ${this.round} ===`);
-            this.startRound();
+        while (true) {
+            if (nextIndex >= this.playerIds.length) {
+                nextIndex = 0;
+                this.time.delayedCall(400, () => {
+                this.round++;
+                if (this.roundText) this.roundText.setText(`ROUND ${this.round}`);
+                if (this.cycleRoundText) this.cycleRoundText.setText(this.toRoman(this.round));
+                this.duelHistory.logMessage(`=== ROUND ${this.round} ===`);
+                this.startRound();
+            });
+            }
+            const nextTurn = this.playerIds[nextIndex];
+            const char = this.players[nextTurn];
+            if ((char.hand.length + char.board.length) > 0) {
+                break; // Found the next alive player
+            }
+            nextIndex++;
         }
 
         const nextTurn = this.playerIds[nextIndex];
@@ -571,7 +646,6 @@ export class Game extends Phaser.Scene {
         }
         
         const el = this.cycleElements[this.cycleIndex];
-        this.duelHistory.logMessage(`The Cycle rotates to: [${el.toUpperCase()}]`);
 
         // Rotate graphic dial
         this.tweens.add({
@@ -587,6 +661,8 @@ export class Game extends Phaser.Scene {
 
     checkDefeatCondition(who) {
         const char = this.players[who];
+        if (char.isEliminated) return true;
+
         const totalCards = char.hand.length + char.board.length;
         if (totalCards === 0) {
             if (this.mode === 'test') {
@@ -619,7 +695,8 @@ export class Game extends Phaser.Scene {
             // (ai_contest) where multiple players can still be alive. Just log elimination
             // and return true; endTurn() already handles the final win check via
             // `this.playerIds.length <= 1` after filtering out dead players.
-            const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+            char.isEliminated = true;
+            const localId = this.getLocalPlayerId();
             if (who === localId) {
                 this.duelHistory.logMessage(`--- YOU HAVE BEEN ELIMINATED ---`);
             } else {
@@ -635,8 +712,100 @@ export class Game extends Phaser.Scene {
         this.spellEffects.setupParticles();
     }
 
-    triggerSpellVisual(spell, startX, startY, endX, endY, onComplete) {
-        this.spellEffects.playSpellCast(spell, startX, startY, endX, endY, onComplete);
+    triggerSpellCastAnimation(spell, startX, startY, onComplete) {
+        this.spellEffects.playCastAnimation(spell, startX, startY, onComplete);
+    }
+
+    fireSpellProjectiles(attackerId, defenderId, attackerSpell, defenderSpell, drainTargets, onComplete) {
+        const w = this.scale.width;
+        const h = this.scale.height;
+
+        let completed = 0;
+        let expected = 0;
+
+        const checkDone = () => {
+            completed++;
+            if (completed >= expected && onComplete) onComplete();
+        };
+
+        const getPos = (id) => {
+            if (id === this.getLocalPlayerId()) return { x: w / 2, y: h - 50, avatarX: w / 2, avatarY: h - 150 };
+            const targetPos = this.getPlayerPositionIndex(id);
+            if (targetPos === 1) return { x: 50, y: h / 2, avatarX: 100, avatarY: h / 2 };
+            if (targetPos === 2) return { x: w / 2, y: 50, avatarX: w / 2, avatarY: 150 };
+            if (targetPos === 3) return { x: w - 50, y: h / 2, avatarX: w - 100, avatarY: h / 2 };
+            return { x: w / 2, y: h / 2, avatarX: w / 2, avatarY: h / 2 }; 
+        };
+
+        const attPos = getPos(attackerId);
+        const defPos = getPos(defenderId);
+
+        if (attackerSpell) {
+            let tx = defPos.avatarX;
+            let ty = defPos.avatarY;
+            if (drainTargets && drainTargets.length > 0) {
+                expected += drainTargets.length;
+                drainTargets.forEach(elementStr => {
+                    let targetX = defPos.x;
+                    let targetY = defPos.y;
+                    
+                    const defChar = this.players[defenderId];
+                    if (defChar) {
+                        const uniqueElements = [...new Set(defChar.board)];
+                        const elIndex = uniqueElements.indexOf(elementStr);
+                        if (elIndex !== -1) {
+                            const centerX = w / 2 - 20;
+                            const centerY = h / 2 - 40;
+                            const spaceX = 75;
+                            const pos = this.getPlayerPositionIndex(defenderId);
+                            
+                            if (pos === 0) {
+                                targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                                targetY = centerY + 180;
+                            } else if (pos === 1) {
+                                targetX = centerX - 250;
+                                targetY = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                            } else if (pos === 2) {
+                                targetX = centerX - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                                targetY = centerY - 180;
+                            } else if (pos === 3) {
+                                targetX = centerX + 250;
+                                targetY = centerY - ((uniqueElements.length - 1) * spaceX) / 2 + elIndex * spaceX;
+                            }
+                        }
+                    }
+                    this.spellEffects.playProjectileAndImpact(attackerSpell, attPos.x, attPos.y, targetX, targetY, checkDone);
+                });
+            } else {
+                expected++;
+                let sx = attPos.x;
+                let sy = attPos.y;
+                if (attackerSpell.damage === 0 && attackerSpell.drain === 0 && attackerSpell.name !== 'Scour' && attackerSpell.name !== 'Hurricane') {
+                    tx = attPos.avatarX;
+                    ty = attPos.avatarY;
+                    sx = tx;
+                    sy = ty;
+                }
+                this.spellEffects.playProjectileAndImpact(attackerSpell, sx, sy, tx, ty, checkDone);
+            }
+        }
+
+        if (defenderSpell) {
+            expected++;
+            let tx = attPos.avatarX;
+            let ty = attPos.avatarY;
+            let sx = defPos.x;
+            let sy = defPos.y;
+            if (defenderSpell.damage === 0 && defenderSpell.drain === 0 && defenderSpell.name !== 'Scour' && defenderSpell.name !== 'Hurricane') {
+                tx = defPos.avatarX;
+                ty = defPos.avatarY;
+                sx = tx;
+                sy = ty;
+            }
+            this.spellEffects.playProjectileAndImpact(defenderSpell, sx, sy, tx, ty, checkDone);
+        }
+
+        if (expected === 0 && onComplete) onComplete();
     }
 
     drawCycleIndicator() {
@@ -663,10 +832,10 @@ export class Game extends Phaser.Scene {
 
         // 4 Elements around the circle
         const ringPositions = [
-            { x: 0, y: -50, color: 0xdf1b2d, icon: 'icon_fire', label: 'FIRE' },
-            { x: 50, y: 0, color: 0xa67032, icon: 'icon_earth', label: 'EARTH' },
-            { x: 0, y: 50, color: 0xbf8cff, icon: 'icon_air', label: 'AIR' },
-            { x: -50, y: 0, color: 0x1084e9, icon: 'icon_water', label: 'WATER' }
+            { x: 0, y: -60, color: 0xdf1b2d, icon: 'icon_fire', label: 'FIRE' },
+            { x: 60, y: 0, color: 0xa67032, icon: 'icon_earth', label: 'EARTH' },
+            { x: 0, y: 60, color: 0xbf8cff, icon: 'icon_air', label: 'AIR' },
+            { x: -60, y: 0, color: 0x1084e9, icon: 'icon_water', label: 'WATER' }
         ];
 
         ringPositions.forEach((pos) => {
@@ -680,34 +849,28 @@ export class Game extends Phaser.Scene {
             this.cycleLabels.push(label);
         });
 
-        // Center wheel indicator
-        this.cycleCenterText = this.add.text(0, 0, 'CYCLE', {
-            fontFamily: '"Outfit", sans-serif',
-            fontSize: '15px',
+        // Center round indicator (roman numeral)
+        this.cycleRoundText = this.add.text(w / 2 - 20, h / 2 - 40, this.toRoman(this.round), {
+            fontFamily: '"Cinzel", serif',
+            fontSize: '48px',
             fontWeight: '800',
-            color: '#1a1a1a'
-        }).setOrigin(0.5);
-        this.cycleContainer.add(this.cycleCenterText);
+            color: '#1a1a1a',
+            stroke: '#d4af37',
+            strokeThickness: 2
+        }).setOrigin(0.5).setDepth(20);
+        // (Not added to cycleContainer so it doesn't spin)
 
         this.updateCycleDisplayColor(this.cycleElements[this.cycleIndex]);
     }
 
     updateCycleDisplayColor(element) {
-        if (!this.cycleCenterText) return;
+        if (!this.bgSigil) return;
 
         const color = element === 'fire' ? 0xdf1b2d :
                       element === 'water' ? 0x257ee4 :
                       element === 'earth' ? 0x4db15b :
                       element === 'air' ? 0x9247d5 : 0x4a4a4a; // neutral fallback
-
-        const hexColor = element === 'fire' ? '#df1b2d' :
-                         element === 'water' ? '#257ee4' :
-                         element === 'earth' ? '#4db15b' :
-                         element === 'air' ? '#9247d5' : '#1a1a1a';
-
-        // Update center text
-        this.cycleCenterText.setText(element.toUpperCase());
-        this.cycleCenterText.setColor(hexColor);
+        this.bgSigil.setTintFill(color);
     }
 
     triggerCycleParticles(element) {
@@ -723,7 +886,7 @@ export class Game extends Phaser.Scene {
 
 
     getPlayerPositionIndex(pid) {
-        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const localId = this.getLocalPlayerId();
         if (pid === localId) return 0;
         
         let localIdx = this.playerIds.indexOf(localId);
@@ -746,10 +909,10 @@ export class Game extends Phaser.Scene {
             const pos = this.getPlayerPositionIndex(pid);
             
             let containerX = 0, containerY = 0;
-            if (pos === 0) { containerX = w / 2 - 20; containerY = h - 195; } // Bottom
+            if (pos === 0) { containerX = w / 2 - 20; containerY = h - 200; } // Bottom
             else if (pos === 1) { containerX = 40; containerY = h / 2 - 50; } // Left
             else if (pos === 2) { containerX = w / 2 - 20; containerY = 30; } // Top (mirrors bottom)
-            else if (pos === 3) { containerX = w - 195; containerY = h / 2 - 50; } // Right
+            else if (pos === 3) { containerX = w - 120; containerY = h / 2 - 50; } // Right
 
             const zone = this.add.container(containerX, containerY);
             
@@ -772,8 +935,8 @@ export class Game extends Phaser.Scene {
             const displayName = isLocal ? '' : `PLAYER ${pid}`;
             let nx = 0, ny = 0;
             if (pos === 0) { nx = 0; ny = 0; }
-            else if (pos === 1) { nx = 10; ny = -150; }
-            else if (pos === 2) { nx = -200; ny = 10; }
+            else if (pos === 1) { nx = -20; ny = -150; }
+            else if (pos === 2) { nx = -230; ny = 10; }
             else if (pos === 3) { nx = 30; ny = -150; }
 
             char.nameT = this.add.text(nx, ny, displayName, {
@@ -790,13 +953,45 @@ export class Game extends Phaser.Scene {
     }
 
     updateTurnHighlights() {
+        if (!this.turnIndicatorG) {
+            this.turnIndicatorG = this.add.graphics();
+            this.turnIndicatorG.setDepth(15);
+        }
+        this.turnIndicatorG.clear();
+
         this.playerIds.forEach(pid => {
             const char = this.players[pid];
             const pos = this.getPlayerPositionIndex(pid);
             char.nameHighlightG.clear();
+            
             if (this.turn === pid) {
-                char.nameHighlightG.fillStyle(0xd4af37, 0.4);
-                char.nameHighlightG.fillRoundedRect(char.nameT.x - 10, char.nameT.y - 10, char.nameT.width + 20, char.nameT.height + 20, 6);
+                // Don't draw the highlight box for the local player, as they don't have a visible name text
+                if (pos !== 0) {
+                    char.nameHighlightG.fillStyle(0xd4af37, 0.4);
+                    char.nameHighlightG.fillRoundedRect(char.nameT.x - 10, char.nameT.y - 10, char.nameT.width + 20, char.nameT.height + 20, 6);
+                }
+
+                // Draw cardinal direction indicator pointing to the active player
+                const cx = this.scale.width / 2 - 20;
+                const cy = this.scale.height / 2 - 40;
+                let angle = 0;
+                if (pos === 0) angle = Math.PI / 2; // Bottom (South)
+                else if (pos === 1) angle = Math.PI; // Left (West)
+                else if (pos === 2) angle = -Math.PI / 2; // Top (North)
+                else if (pos === 3) angle = 0; // Right (East)
+
+                this.turnIndicatorG.fillStyle(0xd4af37, 0.9);
+                const radius = 95; // Just outside the element ring
+                const tx = cx + Math.cos(angle) * radius;
+                const ty = cy + Math.sin(angle) * radius;
+                
+                const back = radius - 18;
+                const bx = cx + Math.cos(angle) * back;
+                const by = cy + Math.sin(angle) * back;
+                const perpX = Math.cos(angle + Math.PI/2) * 12;
+                const perpY = Math.sin(angle + Math.PI/2) * 12;
+                
+                this.turnIndicatorG.fillTriangle(tx, ty, bx + perpX, by + perpY, bx - perpX, by - perpY);
             }
         });
     }
@@ -850,10 +1045,10 @@ export class Game extends Phaser.Scene {
             
             const pos = this.getPlayerPositionIndex(pid);
             let sx = 0, sy = 0;
-            if (pos === 0) { sx = 0; sy = 155; }
-            else if (pos === 1) { sx = 80; sy = -150; }
-            else if (pos === 2) { sx = -200; sy = 35; }
-            else if (pos === 3) { sx = 100; sy = -150; }
+            if (pos === 0) { sx = -70; sy = 170; }
+            else if (pos === 1) { sx = 120; sy = -150; }
+            else if (pos === 2) { sx = -240; sy = 35; }
+            else if (pos === 3) { sx = -120; sy = -150; }
 
             char.shieldG.fillRoundedRect(sx, sy, 140, 24, 6);
             char.shieldG.strokeRoundedRect(sx, sy, 140, 24, 6);
@@ -948,7 +1143,7 @@ export class Game extends Phaser.Scene {
         const panelW = 264;
         const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(w - 550, h - 180).setVisible(false);
+        this.primedSpellPanel = this.add.container(w - 550, h / 2 + 10).setScale(1.5).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
@@ -992,7 +1187,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // --- INCOMING SPELL PANEL ---
-        this.incomingSpellPanel = this.add.container(w - 550, h - 330).setVisible(false);
+        this.incomingSpellPanel = this.add.container(w - 550, h / 2 - 198).setScale(1.5).setVisible(false);
         
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
@@ -1058,9 +1253,50 @@ export class Game extends Phaser.Scene {
         };
         this.btnHowToPlay = btnHowToPlayTop;
 
-        this.btnSpellBook = this.createActionButton(w - 180, h - 190, 'SPELL BOOK', () => this.handleSpellBookOption());
-        this.btnCastSpell = this.createActionButton(w - 180, h - 130, 'CAST SPELL', () => this.handleCastSpellOption());
-        this.btnPassDraw = this.createActionButton(w - 180, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
+        this.btnSpellBook = this.add.text(w - 280, 25, 'SPELL BOOK', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '16px',
+            fontWeight: '700',
+            color: '#ffffff',
+            backgroundColor: 'rgba(13,11,28,0.85)',
+            padding: { x: 12, y: 6 }
+        }).setOrigin(1, 0).setDepth(2000);
+        this.btnSpellBook.setInteractive({ useHandCursor: true });
+        this.btnSpellBook.on('pointerover', () => this.btnSpellBook.setColor('#1084e9'));
+        this.btnSpellBook.on('pointerout', () => this.btnSpellBook.setColor('#ffffff'));
+        this.btnSpellBook.on('pointerdown', () => this.handleSpellBookOption());
+        this.btnSpellBook.setEnabled = (enabled) => {
+            if (enabled) {
+                this.btnSpellBook.setAlpha(1);
+                this.btnSpellBook.setInteractive({ useHandCursor: true });
+            } else {
+                this.btnSpellBook.setAlpha(0.5);
+                this.btnSpellBook.disableInteractive();
+            }
+        };
+
+        this.btnCastSpell = { setEnabled: () => {} };
+
+        this.btnPassDraw = this.createActionButton(480, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
+
+        // Make primedSpellPanel clickable to replace CAST SPELL
+        this.primedSpellPanel.setInteractive({
+            hitArea: new Phaser.Geom.Rectangle(0, 0, 264, 132),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+            useHandCursor: true
+        });
+        this.primedSpellPanel.on('pointerdown', () => {
+            let canCast = false;
+            if (this.phase === 'reaction' || this.phase === 'reaction_request_active') {
+                canCast = (this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
+            } else if (this.phase === 'action') {
+                canCast = (!this.spellCastThisTurn && this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
+            }
+            
+            if (canCast) {
+                this.handleCastSpellOption();
+            }
+        });
 
         // Select Discard prompt overlay container
         this.discardPromptText = this.add.text(w / 2 - 20, h / 2 + 250, '', {
@@ -1390,7 +1626,8 @@ export class Game extends Phaser.Scene {
 
             let x = 0, y = 0, angle = 0;
             if (pos === 0) {
-                x = -totalW / 2 + index * spaceX;
+                const startX = 0;
+                x = startX - totalW / 2 + index * spaceX;
                 y = 90 + curveY;
                 angle = rotDeg;
             } else if (pos === 2) {
@@ -1407,14 +1644,26 @@ export class Game extends Phaser.Scene {
                 angle = -90 - rotDeg;
             }
 
-            const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            const isLocal = pid === (this.getLocalPlayerId());
             const tex = isLocal ? `card_${el}` : 'card_back';
             const scaleAmt = isLocal ? 0.8 : 0.55;
 
             const cardObj = this.add.image(x, y, tex).setScale(scaleAmt).setAngle(angle);
 
+            // Warning glow if at risk of being Overwhelmed
+            if (char.consecutiveDiscards === 1) {
+                const glow = cardObj.postFX.addGlow(0x4aa5ff, 4, 0, false, 0.1, 24);
+                this.tweens.add({
+                    targets: glow,
+                    outerStrength: 8,
+                    yoyo: true,
+                    repeat: -1,
+                    duration: 800
+                });
+            }
+
             if (isLocal) {
-                cardObj.setInteractive({ useHandCursor: true });
+                cardObj.setInteractive({ useHandCursor: true, draggable: true });
                 const incoming = this.playerIncomingHandCards || 0;
                 if (index >= char.hand.length - incoming) {
                     cardObj.setAlpha(0);
@@ -1423,12 +1672,59 @@ export class Game extends Phaser.Scene {
                 cardObj.on('pointerdown', () => {
                     if (this.phase === 'discard' || this.phase === 'discard_request_active') {
                         this.discardCardFromZone('hand', index, pid);
-                    } else if (this.phase === 'action' && !this.manaPlacedThisTurn && this.turn === pid) {
-                        this.playHandCardToBoard(index);
+                    }
+                });
+
+                cardObj.on('dragstart', (pointer, dragX, dragY) => {
+                    if (this.phase === 'action' && !this.manaPlacedThisTurn && this.turn === pid) {
+                        cardObj.setData('isDragging', true);
+                        cardObj.setData('origX', cardObj.x);
+                        cardObj.setData('origY', cardObj.y);
+                        cardObj.setData('origAngle', cardObj.angle);
+                        cardObj.setData('origDepth', cardObj.depth);
+                        cardObj.setDepth(100);
+                        cardObj.setAngle(0);
+                    }
+                });
+
+                cardObj.on('drag', (pointer, dragX, dragY) => {
+                    if (cardObj.getData('isDragging')) {
+                        cardObj.x = dragX;
+                        cardObj.y = dragY;
+                    }
+                });
+
+                cardObj.on('dragend', (pointer, dragX, dragY) => {
+                    if (cardObj.getData('isDragging')) {
+                        cardObj.setData('isDragging', false);
+                        const w = this.scale.width;
+                        const h = this.scale.height;
+                        const sigilX = w / 2 - 20;
+                        const sigilY = h / 2 - 40;
+                        
+                        // Use pointer.x and pointer.y (world coordinates) instead of cardObj.x/y (local container coordinates)
+                        const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, sigilX, sigilY);
+                        
+                        if (dist < 180) {
+                            this.playHandCardToBoard(index);
+                        } else {
+                            cardObj.setDepth(cardObj.getData('origDepth'));
+                            this.tweens.add({
+                                targets: cardObj,
+                                x: cardObj.getData('origX'),
+                                y: cardObj.getData('origY'),
+                                angle: cardObj.getData('origAngle'),
+                                scaleX: 0.8,
+                                scaleY: 0.8,
+                                duration: 250,
+                                ease: 'Back.easeOut'
+                            });
+                        }
                     }
                 });
 
                 cardObj.on('pointerover', () => {
+                    if (cardObj.getData('isDragging')) return;
                     this.playSound('click');
                     this.tweens.add({
                         targets: cardObj,
@@ -1441,6 +1737,7 @@ export class Game extends Phaser.Scene {
                 });
 
                 cardObj.on('pointerout', () => {
+                    if (cardObj.getData('isDragging')) return;
                     this.tweens.add({
                         targets: cardObj,
                         y: y,
@@ -1521,7 +1818,7 @@ export class Game extends Phaser.Scene {
                 }).setOrigin(0.5).setDepth(11);
             }
 
-            const isLocal = pid === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            const isLocal = pid === (this.getLocalPlayerId());
             if (isLocal) {
                 cardObj.setInteractive({ useHandCursor: true });
                 const selectedCount = indicesForEl.filter(i => this.selectedBoardMana.includes(i)).length;
@@ -1681,7 +1978,7 @@ export class Game extends Phaser.Scene {
         this.enablePlayerControls(false);
 
         // Calculate Start Position (from hand)
-        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const localId = this.getLocalPlayerId();
         const pGroup = this.playerGroups[localId];
         const posIndex = this.getPlayerPositionIndex(localId);
         
@@ -1695,7 +1992,7 @@ export class Game extends Phaser.Scene {
         
         let relX = 0, relY = 0;
         if (posIndex === 0) {
-            relX = -totalW / 2 + index * handSpaceX;
+            relX = 0 - totalW / 2 + index * handSpaceX;
             relY = -20 + curveOffset;
         } else if (posIndex === 2) {
             relX = 150 - totalW / 2 + index * handSpaceX;
@@ -1763,9 +2060,9 @@ export class Game extends Phaser.Scene {
             ease: 'Power2',
             onComplete: () => {
                 phantom.destroy();
-                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-                this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerHandDisplay(this.getLocalPlayerId());
+                this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+                this.updatePlayerLifeDisplay(this.getLocalPlayerId());
                 
                 this.playElementalBurst(targetX, targetY, el);
 
@@ -1775,7 +2072,7 @@ export class Game extends Phaser.Scene {
                     this.duelHistory.logMessage(`Player's mana play deals 3 damage to AI!`);
                 }
                 // C7 Surge fix: check if opponent's oppManaPlayDamage is active (opponent played Surge)
-                const localId2 = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+                const localId2 = this.getLocalPlayerId();
                 const oppId2 = this.playerIds.find(p => p !== localId2) || this.playerIds[1];
                 if (this.players[oppId2] && this.players[oppId2].status.oppManaPlayDamage > 0) {
                     this.players[oppId2].status.oppManaPlayDamage = 0;
@@ -1868,18 +2165,18 @@ export class Game extends Phaser.Scene {
             this.sharedDiscard.push(discarded);
         }
         
-        if (who === 'player') {
-            if (source === 'hand') this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            else this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        if (who === this.getLocalPlayerId()) {
+            if (source === 'hand') this.updatePlayerHandDisplay(this.getLocalPlayerId());
+            else this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
         } else {
-            if (source === 'hand') this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-            else this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
-            this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1]));
+            if (source === 'hand') this.updatePlayerHandDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
+            else this.updatePlayerBoardDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
+            this.updatePlayerLifeDisplay((this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1]));
         }
         this.updateDeckDiscardDisplay();
         
-        if (who === 'player' && source === 'board') {
+        if (who === this.getLocalPlayerId() && source === 'board') {
             this.selectedBoardMana = [];
             this.updateComboPreview();
         }
@@ -1931,9 +2228,9 @@ export class Game extends Phaser.Scene {
                 this.duelHistory.logMessage(`Player lost a hand mana from drawing!`);
             }
 
-            this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerHandDisplay(this.getLocalPlayerId());
+            this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
         }
 
         this.enablePlayerControls(false);
@@ -1960,9 +2257,9 @@ export class Game extends Phaser.Scene {
                 this.animateCardMovement(consumed, 'board', 'discard', 'player');
                 this.sharedDiscard.push(consumed);
             });
-            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerBoardDisplay(this.getLocalPlayerId());
             this.updateDeckDiscardDisplay();
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
 
             if (this.phase === 'reaction_request_active') {
                 this.phase = 'reaction_response';
@@ -1990,8 +2287,8 @@ export class Game extends Phaser.Scene {
             this.sharedDiscard.push(consumed);
         });
 
-        this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-        this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+        this.updatePlayerLifeDisplay(this.getLocalPlayerId());
         this.updateDeckDiscardDisplay();
 
         this.selectedBoardMana = [];
@@ -2000,7 +2297,7 @@ export class Game extends Phaser.Scene {
         this.duelHistory.logMessage(`Player casts: ${spell.name}!`);
 
         // Target Selection
-        const localPlayer = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const localPlayer = this.getLocalPlayerId();
         const opponents = this.playerIds.filter(p => p !== localPlayer);
         
         // Calculate synergy to determine if targeting is needed
@@ -2016,34 +2313,52 @@ export class Game extends Phaser.Scene {
         }
         
         const requiresTarget = finalDmg > 0 || finalDrain > 0;
-        
-        const finishCast = (targetId) => {
-            if (requiresTarget) {
-                this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name} targeting ${targetId.toUpperCase()}!`);
-            } else {
-                this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name}!`);
-            }
-            
-            // Simple visual from local to target
+
+        if (!requiresTarget) {
+            // Self-cast path: shield/draw only spells target the caster, no opponent involved
+            this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name}!`);
             const w = this.scale.width;
             const h = this.scale.height;
-            const targetPos = this.getPlayerPositionIndex(targetId);
-            let tx = w/2, ty = h/2;
-            if (targetPos === 1) { tx = 50; ty = h/2; }
-            else if (targetPos === 2) { tx = w/2; ty = 50; }
-            else if (targetPos === 3) { tx = w-50; ty = h/2; }
-            
-            this.triggerSpellVisual(spell, w / 2, h - 50, tx, ty, () => {
-                this.combat.initiateAttack(localPlayer, targetId, spell);
+            this.spellEffects.playSelfCastEffect(spell, w / 2, h - 50, () => {
+                this.combat.resolveSelfCast(localPlayer, spell);
             });
-        };
-
-        if (!requiresTarget || opponents.length === 1) {
-            finishCast(opponents[0]);
         } else {
-            // Need to select an opponent
-            this.duelHistory.logMessage(`Select target for ${spell.name}...`);
-            this.enableTapTargeting(opponents, finishCast);
+            // Offensive spell: needs an opponent target
+            const finishCast = (targetId) => {
+                this.duelHistory.logMessage(`${localPlayer.toUpperCase()} casts: ${spell.name} targeting ${targetId.toUpperCase()}!`);
+                
+                // Simple visual from local to target
+                const w = this.scale.width;
+                const h = this.scale.height;
+                const targetPos = this.getPlayerPositionIndex(targetId);
+                let tx = w/2, ty = h/2;
+                if (targetPos === 1) { tx = 50; ty = h/2; }
+                else if (targetPos === 2) { tx = w/2; ty = 50; }
+                else if (targetPos === 3) { tx = w-50; ty = h/2; }
+
+                // Override for Breeze to target opponent's board card
+                if (spell.name === 'Breeze') {
+                    const oppGroup = this.playerGroups[targetId];
+                    if (oppGroup && oppGroup.boardGroup && oppGroup.boardGroup.getChildren().length > 0) {
+                        const children = oppGroup.boardGroup.getChildren();
+                        const randomCard = children[Math.floor(Math.random() * children.length)];
+                        tx = randomCard.x;
+                        ty = randomCard.y;
+                    }
+                }
+                
+                this.triggerSpellCastAnimation(spell, w / 2, h - 50, () => {
+                    this.combat.initiateAttack(localPlayer, targetId, spell);
+                });
+            };
+
+            if (opponents.length === 1) {
+                finishCast(opponents[0]);
+            } else {
+                // Need to select an opponent
+                this.duelHistory.logMessage(`Select target for ${spell.name}...`);
+                this.enableTapTargeting(opponents, finishCast);
+            }
         }
     }
 
@@ -2109,6 +2424,117 @@ export class Game extends Phaser.Scene {
     }
 
     // --- COMBAT RESOLUTION & REACTION WINDOW ---
+    resolveSelfCast(caster, spell) {
+        const attChar = this.players[caster];
+        const cycle = this.cycleElements[this.cycleIndex];
+
+        // Status: Spell Fail Chance
+        if (attChar.status.spellFailChance > 0) {
+            if (Math.random() < 0.5) {
+                this.duelHistory.logMessage(`${caster.toUpperCase()}'s spell fizzled out!`);
+                this.time.delayedCall(800, () => {
+                    if (this.pendingExtraAction) {
+                        this.pendingExtraAction = false;
+                        this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
+                        this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
+                        if (this.turn === this.getLocalPlayerId()) { this.phase = 'action'; this.enablePlayerControls(true); }
+                        else if (this.mode === 'ai_contest') { this.contestAiAgent.runAITurn(this.turn); }
+                        else { this.aiAgent.runAITurn(); }
+                    } else {
+                        this.checkTurnContinuation();
+                    }
+                });
+                return;
+            }
+        }
+
+        // Synergy logic
+        let isEmp = this.synergy.calculateSynergy(spell, cycle);
+
+        let finalShield = spell.shield;
+        let finalDraw = spell.draw;
+
+        if (isEmp) {
+            const overrides = this.synergy.getEmpoweredOverrides(spell.name);
+            if (overrides.shield) finalShield = overrides.shield;
+            if (overrides.draw) finalDraw = overrides.draw;
+        }
+
+        // Force Cycle always triggers (not gated by isEmp)
+        if (spell.synergyType === 'force_cycle') {
+            const fcMap = { 'Tempest': 'air', 'Pillar': 'earth', 'Blaze': 'fire', 'Deluge': 'water' };
+            const fcEl = fcMap[spell.name];
+            if (fcEl) {
+                this.cycleIndex = this.cycleElements.indexOf(fcEl);
+                this.duelHistory.logMessage(`The Cycle is forced to ${fcEl.toUpperCase()}!`);
+                this.cycleCenterText.setText(fcEl.toUpperCase());
+                this.triggerCycleParticles(fcEl);
+            }
+        }
+
+        // Apply shield to caster
+        if (finalShield > 0) {
+            if (attChar.status.shieldFailChance > 0 && Math.random() < 0.5) {
+                this.duelHistory.logMessage(`${caster.toUpperCase()}'s Shield application failed due to Quake!`);
+            } else {
+                if (attChar.status.shieldDamageDebuff > 0) {
+                    this.forceDiscardRandom(caster, 1);
+                    this.duelHistory.logMessage(`${caster.toUpperCase()} takes 1 damage from unstable shield!`);
+                }
+                attChar.shield += finalShield;
+                this.updateShieldDisplay(caster);
+                this.duelHistory.logMessage(`${caster.toUpperCase()} gains ${finalShield} Shield.`);
+            }
+        }
+
+        // Draw logic
+        if (finalDraw > 0) {
+            for (let i = 0; i < finalDraw; i++) {
+                const drawn = this.drawCard();
+                if (drawn) {
+                    if (attChar.status.autoPlayDraw > 0 && attChar.board.length < 3) {
+                        attChar.board.push(drawn);
+                        this.duelHistory.logMessage(`Auto-played drawn mana!`);
+                    } else {
+                        attChar.hand.push(drawn);
+                    }
+                    if (attChar.status.loseManaOnDraw > 0 && attChar.board.length > 0) {
+                        this.sharedDiscard.push(attChar.board.pop());
+                        this.duelHistory.logMessage(`${caster.toUpperCase()} lost a board mana from drawing!`);
+                    }
+                }
+            }
+            this.playerIds.forEach(pid => { this.updatePlayerHandDisplay(pid); this.updatePlayerBoardDisplay(pid); this.updatePlayerLifeDisplay(pid); });
+        }
+
+        // Deferred status effects (self-cast spells that have them)
+        if (isEmp) {
+            // Self-cast empowered spells only apply self/global statuses, never defender-targeted ones.
+            if (spell.name === 'Enrich') { this.playerIds.forEach(p => this.players[p].status.everyoneDraw3 = 1); }
+            if (spell.name === 'Fortress') attChar.status.extraDrawIfShield = 1;
+            if (spell.name === 'Quagmire') attChar.status.redrawMana = 1;
+        }
+
+        // Done — resolve post action
+        this.time.delayedCall(800, () => {
+            if (this.pendingExtraAction) {
+                this.pendingExtraAction = false;
+                this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
+                this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
+                if (this.turn === this.getLocalPlayerId()) {
+                    this.phase = 'action';
+                    this.enablePlayerControls(true);
+                } else if (this.mode === 'ai_contest') {
+                    this.contestAiAgent.runAITurn(this.turn);
+                } else {
+                    this.aiAgent.runAITurn();
+                }
+            } else {
+                this.checkTurnContinuation();
+            }
+        });
+    }
+
     initiateAttack(attacker, defender, spell) {
         let defChar = this.players[defender];
         let attChar = this.players[attacker];
@@ -2269,7 +2695,7 @@ export class Game extends Phaser.Scene {
                         this.pendingExtraAction = false;
                         this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                         this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
-                        if (this.turn === 'player') {
+                        if (this.turn === this.getLocalPlayerId()) {
                             this.phase = 'action';
                             this.enablePlayerControls(true);
                         } else if (this.mode === 'ai_contest') {
@@ -2293,7 +2719,7 @@ export class Game extends Phaser.Scene {
 
         this.duelHistory.logMessage(`Reaction window triggers for ${defender.toUpperCase()}!`);
 
-        if (defender === 'player') {
+        if (defender === this.getLocalPlayerId()) {
             this.selectedBoardMana = [];
             this.updateComboPreview();
             this.enablePlayerControls(true);
@@ -2421,7 +2847,7 @@ export class Game extends Phaser.Scene {
             this.phase = 'discard';
             this.enablePlayerControls(false);
 
-            if (who === 'player') {
+            if (who === this.getLocalPlayerId()) {
                 this.cardsToDiscardCount = amount;
                 this.promptDiscardSelection();
             } else {
@@ -2446,7 +2872,7 @@ export class Game extends Phaser.Scene {
                     this.pendingExtraAction = false;
                     this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
                     this.duelHistory.logMessage(`${this.turn.toUpperCase()} gets another action!`);
-                    if (this.turn === 'player') {
+                    if (this.turn === this.getLocalPlayerId()) {
                         this.phase = 'action';
                         this.enablePlayerControls(true);
                     } else {
@@ -2467,10 +2893,13 @@ export class Game extends Phaser.Scene {
             this.duelHistory.logMessage("Player is out of cards!");
             this.player.hand = [];
             this.player.board = [];
-            this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerHandDisplay(this.getLocalPlayerId());
+            this.updatePlayerBoardDisplay(this.getLocalPlayerId());
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
             this.checkDefeatCondition('player');
+            this.time.delayedCall(1200, () => {
+                this.checkTurnContinuation();
+            });
             return;
         }
 
@@ -2479,22 +2908,22 @@ export class Game extends Phaser.Scene {
     }
 
     discardCardFromZone(zone, index, who) {
-        const localId = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+        const localId = this.getLocalPlayerId();
         if (who === localId && (this.phase === 'discard' || this.phase === 'discard_request_active') && this.cardsToDiscardCount > 0) {
             const char = this.player;
             let discarded;
             if (zone === 'hand') {
                 discarded = char.hand.splice(index, 1)[0];
-                this.updatePlayerHandDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerHandDisplay(this.getLocalPlayerId());
             } else {
                 discarded = char.board.splice(index, 1)[0];
-                this.updatePlayerBoardDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+                this.updatePlayerBoardDisplay(this.getLocalPlayerId());
             }
 
             this.animateCardMovement(discarded, zone, 'discard', 'player');
             this.sharedDiscard.push(discarded);
             this.updateDeckDiscardDisplay();
-            this.updatePlayerLifeDisplay(this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+            this.updatePlayerLifeDisplay(this.getLocalPlayerId());
 
             this.cardsToDiscardCount--;
             this.playSound('fire');
@@ -2554,7 +2983,7 @@ export class Game extends Phaser.Scene {
 
 
     checkTurnContinuation() {
-        if (this.turn === 'player' && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
+        if (this.turn === this.getLocalPlayerId() && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
             this.phase = 'action';
             this.enablePlayerControls(true);
         } else if (this.turn.startsWith('ai') && (!this.manaPlacedThisTurn || !this.spellCastThisTurn)) {
@@ -2590,7 +3019,7 @@ export class Game extends Phaser.Scene {
             this.onlineManager.syncToFirebase('init');
 
             // Host goes first
-            this.startTurn('player');
+            this.startTurn(this.myRole);
         }
 
         // Both host and guest listen for state changes
@@ -2609,7 +3038,7 @@ export class Game extends Phaser.Scene {
             discard: this.sharedDiscard.slice(),
             cycleIndex: this.cycleIndex,
             firstCycleIndex: this.firstCycleIndex,
-            turn: this.turn === 'player' ? myKey : oppKey,
+            turn: this.turn === this.getLocalPlayerId() ? myKey : oppKey,
             phase: this.phase,
             actionUsed: this.actionUsedThisTurn || false,
             manaPlacedThisTurn: this.manaPlacedThisTurn || false,
@@ -2781,7 +3210,7 @@ export class Game extends Phaser.Scene {
 
         // Normal Turn Logic
         if (isMyTurn) {
-            this.duelHistory.logMessage("--- YOUR TURN ---");
+        // Turn announcement removed per request
             this.manaPlacedThisTurn = false; this.spellCastThisTurn = false;
             this.selectedBoardMana = [];
             this.updateComboPreview();
@@ -2990,13 +3419,13 @@ export class Game extends Phaser.Scene {
         }
         
         if (toStr === 'hand') {
-            if (who === 'player') {
+            if (who === this.getLocalPlayerId()) {
                 this.playerIncomingHandCards = (this.playerIncomingHandCards || 0) + 1;
             } else {
                 this.aiIncomingHandCards = (this.aiIncomingHandCards || 0) + 1;
             }
         } else if (toStr === 'board') {
-            if (who === 'player') {
+            if (who === this.getLocalPlayerId()) {
                 this.playerIncomingBoardCards = (this.playerIncomingBoardCards || 0) + 1;
             } else {
                 this.aiIncomingBoardCards = (this.aiIncomingBoardCards || 0) + 1;
@@ -3012,10 +3441,10 @@ export class Game extends Phaser.Scene {
             
             // Map who parameter ('player' / 'ai') to a pid
             let pid = player;
-            if (player === 'player') {
-                pid = this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole;
+            if (player === this.getLocalPlayerId()) {
+                pid = this.getLocalPlayerId();
             } else if (player === 'ai') {
-                pid = this.playerIds.find(p => p !== (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole)) || this.playerIds[1];
+                pid = this.playerIds.find(p => p !== (this.getLocalPlayerId())) || this.playerIds[1];
             }
             // If they passed a direct pid (like guest1) it stays as is
             
@@ -3077,7 +3506,7 @@ export class Game extends Phaser.Scene {
         const start = getZoneCoords(fromStr, who);
         const end = getZoneCoords(toStr, who);
         
-        const isLocal = who === (this.myRole === 'host' || this.mode !== 'online' ? 'player' : this.myRole);
+        const isLocal = who === this.getLocalPlayerId();
         let tex = `card_${element}`;
         if (!isLocal && toStr === 'hand' && fromStr === 'deck') {
             tex = 'card_back';
@@ -3095,14 +3524,14 @@ export class Game extends Phaser.Scene {
             ease: 'Cubic.easeOut',
             onComplete: () => {
                 if (toStr === 'hand') {
-                    if (who === 'player') {
+                    if (who === this.getLocalPlayerId()) {
                         this.playerIncomingHandCards = Math.max(0, this.playerIncomingHandCards - 1);
                     } else {
                         this.aiIncomingHandCards = Math.max(0, this.aiIncomingHandCards - 1);
                     }
                     this.updatePlayerHandDisplay(who);
                 } else if (toStr === 'board') {
-                    if (who === 'player') {
+                    if (who === this.getLocalPlayerId()) {
                         this.playerIncomingBoardCards = Math.max(0, this.playerIncomingBoardCards - 1);
                     } else {
                         this.aiIncomingBoardCards = Math.max(0, this.aiIncomingBoardCards - 1);

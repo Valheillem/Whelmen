@@ -1,0 +1,1052 @@
+{
+    "earth_fissure": {
+        "frameWidth": 800,
+        "frameHeight": 480,
+        "frameCount": 8,
+        "originalName": "Earth Fissure"
+    },
+    "earth_spike": {
+        "frameWidth": 600,
+        "frameHeight": 480,
+        "frameCount": 12,
+        "originalName": "Earth Spike"
+    },
+    "fire_explosion": {
+        "frameWidth": 480,
+        "frameHeight": 480,
+        "frameCount": 12,
+        "originalName": "Fire Explosion"
+    },
+    "flame": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 12,
+        "originalName": "Flame"
+    },
+    "ground_hit": {
+        "frameWidth": 1200,
+        "frameHeight": 800,
+        "frameCount": 8,
+        "originalName": "Ground Hit"
+    },
+    "icons": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 6,
+        "originalName": "Icons"
+    },
+    "meteor": {
+        "frameWidth": 1024,
+        "frameHeight": 320,
+        "frameCount": 12,
+        "originalName": "Meteor"
+    },
+    "chemical_smoke": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 8,
+        "originalName": "Chemical Smoke"
+    },
+    "poisonous_smoke": {
+        "frameWidth": 640,
+        "frameHeight": 480,
+        "frameCount": 12,
+        "originalName": "Poisonous Smoke"
+    },
+    "smoke": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 10,
+        "originalName": "Smoke"
+    },
+    "smoke_blow": {
+        "frameWidth": 800,
+        "frameHeight": 240,
+        "frameCount": 12,
+        "originalName": "Smoke Blow"
+    },
+    "smoke_explosion": {
+        "frameWidth": 800,
+        "frameHeight": 800,
+        "frameCount": 16,
+        "originalName": "Smoke Explosion"
+    },
+    "smoke_spell": {
+        "frameWidth": 640,
+        "frameHeight": 320,
+        "frameCount": 10,
+        "originalName": "Smoke Spell"
+    },
+    "fire_arrow": {
+        "frameWidth": 600,
+        "frameHeight": 320,
+        "frameCount": 8,
+        "originalName": "Fire Arrow"
+    },
+    "fire_ball": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 8,
+        "originalName": "Fire Ball"
+    },
+    "fire_spell": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 8,
+        "originalName": "Fire Spell"
+    },
+    "water_arrow": {
+        "frameWidth": 480,
+        "frameHeight": 360,
+        "frameCount": 8,
+        "originalName": "Water Arrow"
+    },
+    "water_ball": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 12,
+        "originalName": "Water Ball"
+    },
+    "water_spell": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 8,
+        "originalName": "Water Spell"
+    },
+    "lightning_arrow": {
+        "frameWidth": 480,
+        "frameHeight": 360,
+        "frameCount": 12,
+        "originalName": "Lightning Arrow"
+    },
+    "lightning_spell": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 12,
+        "originalName": "Lightning Spell"
+    },
+    "lightning_strike": {
+        "frameWidth": 512,
+        "frameHeight": 640,
+        "frameCount": 12,
+        "originalName": "Lightning Strike"
+    },
+    "typhoon": {
+        "frameWidth": 800,
+        "frameHeight": 800,
+        "frameCount": 12,
+        "originalName": "Typhoon"
+    },
+    "wind_ball": {
+        "frameWidth": 640,
+        "frameHeight": 640,
+        "frameCount": 8,
+        "originalName": "Wind Ball"
+    },
+    "wind_spell": {
+        "frameWidth": 640,
+        "frameHeight": 360,
+        "frameCount": 12,
+        "originalName": "Wind Spell"
+    },
+    "earth_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 8,
+        "originalName": "Earth Shield"
+    },
+    "fire_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 8,
+        "originalName": "Fire Shield"
+    },
+    "leaf_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 16,
+        "originalName": "Leaf Shield"
+    },
+    "lightning_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 12,
+        "originalName": "Lightning Shield"
+    },
+    "water_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 8,
+        "originalName": "Water Shield"
+    },
+    "wind_shield": {
+        "frameWidth": 720,
+        "frameHeight": 720,
+        "frameCount": 4,
+        "originalName": "Wind Shield"
+    },
+    "explosion_vector_sprite_effects_1": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 9,
+        "originalName": "explosion_vector_sprite_effects_1"
+    },
+    "explosion_vector_sprite_effects_10": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "explosion_vector_sprite_effects_10"
+    },
+    "explosion_vector_sprite_effects_2": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 12,
+        "originalName": "explosion_vector_sprite_effects_2"
+    },
+    "explosion_vector_sprite_effects_3": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "explosion_vector_sprite_effects_3"
+    },
+    "explosion_vector_sprite_effects_4": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 9,
+        "originalName": "explosion_vector_sprite_effects_4"
+    },
+    "explosion_vector_sprite_effects_5": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 9,
+        "originalName": "explosion_vector_sprite_effects_5"
+    },
+    "explosion_vector_sprite_effects_6": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 10,
+        "originalName": "explosion_vector_sprite_effects_6"
+    },
+    "explosion_vector_sprite_effects_7": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 9,
+        "originalName": "explosion_vector_sprite_effects_7"
+    },
+    "explosion_vector_sprite_effects_8": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 11,
+        "originalName": "explosion_vector_sprite_effects_8"
+    },
+    "explosion_vector_sprite_effects_9": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 9,
+        "originalName": "explosion_vector_sprite_effects_9"
+    },
+    "free_flame_effects_sprite_pack_flame1_images": {
+        "frameWidth": 1342,
+        "frameHeight": 1006,
+        "frameCount": 29,
+        "originalName": "free_flame_effects_sprite_pack_flame1_images"
+    },
+    "free_flame_effects_sprite_pack_flame1": {
+        "frameWidth": 547,
+        "frameHeight": 483,
+        "frameCount": 28,
+        "originalName": "free_flame_effects_sprite_pack_flame1"
+    },
+    "free_flame_effects_sprite_pack_flame1_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 1,
+        "originalName": "free_flame_effects_sprite_pack_flame1_spine"
+    },
+    "free_flame_effects_sprite_pack_flame10_images": {
+        "frameWidth": 1442,
+        "frameHeight": 885,
+        "frameCount": 31,
+        "originalName": "free_flame_effects_sprite_pack_flame10_images"
+    },
+    "free_flame_effects_sprite_pack_flame10": {
+        "frameWidth": 1666,
+        "frameHeight": 1070,
+        "frameCount": 41,
+        "originalName": "free_flame_effects_sprite_pack_flame10"
+    },
+    "free_flame_effects_sprite_pack_flame10_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 4,
+        "originalName": "free_flame_effects_sprite_pack_flame10_spine"
+    },
+    "free_flame_effects_sprite_pack_flame2_images": {
+        "frameWidth": 37,
+        "frameHeight": 35,
+        "frameCount": 18,
+        "originalName": "free_flame_effects_sprite_pack_flame2_images"
+    },
+    "free_flame_effects_sprite_pack_flame2": {
+        "frameWidth": 2022,
+        "frameHeight": 1793,
+        "frameCount": 16,
+        "originalName": "free_flame_effects_sprite_pack_flame2"
+    },
+    "free_flame_effects_sprite_pack_flame2_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 1,
+        "originalName": "free_flame_effects_sprite_pack_flame2_spine"
+    },
+    "free_flame_effects_sprite_pack_flame3_image": {
+        "frameWidth": 1442,
+        "frameHeight": 885,
+        "frameCount": 85,
+        "originalName": "free_flame_effects_sprite_pack_flame3_image"
+    },
+    "free_flame_effects_sprite_pack_flame3": {
+        "frameWidth": 690,
+        "frameHeight": 804,
+        "frameCount": 49,
+        "originalName": "free_flame_effects_sprite_pack_flame3"
+    },
+    "free_flame_effects_sprite_pack_flame3_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 3,
+        "originalName": "free_flame_effects_sprite_pack_flame3_spine"
+    },
+    "free_flame_effects_sprite_pack_flame4_image": {
+        "frameWidth": 116,
+        "frameHeight": 119,
+        "frameCount": 92,
+        "originalName": "free_flame_effects_sprite_pack_flame4_image"
+    },
+    "free_flame_effects_sprite_pack_flame4": {
+        "frameWidth": 339,
+        "frameHeight": 404,
+        "frameCount": 53,
+        "originalName": "free_flame_effects_sprite_pack_flame4"
+    },
+    "free_flame_effects_sprite_pack_flame4_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 2,
+        "originalName": "free_flame_effects_sprite_pack_flame4_spine"
+    },
+    "free_flame_effects_sprite_pack_flame5_image": {
+        "frameWidth": 39,
+        "frameHeight": 20,
+        "frameCount": 73,
+        "originalName": "free_flame_effects_sprite_pack_flame5_image"
+    },
+    "free_flame_effects_sprite_pack_flame5": {
+        "frameWidth": 662,
+        "frameHeight": 506,
+        "frameCount": 84,
+        "originalName": "free_flame_effects_sprite_pack_flame5"
+    },
+    "free_flame_effects_sprite_pack_flame5_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 2,
+        "originalName": "free_flame_effects_sprite_pack_flame5_spine"
+    },
+    "free_flame_effects_sprite_pack_flame6_images": {
+        "frameWidth": 458,
+        "frameHeight": 458,
+        "frameCount": 3,
+        "originalName": "free_flame_effects_sprite_pack_flame6_images"
+    },
+    "free_flame_effects_sprite_pack_flame6": {
+        "frameWidth": 662,
+        "frameHeight": 506,
+        "frameCount": 18,
+        "originalName": "free_flame_effects_sprite_pack_flame6"
+    },
+    "free_flame_effects_sprite_pack_flame6_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 1,
+        "originalName": "free_flame_effects_sprite_pack_flame6_spine"
+    },
+    "free_flame_effects_sprite_pack_flame7_images1": {
+        "frameWidth": 606,
+        "frameHeight": 591,
+        "frameCount": 25,
+        "originalName": "free_flame_effects_sprite_pack_flame7_images1"
+    },
+    "free_flame_effects_sprite_pack_flame7_images2": {
+        "frameWidth": 1342,
+        "frameHeight": 1006,
+        "frameCount": 51,
+        "originalName": "free_flame_effects_sprite_pack_flame7_images2"
+    },
+    "free_flame_effects_sprite_pack_flame7_png1": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 24,
+        "originalName": "free_flame_effects_sprite_pack_flame7_png1"
+    },
+    "free_flame_effects_sprite_pack_flame7_png2": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 24,
+        "originalName": "free_flame_effects_sprite_pack_flame7_png2"
+    },
+    "free_flame_effects_sprite_pack_flame7_png3": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 24,
+        "originalName": "free_flame_effects_sprite_pack_flame7_png3"
+    },
+    "free_flame_effects_sprite_pack_flame7_png4": {
+        "frameWidth": 1804,
+        "frameHeight": 1145,
+        "frameCount": 42,
+        "originalName": "free_flame_effects_sprite_pack_flame7_png4"
+    },
+    "free_flame_effects_sprite_pack_flame7_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 3,
+        "originalName": "free_flame_effects_sprite_pack_flame7_spine"
+    },
+    "free_flame_effects_sprite_pack_flame8_images": {
+        "frameWidth": 348,
+        "frameHeight": 452,
+        "frameCount": 43,
+        "originalName": "free_flame_effects_sprite_pack_flame8_images"
+    },
+    "free_flame_effects_sprite_pack_flame8": {
+        "frameWidth": 930,
+        "frameHeight": 934,
+        "frameCount": 34,
+        "originalName": "free_flame_effects_sprite_pack_flame8"
+    },
+    "free_flame_effects_sprite_pack_flame8_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 1,
+        "originalName": "free_flame_effects_sprite_pack_flame8_spine"
+    },
+    "free_flame_effects_sprite_pack_flame9_images": {
+        "frameWidth": 288,
+        "frameHeight": 320,
+        "frameCount": 19,
+        "originalName": "free_flame_effects_sprite_pack_flame9_images"
+    },
+    "free_flame_effects_sprite_pack_flame9": {
+        "frameWidth": 1593,
+        "frameHeight": 1500,
+        "frameCount": 31,
+        "originalName": "free_flame_effects_sprite_pack_flame9"
+    },
+    "free_flame_effects_sprite_pack_flame9_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 2048,
+        "frameCount": 3,
+        "originalName": "free_flame_effects_sprite_pack_flame9_spine"
+    },
+    "free_slash_sprite_cartoon_effects_1": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 10,
+        "originalName": "free_slash_sprite_cartoon_effects_1"
+    },
+    "free_slash_sprite_cartoon_effects_10": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "free_slash_sprite_cartoon_effects_10"
+    },
+    "free_slash_sprite_cartoon_effects_2": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 5,
+        "originalName": "free_slash_sprite_cartoon_effects_2"
+    },
+    "free_slash_sprite_cartoon_effects_3": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 10,
+        "originalName": "free_slash_sprite_cartoon_effects_3"
+    },
+    "free_slash_sprite_cartoon_effects_4": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "free_slash_sprite_cartoon_effects_4"
+    },
+    "free_slash_sprite_cartoon_effects_5": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "free_slash_sprite_cartoon_effects_5"
+    },
+    "free_slash_sprite_cartoon_effects_6": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 10,
+        "originalName": "free_slash_sprite_cartoon_effects_6"
+    },
+    "free_slash_sprite_cartoon_effects_7": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 10,
+        "originalName": "free_slash_sprite_cartoon_effects_7"
+    },
+    "free_slash_sprite_cartoon_effects_8": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 10,
+        "originalName": "free_slash_sprite_cartoon_effects_8"
+    },
+    "free_slash_sprite_cartoon_effects_9": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "free_slash_sprite_cartoon_effects_9"
+    },
+    "free_water_effects_sprite_pack_water1_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 49,
+        "originalName": "free_water_effects_sprite_pack_water1_image"
+    },
+    "free_water_effects_sprite_pack_water1": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 48,
+        "originalName": "free_water_effects_sprite_pack_water1"
+    },
+    "free_water_effects_sprite_pack_water1_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water1_spine"
+    },
+    "free_water_effects_sprite_pack_water10_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 11,
+        "originalName": "free_water_effects_sprite_pack_water10_image"
+    },
+    "free_water_effects_sprite_pack_water10": {
+        "frameWidth": 573,
+        "frameHeight": 377,
+        "frameCount": 14,
+        "originalName": "free_water_effects_sprite_pack_water10"
+    },
+    "free_water_effects_sprite_pack_water10_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water10_spine"
+    },
+    "free_water_effects_sprite_pack_water2_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 18,
+        "originalName": "free_water_effects_sprite_pack_water2_image"
+    },
+    "free_water_effects_sprite_pack_water2": {
+        "frameWidth": 1800,
+        "frameHeight": 1200,
+        "frameCount": 17,
+        "originalName": "free_water_effects_sprite_pack_water2"
+    },
+    "free_water_effects_sprite_pack_water2_spine": {
+        "frameWidth": 1024,
+        "frameHeight": 128,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water2_spine"
+    },
+    "free_water_effects_sprite_pack_water3_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 23,
+        "originalName": "free_water_effects_sprite_pack_water3_image"
+    },
+    "free_water_effects_sprite_pack_water3": {
+        "frameWidth": 1800,
+        "frameHeight": 1200,
+        "frameCount": 23,
+        "originalName": "free_water_effects_sprite_pack_water3"
+    },
+    "free_water_effects_sprite_pack_water3_spine": {
+        "frameWidth": 1024,
+        "frameHeight": 1024,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water3_spine"
+    },
+    "free_water_effects_sprite_pack_water4_images": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 16,
+        "originalName": "free_water_effects_sprite_pack_water4_images"
+    },
+    "free_water_effects_sprite_pack_water4": {
+        "frameWidth": 1800,
+        "frameHeight": 1200,
+        "frameCount": 16,
+        "originalName": "free_water_effects_sprite_pack_water4"
+    },
+    "free_water_effects_sprite_pack_water4_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 1024,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water4_spine"
+    },
+    "free_water_effects_sprite_pack_water5_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 16,
+        "originalName": "free_water_effects_sprite_pack_water5_image"
+    },
+    "free_water_effects_sprite_pack_water5": {
+        "frameWidth": 666,
+        "frameHeight": 464,
+        "frameCount": 31,
+        "originalName": "free_water_effects_sprite_pack_water5"
+    },
+    "free_water_effects_sprite_pack_water5_spine": {
+        "frameWidth": 1024,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water5_spine"
+    },
+    "free_water_effects_sprite_pack_water6_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 12,
+        "originalName": "free_water_effects_sprite_pack_water6_image"
+    },
+    "free_water_effects_sprite_pack_water6": {
+        "frameWidth": 1800,
+        "frameHeight": 1200,
+        "frameCount": 12,
+        "originalName": "free_water_effects_sprite_pack_water6"
+    },
+    "free_water_effects_sprite_pack_water6_spine": {
+        "frameWidth": 1024,
+        "frameHeight": 1024,
+        "frameCount": 2,
+        "originalName": "free_water_effects_sprite_pack_water6_spine"
+    },
+    "free_water_effects_sprite_pack_water7_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 14,
+        "originalName": "free_water_effects_sprite_pack_water7_image"
+    },
+    "free_water_effects_sprite_pack_water7": {
+        "frameWidth": 1800,
+        "frameHeight": 1200,
+        "frameCount": 14,
+        "originalName": "free_water_effects_sprite_pack_water7"
+    },
+    "free_water_effects_sprite_pack_water7_spine": {
+        "frameWidth": 1024,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water7_spine"
+    },
+    "free_water_effects_sprite_pack_water8_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 23,
+        "originalName": "free_water_effects_sprite_pack_water8_image"
+    },
+    "free_water_effects_sprite_pack_water8": {
+        "frameWidth": 1800,
+        "frameHeight": 1200,
+        "frameCount": 21,
+        "originalName": "free_water_effects_sprite_pack_water8"
+    },
+    "free_water_effects_sprite_pack_water8_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water8_spine"
+    },
+    "free_water_effects_sprite_pack_water9_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 43,
+        "originalName": "free_water_effects_sprite_pack_water9_image"
+    },
+    "free_water_effects_sprite_pack_water9": {
+        "frameWidth": 1800,
+        "frameHeight": 1200,
+        "frameCount": 42,
+        "originalName": "free_water_effects_sprite_pack_water9"
+    },
+    "free_water_effects_sprite_pack_water9_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 1024,
+        "frameCount": 1,
+        "originalName": "free_water_effects_sprite_pack_water9_spine"
+    },
+    "blood_splash_sprite_effects_asset_pack_1": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "blood_splash_sprite_effects_asset_pack_1"
+    },
+    "blood_splash_sprite_effects_asset_pack_10": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "blood_splash_sprite_effects_asset_pack_10"
+    },
+    "blood_splash_sprite_effects_asset_pack_2": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 6,
+        "originalName": "blood_splash_sprite_effects_asset_pack_2"
+    },
+    "blood_splash_sprite_effects_asset_pack_3": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "blood_splash_sprite_effects_asset_pack_3"
+    },
+    "blood_splash_sprite_effects_asset_pack_4": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "blood_splash_sprite_effects_asset_pack_4"
+    },
+    "blood_splash_sprite_effects_asset_pack_5": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "blood_splash_sprite_effects_asset_pack_5"
+    },
+    "blood_splash_sprite_effects_asset_pack_6": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 9,
+        "originalName": "blood_splash_sprite_effects_asset_pack_6"
+    },
+    "blood_splash_sprite_effects_asset_pack_7": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 6,
+        "originalName": "blood_splash_sprite_effects_asset_pack_7"
+    },
+    "blood_splash_sprite_effects_asset_pack_8": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 9,
+        "originalName": "blood_splash_sprite_effects_asset_pack_8"
+    },
+    "blood_splash_sprite_effects_asset_pack_9": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "blood_splash_sprite_effects_asset_pack_9"
+    },
+    "magic_sprite_effects_vector_pack_1": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "magic_sprite_effects_vector_pack_1"
+    },
+    "magic_sprite_effects_vector_pack_10": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 16,
+        "originalName": "magic_sprite_effects_vector_pack_10"
+    },
+    "magic_sprite_effects_vector_pack_2": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 6,
+        "originalName": "magic_sprite_effects_vector_pack_2"
+    },
+    "magic_sprite_effects_vector_pack_3": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 10,
+        "originalName": "magic_sprite_effects_vector_pack_3"
+    },
+    "magic_sprite_effects_vector_pack_4": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 12,
+        "originalName": "magic_sprite_effects_vector_pack_4"
+    },
+    "magic_sprite_effects_vector_pack_5": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "magic_sprite_effects_vector_pack_5"
+    },
+    "magic_sprite_effects_vector_pack_6": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 10,
+        "originalName": "magic_sprite_effects_vector_pack_6"
+    },
+    "magic_sprite_effects_vector_pack_7": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 12,
+        "originalName": "magic_sprite_effects_vector_pack_7"
+    },
+    "magic_sprite_effects_vector_pack_8": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "magic_sprite_effects_vector_pack_8"
+    },
+    "magic_sprite_effects_vector_pack_9": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 11,
+        "originalName": "magic_sprite_effects_vector_pack_9"
+    },
+    "free_slash_effects_sprite_pack_slash_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 19,
+        "originalName": "free_slash_effects_sprite_pack_slash_image"
+    },
+    "free_slash_effects_sprite_pack_slash": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 12,
+        "originalName": "free_slash_effects_sprite_pack_slash"
+    },
+    "free_slash_effects_sprite_pack_slash_spine": {
+        "frameWidth": 1024,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash_spine"
+    },
+    "free_slash_effects_sprite_pack_slash10_image": {
+        "frameWidth": 106,
+        "frameHeight": 80,
+        "frameCount": 6,
+        "originalName": "free_slash_effects_sprite_pack_slash10_image"
+    },
+    "free_slash_effects_sprite_pack_slash10": {
+        "frameWidth": 662,
+        "frameHeight": 506,
+        "frameCount": 10,
+        "originalName": "free_slash_effects_sprite_pack_slash10"
+    },
+    "free_slash_effects_sprite_pack_slash10_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash10_spine"
+    },
+    "free_slash_effects_sprite_pack_slash2_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 10,
+        "originalName": "free_slash_effects_sprite_pack_slash2_image"
+    },
+    "free_slash_effects_sprite_pack_slash2": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 9,
+        "originalName": "free_slash_effects_sprite_pack_slash2"
+    },
+    "free_slash_effects_sprite_pack_slash2_spine": {
+        "frameWidth": 512,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash2_spine"
+    },
+    "free_slash_effects_sprite_pack_slash3_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 13,
+        "originalName": "free_slash_effects_sprite_pack_slash3_image"
+    },
+    "free_slash_effects_sprite_pack_slash3": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 12,
+        "originalName": "free_slash_effects_sprite_pack_slash3"
+    },
+    "free_slash_effects_sprite_pack_slash3_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 256,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash3_spine"
+    },
+    "free_slash_effects_sprite_pack_slash4_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 13,
+        "originalName": "free_slash_effects_sprite_pack_slash4_image"
+    },
+    "free_slash_effects_sprite_pack_slash4": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 12,
+        "originalName": "free_slash_effects_sprite_pack_slash4"
+    },
+    "free_slash_effects_sprite_pack_slash4_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 512,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash4_spine"
+    },
+    "free_slash_effects_sprite_pack_slash5_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 13,
+        "originalName": "free_slash_effects_sprite_pack_slash5_image"
+    },
+    "free_slash_effects_sprite_pack_slash5": {
+        "frameWidth": 568,
+        "frameHeight": 395,
+        "frameCount": 11,
+        "originalName": "free_slash_effects_sprite_pack_slash5"
+    },
+    "free_slash_effects_sprite_pack_slash5_spine": {
+        "frameWidth": 1024,
+        "frameHeight": 256,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash5_spine"
+    },
+    "free_slash_effects_sprite_pack_slash6_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 11,
+        "originalName": "free_slash_effects_sprite_pack_slash6_image"
+    },
+    "free_slash_effects_sprite_pack_slash6": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 11,
+        "originalName": "free_slash_effects_sprite_pack_slash6"
+    },
+    "free_slash_effects_sprite_pack_slash6_spine": {
+        "frameWidth": 2048,
+        "frameHeight": 256,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash6_spine"
+    },
+    "free_slash_effects_sprite_pack_slash7_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 8,
+        "originalName": "free_slash_effects_sprite_pack_slash7_image"
+    },
+    "free_slash_effects_sprite_pack_slash7": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 6,
+        "originalName": "free_slash_effects_sprite_pack_slash7"
+    },
+    "free_slash_effects_sprite_pack_slash7_spine": {
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash7_spine"
+    },
+    "free_slash_effects_sprite_pack_slash8_image": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 9,
+        "originalName": "free_slash_effects_sprite_pack_slash8_image"
+    },
+    "free_slash_effects_sprite_pack_slash8": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 8,
+        "originalName": "free_slash_effects_sprite_pack_slash8"
+    },
+    "free_slash_effects_sprite_pack_slash8_spine": {
+        "frameWidth": 512,
+        "frameHeight": 128,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash8_spine"
+    },
+    "free_slash_effects_sprite_pack_slash9": {
+        "frameWidth": 1280,
+        "frameHeight": 720,
+        "frameCount": 9,
+        "originalName": "free_slash_effects_sprite_pack_slash9"
+    },
+    "free_slash_effects_sprite_pack_slash9_slash9": {
+        "frameWidth": 763,
+        "frameHeight": 382,
+        "frameCount": 10,
+        "originalName": "free_slash_effects_sprite_pack_slash9_slash9"
+    },
+    "free_slash_effects_sprite_pack_slash9_spine": {
+        "frameWidth": 1024,
+        "frameHeight": 128,
+        "frameCount": 1,
+        "originalName": "free_slash_effects_sprite_pack_slash9_spine"
+    },
+    "cartoon_fire_flame_animation_sprite_set_1": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_1"
+    },
+    "cartoon_fire_flame_animation_sprite_set_10": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_10"
+    },
+    "cartoon_fire_flame_animation_sprite_set_2": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_2"
+    },
+    "cartoon_fire_flame_animation_sprite_set_3": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_3"
+    },
+    "cartoon_fire_flame_animation_sprite_set_4": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_4"
+    },
+    "cartoon_fire_flame_animation_sprite_set_5": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_5"
+    },
+    "cartoon_fire_flame_animation_sprite_set_6": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 8,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_6"
+    },
+    "cartoon_fire_flame_animation_sprite_set_7": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 6,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_7"
+    },
+    "cartoon_fire_flame_animation_sprite_set_8": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 6,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_8"
+    },
+    "cartoon_fire_flame_animation_sprite_set_9": {
+        "frameWidth": 496,
+        "frameHeight": 496,
+        "frameCount": 7,
+        "originalName": "cartoon_fire_flame_animation_sprite_set_9"
+    }
+}

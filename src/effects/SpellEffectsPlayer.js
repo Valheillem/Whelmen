@@ -21,6 +21,38 @@ export class SpellEffectsPlayer {
         });
     }
 
+    playCastAnimation(spell, startX, startY, onComplete) {
+        let effect = getSpellEffect(spell.name);
+        if (effect.castAnim) {
+            let castSprite = this.scene.add.sprite(startX, startY, 'magic_circle').setDepth(100);
+            
+            // Simple generic aura pulse
+            this.scene.tweens.add({
+                targets: castSprite,
+                scale: effect.castAnim.scale || 1.5,
+                alpha: 0,
+                duration: effect.castAnim.duration || 300,
+                onComplete: () => {
+                    castSprite.destroy();
+                    if (onComplete) onComplete();
+                }
+            });
+        } else {
+            if (onComplete) onComplete();
+        }
+    }
+
+    playProjectileAndImpact(spell, startX, startY, endX, endY, onComplete) {
+        let effect = getSpellEffect(spell.name);
+        
+        if (effect.projectile) {
+            this.playProjectile(spell, effect, startX, startY, endX, endY, onComplete);
+        } else {
+            this.playImpact(spell, effect, endX, endY);
+            if (onComplete) onComplete();
+        }
+    }
+
     playSpellCast(spell, startX, startY, endX, endY, onComplete) {
         const effect = getSpellEffect(spell.name);
         
@@ -43,17 +75,43 @@ export class SpellEffectsPlayer {
         const element = spell.element === 'n/a' ? 'air' : spell.element;
         
         if (effect.sound) {
-            this.scene.playSound(effect.sound.type);
+            this.scene.playSound(effect.sound.type, effect.sound.volume);
         } else {
             this.scene.playSound(element === 'earth' ? 'shield' : element);
         }
         
-        let visual = this.scene.add.circle(startX, startY, projConfig.size || 20, projConfig.color);
-        visual.setStrokeStyle(4, 0xffffff);
+        let visual;
+        let isSprite = projConfig.shape === 'sprite' || projConfig.animKey;
+
+        if (isSprite) {
+            let textureKey = projConfig.animKey ? projConfig.animKey.replace('anim_', '') : 'fire_ball';
+            visual = this.scene.add.sprite(startX, startY, textureKey).setDepth(100);
+            visual.play(projConfig.animKey);
+            
+            // Scale to fit the configured size while preserving aspect ratio
+            const baseSize = projConfig.size || 64;
+            const frameW = visual.width;
+            const frameH = visual.height;
+            const scaleFactor = baseSize / Math.max(frameW, frameH);
+            visual.setScale(scaleFactor);
+
+            if (projConfig.flipX) visual.setFlipX(true);
+            if (projConfig.flipY) visual.setFlipY(true);
+
+            // Only rotate directional sprites (arrows and beam-like spells)
+            const isDirectional = textureKey.includes('arrow') || textureKey.includes('spell');
+            if (isDirectional) {
+                const angle = Phaser.Math.Angle.Between(startX, startY, endX, endY);
+                visual.setRotation(angle);
+            }
+        } else {
+            visual = this.scene.add.circle(startX, startY, projConfig.size || 20, projConfig.color).setDepth(100);
+            visual.setStrokeStyle(4, 0xffffff);
+        }
 
         // Dynamic tail particle flow
         const emitter = this.emitters[element] || this.emitters['air'];
-        if (emitter) {
+        if (emitter && !isSprite) { // Avoid default tail for rich sprites for now
             emitter.startFollow(visual);
             emitter.start();
         }
@@ -66,7 +124,7 @@ export class SpellEffectsPlayer {
             ease: 'Quad.easeOut',
             onComplete: () => {
                 visual.destroy();
-                if (emitter) {
+                if (emitter && !isSprite) {
                     emitter.stop();
                     emitter.explode(25, endX, endY);
                 }
@@ -79,19 +137,87 @@ export class SpellEffectsPlayer {
 
     playImpact(spell, effect, x, y) {
         this.scene.playSound('hit');
-        const impact = effect.impact;
         
-        if (impact.screenShake) {
+        const impacts = Array.isArray(effect.impact) ? effect.impact : [effect.impact];
+        
+        impacts.forEach(impact => {
+            if (impact && impact.animKey) {
+            let textureKey = impact.animKey.replace('anim_', '');
+            
+            let finalX = x + (impact.offsetX || 0);
+            let finalY = y + (impact.offsetY || 0);
+            
+            if (impact.targetOverride === 'center') {
+                finalX = this.scene.scale.width / 2 - 20 + (impact.offsetX || 0);
+                finalY = this.scene.scale.height / 2 - 40 + (impact.offsetY || 0);
+            }
+            
+            let impactSprite = this.scene.add.sprite(finalX, finalY, textureKey).setDepth(100);
+            
+            if (impact.alpha !== undefined) impactSprite.setAlpha(impact.alpha);
+            
+            // Scale to fit the configured size while preserving aspect ratio
+            const impactSize = impact.size || 128;
+            const frameW = impactSprite.width;
+            const frameH = impactSprite.height;
+            const scaleFactor = impactSize / Math.max(frameW, frameH);
+            
+            if (impact.growAndShrink) {
+                impactSprite.setScale(0.1);
+                this.scene.tweens.add({
+                    targets: impactSprite,
+                    scaleX: scaleFactor,
+                    scaleY: scaleFactor,
+                    duration: impact.duration ? impact.duration / 2 : 750,
+                    ease: 'Sine.easeInOut',
+                    yoyo: true,
+                    onComplete: () => {
+                        if (impactSprite && impactSprite.active) impactSprite.destroy();
+                    }
+                });
+            } else {
+                impactSprite.setScale(scaleFactor);
+            }
+
+            if (impact.timeScale) {
+                impactSprite.anims.timeScale = impact.timeScale;
+            }
+            if (impact.repeat !== undefined) {
+                impactSprite.play({ key: impact.animKey, repeat: impact.repeat });
+            } else {
+                impactSprite.play(impact.animKey);
+            }
+            
+            // Destroy on animation complete for non-looping anims
+            if (!impact.growAndShrink) {
+                impactSprite.on('animationcomplete', () => {
+                    impactSprite.destroy();
+                });
+                impactSprite.on('animationrepeat', () => {
+                    if (impact.repeat === 0) impactSprite.destroy();
+                });
+                
+                // Fallback: always destroy after a timeout in case animation loops forever
+                this.scene.time.delayedCall(impact.duration || 1500, () => {
+                    if (impactSprite && impactSprite.active) {
+                        impactSprite.destroy();
+                    }
+                });
+            }
+        }
+
+        if (impact && impact.screenShake) {
             this.scene.cameras.main.shake(impact.screenShake.duration, impact.screenShake.intensity * 0.01);
         }
         
-        if (impact.flash) {
+        if (impact && impact.flash) {
             this.scene.cameras.main.flash(200, 
                 (impact.flash >> 16) & 255, 
                 (impact.flash >> 8) & 255, 
                 impact.flash & 255
             );
         }
+        });
     }
 
     playElementalBurst(x, y, element) {
@@ -125,6 +251,95 @@ export class SpellEffectsPlayer {
         });
     }
     
+    playSelfCastEffect(spell, x, y, onComplete) {
+        const effect = getSpellEffect(spell.name);
+        const element = spell.element === 'n/a' ? 'air' : spell.element;
+        const color = ELEMENT_COLORS[element] || 0xffffff;
+
+        // Play element-appropriate sound
+        if (spell.shield > 0) {
+            this.scene.playSound('shield');
+        } else {
+            this.scene.playSound(element);
+        }
+        
+        // Play the specific sprite impact for this spell, if configured
+        if (effect.impact) {
+            let cx = x, cy = y;
+            if (effect.impact.targetOverride === 'center') {
+                cx = this.scene.scale.width / 2;
+                cy = this.scene.scale.height / 2;
+            }
+            this.playImpact(spell, effect, cx, cy);
+        }
+
+        // Expanding ring effect
+        const ring = this.scene.add.circle(x, y, 10, 0x000000, 0);
+        ring.setStrokeStyle(4, color, 1);
+        this.scene.tweens.add({
+            targets: ring,
+            radius: 80,
+            alpha: 0,
+            duration: 600,
+            ease: 'Quad.easeOut',
+            onUpdate: () => {
+                ring.setStrokeStyle(4, color, ring.alpha);
+            },
+            onComplete: () => ring.destroy()
+        });
+
+        // Second ring with slight delay
+        this.scene.time.delayedCall(150, () => {
+            const ring2 = this.scene.add.circle(x, y, 10, 0x000000, 0);
+            ring2.setStrokeStyle(3, 0xffffff, 0.7);
+            this.scene.tweens.add({
+                targets: ring2,
+                radius: 60,
+                alpha: 0,
+                duration: 500,
+                ease: 'Quad.easeOut',
+                onUpdate: () => {
+                    ring2.setStrokeStyle(3, 0xffffff, ring2.alpha);
+                },
+                onComplete: () => ring2.destroy()
+            });
+        });
+
+        // Radial particle burst
+        const LIFESPAN = 600;
+        const emitter = this.scene.add.particles(0, 0, 'star', {
+            x: x,
+            y: y,
+            speed: { min: 30, max: 120 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0 },
+            tint: color,
+            alpha: { start: 0.9, end: 0 },
+            lifespan: LIFESPAN,
+            blendMode: 'ADD'
+        });
+        emitter.explode(20);
+
+        this.scene.time.delayedCall(LIFESPAN + 100, () => {
+            if (emitter && emitter.destroy) emitter.destroy();
+        });
+
+        // Brief flash tint on the caster's area
+        this.scene.cameras.main.flash(150,
+            (color >> 16) & 255,
+            (color >> 8) & 255,
+            color & 255,
+            false,
+            null,
+            null
+        );
+
+        // Callback after visual settles
+        this.scene.time.delayedCall(500, () => {
+            if (onComplete) onComplete();
+        });
+    }
+
     // Stubs for future hooks
     playStatusApply(statusName, target) {}
     playSynergyActivation(synergyType, position) {}
