@@ -1143,7 +1143,7 @@ export class Game extends Phaser.Scene {
         const panelW = 264;
         const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(w - 550, h - 180).setVisible(false);
+        this.primedSpellPanel = this.add.container(w - 550, h / 2 + 10).setScale(2).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
@@ -1187,7 +1187,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // --- INCOMING SPELL PANEL ---
-        this.incomingSpellPanel = this.add.container(w - 550, h - 330).setVisible(false);
+        this.incomingSpellPanel = this.add.container(w - 550, h / 2 - 264).setScale(2).setVisible(false);
         
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
