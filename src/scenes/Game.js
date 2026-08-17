@@ -1256,14 +1256,20 @@ export class Game extends Phaser.Scene {
         this.btnSpellBook = this.add.text(w - 280, 25, 'SPELL BOOK', {
             fontFamily: '"Outfit", sans-serif',
             fontSize: '16px',
-            fontWeight: '700',
+            fontWeight: '600',
             color: '#ffffff',
             backgroundColor: 'rgba(13,11,28,0.85)',
-            padding: { x: 12, y: 6 }
-        }).setOrigin(1, 0).setDepth(2000);
+            padding: { left: 8, right: 8, top: 4, bottom: 4 }
+        }).setOrigin(1, 0).setDepth(2000); // Fixed anchor point to prevent overlap
         this.btnSpellBook.setInteractive({ useHandCursor: true });
-        this.btnSpellBook.on('pointerover', () => this.btnSpellBook.setColor('#1084e9'));
-        this.btnSpellBook.on('pointerout', () => this.btnSpellBook.setColor('#ffffff'));
+        this.btnSpellBook.on('pointerover', () => {
+            this.btnSpellBook.setColor('#000000');
+            this.btnSpellBook.setBackgroundColor('#ffffff');
+        });
+        this.btnSpellBook.on('pointerout', () => {
+            this.btnSpellBook.setColor('#ffffff');
+            this.btnSpellBook.setBackgroundColor('rgba(13,11,28,0.85)');
+        });
         this.btnSpellBook.on('pointerdown', () => this.handleSpellBookOption());
         this.btnSpellBook.setEnabled = (enabled) => {
             if (enabled) {
@@ -1287,6 +1293,7 @@ export class Game extends Phaser.Scene {
         });
         this.primedSpellPanel.on('pointerdown', () => {
             let canCast = false;
+            // Allow casting during reaction phase bypassing spellCastThisTurn
             if (this.phase === 'reaction' || this.phase === 'reaction_request_active') {
                 canCast = (this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
             } else if (this.phase === 'action') {
