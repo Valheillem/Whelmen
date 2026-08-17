@@ -916,6 +916,7 @@ html, body {
     height: 100dvh;
     width: 100%;
     max-width: 100%;
+    padding: 20px;
     padding-top: 15px;
     border-radius: 0;
 }
@@ -1126,6 +1127,7 @@ html, body {
     height: 100dvh;
     width: 100%;
     max-width: 100%;
+    padding: 20px;
     padding-top: 15px;
     border-radius: 0;
 }
