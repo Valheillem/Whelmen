@@ -1143,7 +1143,7 @@ export class Game extends Phaser.Scene {
         const panelW = 264;
         const panelH = 132;
         
-        this.primedSpellPanel = this.add.container(w - 550, h / 2 + 10).setScale(2).setVisible(false);
+        this.primedSpellPanel = this.add.container(w - 550, h / 2 + 10).setScale(1.5).setVisible(false);
         
         this.primedSpellBg = this.add.graphics();
         this.primedSpellPanel.add(this.primedSpellBg);
@@ -1187,7 +1187,7 @@ export class Game extends Phaser.Scene {
         this.primedSpellPanel.add(this.primedSpellAdvantage);
 
         // --- INCOMING SPELL PANEL ---
-        this.incomingSpellPanel = this.add.container(w - 550, h / 2 - 264).setScale(2).setVisible(false);
+        this.incomingSpellPanel = this.add.container(w - 550, h / 2 - 198).setScale(1.5).setVisible(false);
         
         this.incomingSpellBg = this.add.graphics();
         this.incomingSpellPanel.add(this.incomingSpellBg);
@@ -1253,9 +1253,45 @@ export class Game extends Phaser.Scene {
         };
         this.btnHowToPlay = btnHowToPlayTop;
 
-        this.btnSpellBook = this.createActionButton(w - 180, h - 190, 'SPELL BOOK', () => this.handleSpellBookOption());
-        this.btnCastSpell = this.createActionButton(w - 180, h - 130, 'CAST SPELL', () => this.handleCastSpellOption());
-        this.btnPassDraw = this.createActionButton(w - 180, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
+        this.btnSpellBook = this.add.text(w - 280, 25, 'SPELL BOOK', {
+            fontFamily: '"Outfit", sans-serif',
+            fontSize: '16px',
+            fontWeight: '700',
+            color: '#ffffff',
+            backgroundColor: 'rgba(13,11,28,0.85)',
+            padding: { x: 12, y: 6 }
+        }).setOrigin(0, 0);
+        this.btnSpellBook.setInteractive({ useHandCursor: true });
+        this.btnSpellBook.on('pointerover', () => this.btnSpellBook.setColor('#1084e9'));
+        this.btnSpellBook.on('pointerout', () => this.btnSpellBook.setColor('#ffffff'));
+        this.btnSpellBook.on('pointerdown', () => this.handleSpellBookOption());
+        this.btnSpellBook.setEnabled = (enabled) => {
+            if (enabled) {
+                this.btnSpellBook.setAlpha(1);
+                this.btnSpellBook.setInteractive({ useHandCursor: true });
+            } else {
+                this.btnSpellBook.setAlpha(0.5);
+                this.btnSpellBook.disableInteractive();
+            }
+        };
+
+        this.btnCastSpell = { setEnabled: () => {} };
+
+        this.btnPassDraw = this.createActionButton(480, h - 70, 'PASS & DRAW', () => this.handlePassDrawOption());
+
+        // Make primedSpellPanel clickable to replace CAST SPELL
+        this.primedSpellPanel.setInteractive(new Phaser.Geom.Rectangle(0, 0, 264, 132), Phaser.Geom.Rectangle.Contains);
+        this.primedSpellPanel.on('pointerdown', () => {
+            if (this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3 && !this.spellCastThisTurn) {
+                this.handleCastSpellOption();
+            }
+        });
+        this.primedSpellPanel.on('pointerover', () => {
+            this.input.setDefaultCursor('pointer');
+        });
+        this.primedSpellPanel.on('pointerout', () => {
+            this.input.setDefaultCursor('default');
+        });
 
         // Select Discard prompt overlay container
         this.discardPromptText = this.add.text(w / 2 - 20, h / 2 + 250, '', {
