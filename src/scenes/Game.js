@@ -1260,7 +1260,7 @@ export class Game extends Phaser.Scene {
             color: '#ffffff',
             backgroundColor: 'rgba(13,11,28,0.85)',
             padding: { x: 12, y: 6 }
-        }).setOrigin(1, 0).setDepth(2000);
+        }).setOrigin(1, 0).setDepth(2000); // Fixed anchor point to prevent overlap
         this.btnSpellBook.setInteractive({ useHandCursor: true });
         this.btnSpellBook.on('pointerover', () => this.btnSpellBook.setColor('#1084e9'));
         this.btnSpellBook.on('pointerout', () => this.btnSpellBook.setColor('#ffffff'));
@@ -1287,6 +1287,7 @@ export class Game extends Phaser.Scene {
         });
         this.primedSpellPanel.on('pointerdown', () => {
             let canCast = false;
+            // Allow casting during reaction phase bypassing spellCastThisTurn
             if (this.phase === 'reaction' || this.phase === 'reaction_request_active') {
                 canCast = (this.selectedBoardMana.length > 0 && this.selectedBoardMana.length <= 3);
             } else if (this.phase === 'action') {
